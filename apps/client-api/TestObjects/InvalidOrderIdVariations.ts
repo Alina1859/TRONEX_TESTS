@@ -1,8 +1,3 @@
-/**
- * Массивы вариаций некорректных значений orderId для тестирования валидации и безопасности API
- * Используется для проверки, что API корректно отклоняет все некорректные значения
- */
-
 // Граничные значения и базовые некорректные значения для проверки валидации
 export const boundaryAndInvalidOrderIdVariations = [
   // Граничные значения для orderId (должен быть > 0 и < 2147483647)
@@ -98,7 +93,6 @@ export const securityAttackOrderIdVariations = [
   { value: '1' + 'A'.repeat(10000), description: 'Очень длинная строка (10000 символов)' },
 ];
 
-// Объединенный массив всех вариаций (для обратной совместимости)
 export const invalidOrderIdVariations = [
   ...boundaryAndInvalidOrderIdVariations,
   ...securityAttackOrderIdVariations,

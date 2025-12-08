@@ -35,5 +35,18 @@ export class ResponseStatusTest {
         expect(typeof errorResponse.message).toBe('string');
         expect(errorResponse.message.length).toBeGreaterThan(0);
     }
+
+    // Проверяет наличие и значения всех обязательных полей в ответе об ошибке URI Too Long (414)
+    checkUriTooLongErrorResponse(errorResponse: any) {
+        expect(errorResponse).toHaveProperty('statusCode');
+        expect(errorResponse.statusCode).toBe(414);
+
+        expect(errorResponse).toHaveProperty('error');
+        expect(errorResponse.error).toBe('URI Too Long');
+
+        expect(errorResponse).toHaveProperty('message');
+        expect(typeof errorResponse.message).toBe('string');
+        expect(errorResponse.message.length).toBeGreaterThan(0);
+    }
 }
 

@@ -191,25 +191,22 @@ test.describe('Order API', () => {
     }
   });
 
-  // Вспомогательная функция для проверки вариаций orderId
-  async function testOrderIdVariations(
-    variations: Array<{ value: any; description: string }>,
-    testName: string,
-    orderApi: OrderApi
-  ) {
+  // Тест-кейс № 7: Проверка граничных значений и базовых некорректных значений orderId
+  test('GET /api/v2/orders/{id} should validate boundary and invalid orderId values', async ({ request }) => {
+    console.log('=== Тест: Проверка граничных значений и базовых некорректных значений orderId ===');
+
+    const orderApi = new OrderApi(request);
     const results = [];
 
-    console.log(`Проверяем ${variations.length} вариаций ${testName}...\n`);
+    console.log(`Проверяем ${boundaryAndInvalidOrderIdVariations.length} вариаций граничных и базовых некорректных значений...\n`);
 
-    for (const variation of variations) {
+    for (const variation of boundaryAndInvalidOrderIdVariations) {
       try {
         console.log(`Проверка: ${variation.description} (значение: ${JSON.stringify(variation.value)})`);
         
-        // Выполняем GET запрос к API
         const response = await orderApi.getOrderById(variation.value as any);
         const status = response.status();
         
-        // Проверяем, что API вернул ошибку (400 Bad Request или 404 Not Found)
         const isValidError = status === 400 || status === 404;
         
         const result: any = {
@@ -224,7 +221,6 @@ test.describe('Order API', () => {
           result.errorResponse = errorResponse;
           console.log(`  ✓ Корректно обработано: статус ${status}`);
           
-          // Проверяем структуру ответа об ошибке в зависимости от статуса
           if (status === 400) {
             console.log(`  Проверка структуры ответа об ошибке валидации (400)...`);
             responseStatusTest.checkValidationErrorResponse(errorResponse);
@@ -234,6 +230,82 @@ test.describe('Order API', () => {
           }
         } else {
           console.log(`  ✗ Неожиданный статус: ${status} (ожидался 400 или 404)`);
+        }
+
+        results.push(result);
+      } catch (error: any) {
+        console.log(`  ✗ Ошибка при выполнении запроса: ${error.message}`);
+        results.push({
+          variation: variation.description,
+          value: variation.value,
+          error: error.message,
+          isValid: false,
+        });
+      }
+      console.log('');
+    }
+
+    console.log('=== ИТОГОВЫЙ ОТЧЕТ ===');
+    const validResults = results.filter(r => r.isValid);
+    const invalidResults = results.filter(r => !r.isValid);
+    
+    console.log(`Корректно обработано: ${validResults.length}/${results.length}`);
+    console.log(`Некорректно обработано: ${invalidResults.length}/${results.length}\n`);
+
+    if (invalidResults.length > 0) {
+      console.log('Некорректно обработанные вариации:');
+      invalidResults.forEach(r => {
+        console.log(`  - ${r.variation} (значение: ${JSON.stringify(r.value)})`);
+      });
+    }
+
+    expect(invalidResults.length).toBe(0);
+    
+    console.log('✓ Все граничные и базовые некорректные значения orderId были правильно отклонены API.');
+  });
+
+  // Тест-кейс № 8: Проверка безопасности orderId (SQL-инъекции, XSS и другие атаки)
+  test('GET /api/v2/orders/{id} should prevent security attacks on orderId', async ({ request }) => {
+    console.log('=== Тест: Проверка безопасности orderId (SQL-инъекции, XSS и другие атаки) ===');
+
+    const orderApi = new OrderApi(request);
+    const results = [];
+
+    console.log(`Проверяем ${securityAttackOrderIdVariations.length} вариаций техник атак безопасности...\n`);
+
+    for (const variation of securityAttackOrderIdVariations) {
+      try {
+        console.log(`Проверка: ${variation.description} (значение: ${JSON.stringify(variation.value)})`);
+        
+        const response = await orderApi.getOrderById(variation.value as any);
+        const status = response.status();
+        
+        const isValidError = status === 400 || status === 414 || status === 404;
+        
+        const result: any = {
+          variation: variation.description,
+          value: variation.value,
+          status: status,
+          isValid: isValidError,
+        };
+
+        if (isValidError) {
+          const errorResponse = await response.json();
+          result.errorResponse = errorResponse;
+          console.log(`  ✓ Корректно обработано: статус ${status}`);
+          
+          if (status === 400) {
+            console.log(`  Проверка структуры ответа об ошибке валидации (400)...`);
+            responseStatusTest.checkValidationErrorResponse(errorResponse);
+          } else if (status === 414) {
+            console.log(`  Проверка структуры ответа об ошибке URI Too Long (414)...`);
+            responseStatusTest.checkUriTooLongErrorResponse(errorResponse);
+          } else if (status === 404) {
+            console.log(`  Проверка структуры ответа об ошибке (404)...`);
+            responseStatusTest.checkNotFoundOrderErrorResponse(errorResponse);
+          }
+        } else {
+          console.log(`  ✗ Неожиданный статус: ${status} (ожидался 400, 414 или 404)`);
         }
 
         results.push(result);
@@ -264,36 +336,7 @@ test.describe('Order API', () => {
       });
     }
 
-    // Проверяем, что все некорректные значения были отклонены
     expect(invalidResults.length).toBe(0);
-    
-    return results;
-  }
-
-  // Тест-кейс № 7: Проверка граничных значений и базовых некорректных значений orderId
-  test('GET /api/v2/orders/{id} should validate boundary and invalid orderId values', async ({ request }) => {
-    console.log('=== Тест: Проверка граничных значений и базовых некорректных значений orderId ===');
-
-    const orderApi = new OrderApi(request);
-    await testOrderIdVariations(
-      boundaryAndInvalidOrderIdVariations,
-      'граничных и базовых некорректных значений',
-      orderApi
-    );
-    
-    console.log('✓ Все граничные и базовые некорректные значения orderId были правильно отклонены API.');
-  });
-
-  // Тест-кейс № 8: Проверка безопасности orderId (SQL-инъекции, XSS и другие атаки)
-  test('GET /api/v2/orders/{id} should prevent security attacks on orderId', async ({ request }) => {
-    console.log('=== Тест: Проверка безопасности orderId (SQL-инъекции, XSS и другие атаки) ===');
-
-    const orderApi = new OrderApi(request);
-    await testOrderIdVariations(
-      securityAttackOrderIdVariations,
-      'техник атак безопасности',
-      orderApi
-    );
     
     console.log('✓ Все техники атак безопасности были правильно отклонены API.');
   });
