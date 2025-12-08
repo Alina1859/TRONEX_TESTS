@@ -189,153 +189,71 @@ test.describe('Order API', () => {
     }
   });
 
-  // Тест-кейс № 7: Проверка граничных значений и базовых некорректных значений orderId
-  test('GET /api/v2/orders/{id} should validate boundary and invalid orderId values', async ({ request }) => {
-    console.log('=== Тест: Проверка граничных значений и базовых некорректных значений orderId ===');
-
-    const orderApi = new OrderApi(request);
+  // Вспомогательная функция для проверки вариаций orderId
+  async function testOrderIdVariations(
+    variations: Array<{ value: any; description: string }>,
+    validStatuses: number[],
+    testName: string,
+    orderApi: OrderApi
+  ) {
     const results = [];
+    const statusNames = validStatuses.join(', ');
+    
+    console.log(`Проверяем ${variations.length} вариаций ${testName}...\n`);
 
-    console.log(`Проверяем ${boundaryAndInvalidOrderIdVariations.length} вариаций граничных и базовых некорректных значений...\n`);
-
-    for (const variation of boundaryAndInvalidOrderIdVariations) {
+    for (const variation of variations) {
       try {
         console.log(`Проверка: ${variation.description} (значение: ${JSON.stringify(variation.value)})`);
-        
         const response = await orderApi.getOrderById(variation.value as any);
         const status = response.status();
+        const isValidError = validStatuses.includes(status);
         
-        const isValidError = status === 400 || status === 404;
-        
-        const result: any = {
-          variation: variation.description,
-          value: variation.value,
-          status: status,
-          isValid: isValidError,
-        };
+        const result: any = { variation: variation.description, value: variation.value, status, isValid: isValidError };
 
         if (isValidError) {
           const errorResponse = await response.json();
           result.errorResponse = errorResponse;
           console.log(`  ✓ Корректно обработано: статус ${status}`);
           
-          if (status === 400) {
-            console.log(`  Проверка структуры ответа об ошибке валидации (400)...`);
-            responseStatusTest.checkValidationErrorResponse(errorResponse);
-          } else if (status === 404) {
-            console.log(`  Проверка структуры ответа об ошибке (404)...`);
-            responseStatusTest.checkNotFoundOrderErrorResponse(errorResponse);
-          }
+          if (status === 400) responseStatusTest.checkValidationErrorResponse(errorResponse);
+          else if (status === 414) responseStatusTest.checkUriTooLongErrorResponse(errorResponse);
+          else if (status === 404) responseStatusTest.checkNotFoundOrderErrorResponse(errorResponse);
         } else {
-          console.log(`  ✗ Неожиданный статус: ${status} (ожидался 400 или 404)`);
+          console.log(`  ✗ Неожиданный статус: ${status} (ожидался ${statusNames})`);
         }
-
         results.push(result);
       } catch (error: any) {
         console.log(`  ✗ Ошибка при выполнении запроса: ${error.message}`);
-        results.push({
-          variation: variation.description,
-          value: variation.value,
-          error: error.message,
-          isValid: false,
-        });
+        results.push({ variation: variation.description, value: variation.value, error: error.message, isValid: false });
       }
       console.log('');
     }
 
-    console.log('=== ИТОГОВЫЙ ОТЧЕТ ===');
-    const validResults = results.filter(r => r.isValid);
     const invalidResults = results.filter(r => !r.isValid);
-    
-    console.log(`Корректно обработано: ${validResults.length}/${results.length}`);
+    console.log('=== ИТОГОВЫЙ ОТЧЕТ ===');
+    console.log(`Корректно обработано: ${results.length - invalidResults.length}/${results.length}`);
     console.log(`Некорректно обработано: ${invalidResults.length}/${results.length}\n`);
 
     if (invalidResults.length > 0) {
       console.log('Некорректно обработанные вариации:');
-      invalidResults.forEach(r => {
-        console.log(`  - ${r.variation} (значение: ${JSON.stringify(r.value)})`);
-      });
+      invalidResults.forEach(r => console.log(`  - ${r.variation} (значение: ${JSON.stringify(r.value)})`));
     }
 
     expect(invalidResults.length).toBe(0);
-    
+    return results;
+  }
+
+  // Тест-кейс № 7: Проверка граничных значений и базовых некорректных значений orderId
+  test('GET /api/v2/orders/{id} should validate boundary and invalid orderId values', async ({ request }) => {
+    console.log('=== Тест: Проверка граничных значений и базовых некорректных значений orderId ===');
+    await testOrderIdVariations(boundaryAndInvalidOrderIdVariations, [400, 404], 'граничных и базовых некорректных значений', new OrderApi(request));
     console.log('✓ Все граничные и базовые некорректные значения orderId были правильно отклонены API.');
   });
 
   // Тест-кейс № 8: Проверка безопасности orderId (SQL-инъекции, XSS и другие атаки)
   test('GET /api/v2/orders/{id} should prevent security attacks on orderId', async ({ request }) => {
     console.log('=== Тест: Проверка безопасности orderId (SQL-инъекции, XSS и другие атаки) ===');
-
-    const orderApi = new OrderApi(request);
-    const results = [];
-
-    console.log(`Проверяем ${securityAttackOrderIdVariations.length} вариаций техник атак безопасности...\n`);
-
-    for (const variation of securityAttackOrderIdVariations) {
-      try {
-        console.log(`Проверка: ${variation.description} (значение: ${JSON.stringify(variation.value)})`);
-        
-        const response = await orderApi.getOrderById(variation.value as any);
-        const status = response.status();
-        
-        const isValidError = status === 400 || status === 414 || status === 404;
-        
-        const result: any = {
-          variation: variation.description,
-          value: variation.value,
-          status: status,
-          isValid: isValidError,
-        };
-
-        if (isValidError) {
-          const errorResponse = await response.json();
-          result.errorResponse = errorResponse;
-          console.log(`  ✓ Корректно обработано: статус ${status}`);
-          
-          if (status === 400) {
-            console.log(`  Проверка структуры ответа об ошибке валидации (400)...`);
-            responseStatusTest.checkValidationErrorResponse(errorResponse);
-          } else if (status === 414) {
-            console.log(`  Проверка структуры ответа об ошибке URI Too Long (414)...`);
-            responseStatusTest.checkUriTooLongErrorResponse(errorResponse);
-          } else if (status === 404) {
-            console.log(`  Проверка структуры ответа об ошибке (404)...`);
-            responseStatusTest.checkNotFoundOrderErrorResponse(errorResponse);
-          }
-        } else {
-          console.log(`  ✗ Неожиданный статус: ${status} (ожидался 400, 414 или 404)`);
-        }
-
-        results.push(result);
-      } catch (error: any) {
-        console.log(`  ✗ Ошибка при выполнении запроса: ${error.message}`);
-        results.push({
-          variation: variation.description,
-          value: variation.value,
-          error: error.message,
-          isValid: false,
-        });
-      }
-      console.log('');
-    }
-
-    // Выводим итоговый отчет
-    console.log('=== ИТОГОВЫЙ ОТЧЕТ ===');
-    const validResults = results.filter(r => r.isValid);
-    const invalidResults = results.filter(r => !r.isValid);
-    
-    console.log(`Корректно обработано: ${validResults.length}/${results.length}`);
-    console.log(`Некорректно обработано: ${invalidResults.length}/${results.length}\n`);
-
-    if (invalidResults.length > 0) {
-      console.log('Некорректно обработанные вариации:');
-      invalidResults.forEach(r => {
-        console.log(`  - ${r.variation} (значение: ${JSON.stringify(r.value)})`);
-      });
-    }
-
-    expect(invalidResults.length).toBe(0);
-    
+    await testOrderIdVariations(securityAttackOrderIdVariations, [400, 414, 404], 'техник атак безопасности', new OrderApi(request));
     console.log('✓ Все техники атак безопасности были правильно отклонены API.');
   });
 
