@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { UserRepository } from '../repositories/user.repository';
 import { OrderRepository } from '../repositories/order.repository';
-import { coreDb } from '../../../shared/database/connection';
 import { OrderApi } from '../api/order.api';
 import { OrderResponseTest } from '../TestObjects/OrderResponseTest';
 import { OrderFieldTest } from '../TestObjects/OrderFieldTest';

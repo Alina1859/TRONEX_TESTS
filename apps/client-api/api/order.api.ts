@@ -8,7 +8,6 @@ export class OrderApi {
     private request: APIRequestContext,
   ) {}
 
-
   async getOrderById(orderId: string | number) {
     return await this.request.get(`${apiUrl}/api/v2/orders/${orderId}`, {
       headers: {
