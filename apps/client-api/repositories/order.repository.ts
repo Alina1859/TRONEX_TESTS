@@ -1,18 +1,30 @@
 import { coreDb } from '../../../shared/database/connection';
 
 export class OrderRepository {
-  /**
-   * Retrieves an order by its ID.
-   * @param id The ID of the order to retrieve.
-   * @returns The order object or undefined if not found.
-   */
-  async getOrderById(id: number) {
-    const result = await coreDb.$queryRaw<any[]>`
-      SELECT * FROM "Order" 
-      WHERE id = ${id}
+  
+  async getLastOrderByUserId(userId: string): Promise<any[]> {
+    return await coreDb.$queryRaw<any[]>`
+      SELECT id, status, amount FROM "Order" 
+      WHERE "userId" = ${userId}
+      ORDER BY "createdAt" DESC 
+      LIMIT 1
     `;
-    
-    return result[0];
   }
+
+  async getOrderById(orderId: number): Promise<any[]> {
+    return await coreDb.$queryRaw<any[]>`
+      SELECT id FROM "Order" 
+      WHERE id = ${orderId}
+      LIMIT 1
+    `;
+  }
+
+  async getMaxOrderId(): Promise<number> {
+    const result = await coreDb.$queryRaw<any[]>`
+      SELECT MAX(id) as max_id FROM "Order"
+    `;
+    return result[0]?.max_id || 0;
+  }
+
 }
 

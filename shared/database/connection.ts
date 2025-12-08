@@ -6,6 +6,14 @@ import * as path from 'path';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+if (!process.env.API_KEY_PRIMARY) {
+  throw new Error('API_KEY_PRIMARY is not defined in environment variables');
+}
+
+if (!process.env.API_URL) {
+  throw new Error('API_URL is not defined in environment variables');
+}
+
 const createClient = (connectionString: string | undefined, name: string) => {
   if (!connectionString) {
     console.warn(`Database URL for ${name} is not defined.`);
@@ -42,3 +50,4 @@ export const botDb = new Proxy({} as PrismaClient, {
     return (botDbInstance as any)[prop];
   }
 });
+
