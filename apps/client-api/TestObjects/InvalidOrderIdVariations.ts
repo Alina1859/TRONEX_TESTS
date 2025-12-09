@@ -16,6 +16,7 @@ export const boundaryAndInvalidOrderIdVariations = [
   { value: 1.5, description: 'Дробное число (1.5)' },
   { value: -0.1, description: 'Отрицательное дробное число (-0.1)' },
   { value: Number.MAX_SAFE_INTEGER + 1, description: 'Число больше MAX_SAFE_INTEGER' },
+  { value: '9'.repeat(100), description: 'Очень длинное число (100 цифр)' },
   { value: '0', description: 'Строка "0"' },
   { value: '-1', description: 'Строка "-1"' },
   { value: '-2147483648', description: 'Строка "-2147483648" (минимальное 32-битное)' },

@@ -3,7 +3,7 @@ import { coreDb } from '../../../shared/database/connection';
 export class UserRepository {
   
   async findUserIdByApiKey(apiKey: string): Promise<string | null> {
-    const result = await coreDb.$queryRaw<any[]>`
+    const result = await coreDb.$queryRaw<{ userId: string }[]>`
       SELECT "userId" 
       FROM "AccessToken" 
       WHERE token = ${apiKey}

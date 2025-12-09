@@ -3,6 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import { log } from '../utils/logger';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -16,7 +17,7 @@ if (!process.env.API_URL) {
 
 const createClient = (connectionString: string | undefined, name: string) => {
   if (!connectionString) {
-    console.warn(`Database URL for ${name} is not defined.`);
+    log.warn(`Database URL for ${name} is not defined.`);
     throw new Error(`Database URL for ${name} is not defined.`);
   }
 

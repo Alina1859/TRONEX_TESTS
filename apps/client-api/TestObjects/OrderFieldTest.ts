@@ -1,7 +1,5 @@
 import { expect } from "@playwright/test";
 
-// Класс для проверки полей объекта заказа
-// Содержит методы для валидации структуры и типов данных полей заказа
 export class OrderFieldTest {
 
     // Проверка поля id: должно быть числом (number), обязательное поле
@@ -36,9 +34,13 @@ export class OrderFieldTest {
     }
 
     // Проверка поля amount: должно быть числом (number), обязательное поле
-    checkAmount(apiOrder: any) {
+    // Если передан expectedValue, дополнительно проверяется равенство значения
+    checkAmount(apiOrder: any, expectedValue?: number) {
         expect(apiOrder).toHaveProperty('amount');
         expect(typeof apiOrder.amount).toBe('number');
+        if (expectedValue !== undefined) {
+            expect(apiOrder.amount).toBe(expectedValue);
+        }
     }
 
     // Период действия заказа в миллисекундах (может быть null для некоторых типов заказов)

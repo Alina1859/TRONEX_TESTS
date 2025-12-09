@@ -1,0 +1,403 @@
+generator client {
+    provider      = "prisma-client-js"
+    output        = "../../generated/core/client"
+    binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("CORE_DATABASE_URL")
+}
+
+model User {
+    id        String   @id @default(uuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    balance Balance?
+
+    orders       Order[]
+    autoRefills  AutoRefill[]
+    smartRefills SmartRefill[]
+    savedAddress SavedAddress[]
+    accessTokens AccessToken[]
+
+    settings UserSetting[]
+
+    externalId   String?
+    parentId     String?
+    referralCode String?
+    parent       User?   @relation("UserParent", fields: [parentId], references: [id], onDelete: Cascade)
+
+    children User[] @relation("UserParent")
+
+    ref Referral?
+
+    promoCodeUsages PromoCodeUsage[]
+    smartOrders     SmartOrder[]
+}
+
+model Referral {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    code String @unique
+}
+
+model Balance {
+    id        String   @id @default(cuid())
+    amount    Decimal  @default(0) @db.Decimal(20, 2)
+    currency  String   @default("TRX")
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    processingWallets ProcessingWallet[]
+    transactions      Transaction[]
+}
+
+enum TransactionType {
+    DEPOSIT
+    WITHDRAW
+}
+
+enum TransactionStatus {
+    PENDING
+    COMPLETED
+    FAILED
+    CANCELLED
+}
+
+enum TransactionCode {
+    UNDEFINED
+
+    SMART_REFILL_PAYMENT
+    REFERRAL_COMMISSION
+    PROMO_CODE_START_BALANCE
+
+    ORDER_PAYMENT
+    TOP_UP_BALANCE
+    DECREASE_BALANCE
+}
+
+model Transaction {
+    id String @id @default(cuid())
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    amount Decimal           @db.Decimal(20, 2)
+    type   TransactionType
+    status TransactionStatus
+    code   TransactionCode   @default(UNDEFINED)
+
+    referenceId String? @unique
+    description String?
+    details     Json?
+
+    balanceId String
+    balance   Balance @relation(fields: [balanceId], references: [id])
+
+    orderId Int?
+    order   Order? @relation(fields: [orderId], references: [id])
+
+    smartRefillPayment SmartRefillPayment?
+
+    @@index([orderId])
+    @@index([balanceId, status])
+    @@index([balanceId, createdAt])
+}
+
+enum AutoRefillOrderType {
+    EXTRA
+    BASE
+}
+
+enum OrderType {
+    ENERGY
+    BANDWIDTH
+    ACTIVATION
+}
+
+enum OrderStatus {
+    INIT
+    PENDING
+    COMPLETED
+    FAILED
+    CANCELLED
+}
+
+enum OrderSource {
+    BOT
+    API
+    WEB
+    AUTO_REFILL
+    SMART_REFILL
+}
+
+model Order {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    status        OrderStatus @default(INIT)
+    type          OrderType
+    amount        Int         @db.Integer
+    period        Int         @db.Integer
+    targetAddress String
+
+    provider              String?
+    externalId            String?
+    buyPrice              Decimal?    @db.Decimal(20, 2)
+    sellPrice             Decimal     @default(0) @db.Decimal(20, 2)
+    profit                Decimal?    @db.Decimal(20, 2)
+    blockchainTransaction String?
+    description           String?
+    details               Json?
+    silent                Boolean     @default(false)
+    source                OrderSource @default(API)
+
+    userId       String
+    user         User          @relation(fields: [userId], references: [id])
+    transactions Transaction[]
+
+    // if the order is created from an auto-refill
+    autoRefillId   Int?
+    autoRefillType AutoRefillOrderType?
+    autoRefill     AutoRefill?          @relation(fields: [autoRefillId], references: [id])
+
+    smartRefillConnection SmartRefillOrderConnection?
+
+    smartOrderId Int?
+    smartOrder   SmartOrder? @relation(fields: [smartOrderId], references: [id], onDelete: SetNull)
+
+    @@index([userId])
+    @@index([status])
+    @@index([userId, targetAddress, createdAt])
+    @@index([autoRefillId, autoRefillType, createdAt])
+}
+
+// SmartRefill
+enum AutoSmartRefill {
+    ACTIVE
+    STOPPED
+    INSUFFICIENT_BALANCE
+}
+
+model SmartRefill {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    targetAddress String          @unique
+    status        AutoSmartRefill @default(STOPPED)
+    provider      String?
+
+    orderConnections SmartRefillOrderConnection[]
+    payments         SmartRefillPayment[]
+
+    @@index([userId, id])
+}
+
+model SmartRefillOrderConnection {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    orderId Int   @unique
+    order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+    smartRefillId Int
+    smartRefill   SmartRefill @relation(fields: [smartRefillId], references: [id], onDelete: Cascade)
+}
+
+model SmartRefillPayment {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    transactionId String      @unique
+    transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+    smartRefillId Int
+    smartRefill   SmartRefill @relation(fields: [smartRefillId], references: [id], onDelete: Cascade)
+}
+
+enum Currency {
+    TRX
+    USDT
+}
+
+model ProcessingWallet {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    processingName String
+    externalId     String
+    address        String
+    currency       Currency @default(TRX)
+    extra          Json?
+
+    balanceId String
+    balance   Balance @relation(fields: [balanceId], references: [id], onDelete: Cascade)
+
+    @@index([externalId])
+}
+
+model Constant {
+    id    Int    @id @default(autoincrement())
+    key   String @unique
+    value String
+}
+
+model UserSetting {
+    id     Int    @id @default(autoincrement())
+    key    String
+    userId String
+    value  String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, key])
+}
+
+enum AutoRefillResourceType {
+    ENERGY
+    BANDWIDTH
+}
+
+enum AutoRefillStatus {
+    ACTIVE
+    STOPPED
+    INSUFFICIENT_BALANCE
+}
+
+model AutoRefill {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    targetAddress      String
+    resourceType       AutoRefillResourceType
+    transactionsNumber Int                    @db.Integer
+
+    baseAmount    Int     @db.Integer
+    basePeriod    Int     @db.Integer
+    baseSellPrice Decimal @db.Decimal(20, 2)
+
+    extraAmount    Int     @db.Integer
+    extraPeriod    Int     @db.Integer
+    extraSellPrice Decimal @db.Decimal(20, 2)
+
+    resourceThreshold Int              @db.Integer
+    balanceToNotify   Decimal          @db.Decimal(20, 2)
+    minimumBalance    Decimal          @db.Decimal(20, 2)
+    status            AutoRefillStatus @default(STOPPED)
+
+    turboModeEnabled    Boolean @default(false)
+    turboModeMultiplier Int     @default(1) @db.Integer
+
+    nightModeEnabled   Boolean @default(false)
+    nightModeStartHour Int     @default(22) @db.Integer
+    nightModeEndHour   Int     @default(10) @db.Integer
+    nightModeAmount    Int     @default(135000) @db.Integer
+    nightModeThreshold Int     @default(130000) @db.Integer
+
+    connectedOrders Order[]
+}
+
+model SavedAddress {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    address String
+    userId  String
+    user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([userId, address])
+}
+
+// ----------------------------------------------------------------------------------------------------------
+// Access Tokens are used to authenticate users in the API will be moved to a separate database in the future
+// ----------------------------------------------------------------------------------------------------------
+model AccessToken {
+    id        String   @id @default(cuid())
+    token     String   @unique @default(nanoid(64))
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    @@index([userId])
+}
+
+model PromoCode {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    code     String  @unique
+    isActive Boolean @default(true)
+
+    startBalance Decimal? @db.Decimal(20, 2)
+
+    usages PromoCodeUsage[]
+}
+
+model PromoCodeUsage {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    promoCodeId Int
+    promoCode   PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([promoCodeId, userId])
+}
+
+enum SmartOrderStatus {
+    INIT
+    PENDING_ACTIVATION
+    PENDING_RESOURCES
+    COMPLETED
+    FAILED
+}
+
+model SmartOrder {
+    id        Int      @id @default(autoincrement())
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    fromAddress String
+    toAddress   String
+
+    withActivation Boolean @default(false)
+    withEnergy     Boolean @default(false)
+    withBandwidth  Boolean @default(false)
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    orders  Order[]
+    status  SmartOrderStatus @default(INIT)
+    details Json? // Additional details about the smart order
+
+    @@index([userId])
+}

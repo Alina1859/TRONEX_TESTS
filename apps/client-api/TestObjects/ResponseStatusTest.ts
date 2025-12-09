@@ -1,28 +1,18 @@
 import { expect, APIResponse } from "@playwright/test";
+import { log } from "../../../shared/utils/logger";
 
-// Класс для проверки HTTP статус кодов ответов API
 export class ResponseStatusTest {
-    // Ожидаемый статус код (по умолчанию 200)
     checkResponseStatus(response: APIResponse, expectedStatus: number = 200) {
-        if (response.status() === expectedStatus) {
-            console.log(`API returned ${expectedStatus}`);
+        const actualStatus = response.status();
+        log.info(`Проверка статуса ответа: ожидаемый ${expectedStatus}, фактический ${actualStatus}`);
+        
+        const isMatch = actualStatus === expectedStatus;
+        if (isMatch) {
+            log.info(`✓ Статус ответа корректен: ${actualStatus}`);
+        } else {
+            log.error(`✗ Статус ответа не совпадает: ожидался ${expectedStatus}, получен ${actualStatus}`);
         }
-        expect(response.status(), `API returned error: ${response.status()} ${response.statusText()}`).toBe(expectedStatus);
-    }
-
-    checkNotFoundOrderErrorResponse(errorResponse: any) {
-        expect(errorResponse).toHaveProperty('statusCode');
-        expect(errorResponse.statusCode).toBe(404);
-    }
-
-    checkValidationErrorResponse(errorResponse: any) {
-        expect(errorResponse).toHaveProperty('statusCode');
-        expect(errorResponse.statusCode).toBe(400);
-    }
-
-    checkUriTooLongErrorResponse(errorResponse: any) {
-        expect(errorResponse).toHaveProperty('statusCode');
-        expect(errorResponse.statusCode).toBe(414);
+        
+        expect(actualStatus).toBe(expectedStatus);
     }
 }
-
