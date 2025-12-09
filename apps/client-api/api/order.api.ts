@@ -1,6 +1,10 @@
 import { APIRequestContext } from '@playwright/test';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
 
-const apiKey = process.env.API_KEY!;
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+
+const apiKey = process.env.API_KEY_PRIMARY!;
 const apiUrl = process.env.API_URL!;
 
 export class OrderApi {

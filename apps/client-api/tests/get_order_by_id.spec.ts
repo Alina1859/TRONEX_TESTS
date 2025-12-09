@@ -6,7 +6,6 @@ import { OrderFieldTest } from '../TestObjects/OrderFieldTest';
 import { ResponseStatusTest } from '../TestObjects/ResponseStatusTest';
 import { boundaryAndInvalidOrderIdVariations } from '../TestObjects/InvalidOrderIdVariations';
 
-
 // Тестирует корректность работы эндпоинта GET /api/v2/orders/{id}
 
 test.describe('Order API', () => {
