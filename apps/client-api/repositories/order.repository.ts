@@ -1,8 +1,7 @@
-import { coreDb } from '../../../shared/database/connection';
-import { Order } from '../../../shared/utils/types';
+import { coreDb } from "../../../shared/database/connection";
+import { Order } from "../../../shared/utils/types";
 
 export class OrderRepository {
-  
   async getLastOrderByUserId(userId: string): Promise<Order[]> {
     return await coreDb.$queryRaw<Order[]>`
       SELECT id, status, amount FROM "Order" 
@@ -71,6 +70,4 @@ export class OrderRepository {
       LIMIT 1
     `;
   }
-
 }
-

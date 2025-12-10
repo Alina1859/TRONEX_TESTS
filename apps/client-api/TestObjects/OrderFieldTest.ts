@@ -1,83 +1,88 @@
 import { expect } from "@playwright/test";
+import { Order } from "../../../shared/utils/types";
+import { VALID_ORDER_PERIODS } from "../../../shared/utils/constants";
 
 export class OrderFieldTest {
+  checkId(apiOrder: Order) {
+    expect(apiOrder).toHaveProperty("id");
+    expect(typeof apiOrder.id).toBe("number");
+  }
 
-    // Проверка поля id: должно быть числом (number), обязательное поле
-    checkId(apiOrder: any) {
-        expect(apiOrder).toHaveProperty('id');
-        expect(typeof apiOrder.id).toBe('number');
+  checkCreatedAt(apiOrder: Order) {
+    expect(apiOrder).toHaveProperty("createdAt");
+    expect(typeof apiOrder.createdAt).toBe("string");
+    expect(() => new Date(apiOrder.createdAt)).not.toThrow();
+    expect(isNaN(new Date(apiOrder.createdAt).getTime())).toBe(false);
+  }
+
+  checkStatus(apiOrder: Order) {
+    expect(apiOrder).toHaveProperty("status");
+    expect(typeof apiOrder.status).toBe("string");
+    expect(["INIT", "PENDING", "COMPLETED", "FAILED", "CANCELLED"]).toContain(apiOrder.status);
+  }
+
+  checkType(apiOrder: Order) {
+    expect(apiOrder).toHaveProperty("type");
+    expect(typeof apiOrder.type).toBe("string");
+    expect(["ENERGY", "BANDWIDTH", "ACTIVATION"]).toContain(apiOrder.type);
+  }
+
+  checkAmount(apiOrder: Order, expectedValue?: number) {
+    expect(apiOrder).toHaveProperty("amount");
+    expect(typeof apiOrder.amount).toBe("number");
+    if (expectedValue !== undefined) {
+      expect(apiOrder.amount).toBe(expectedValue);
     }
+  }
 
-    // Проверка поля createdAt: должно быть строкой в формате ISO 8601 (date-time), обязательное поле
-    checkCreatedAt(apiOrder: any) {
-        expect(apiOrder).toHaveProperty('createdAt');
-        expect(typeof apiOrder.createdAt).toBe('string');
-        expect(() => new Date(apiOrder.createdAt)).not.toThrow();
-        expect(isNaN(new Date(apiOrder.createdAt).getTime())).toBe(false);
+  checkPeriod(apiOrder: Order) {
+    expect(apiOrder).toHaveProperty("period");
+
+    const period = (apiOrder as any).period;
+    if (period !== null && period !== undefined) {
+      expect(typeof period).toBe("number");
+      expect(VALID_ORDER_PERIODS).toContain(period);
+    } else {
+      expect(period).toBeNull();
     }
+  }
 
+  checkTargetAddress(apiOrder: Order) {
+    expect(apiOrder).toHaveProperty("targetAddress");
+    expect(typeof apiOrder.targetAddress).toBe("string");
+    expect(apiOrder.targetAddress.length).toBeGreaterThan(0);
 
-    //  Проверка поля status: должно быть строкой из списка допустимых значений (enum), обязательное поле
-    //  Статус заказа может быть одним из: INIT, PENDING, COMPLETED, FAILED, CANCELLED
-    checkStatus(apiOrder: any) {
-        expect(apiOrder).toHaveProperty('status');
-        expect(typeof apiOrder.status).toBe('string');
-        expect(['INIT', 'PENDING', 'COMPLETED', 'FAILED', 'CANCELLED']).toContain(apiOrder.status);
+    const address = apiOrder.targetAddress;
+    expect(address.length).toBe(34);
+    expect(address.startsWith("T")).toBe(true);
+
+    const base58Regex = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
+    expect(base58Regex.test(address)).toBe(true);
+  }
+
+  checkBlockchainTransaction(apiOrder: Order) {
+    expect(apiOrder).toHaveProperty("blockchainTransaction");
+    if (apiOrder.blockchainTransaction !== null) {
+      expect(typeof apiOrder.blockchainTransaction).toBe("string");
+    } else {
+      expect(apiOrder.blockchainTransaction).toBeNull();
     }
+  }
 
-    // Проверка поля type: должно быть строкой из списка допустимых значений (enum), обязательное поле
-    // Тип заказа может быть одним из: ENERGY, BANDWIDTH, ACTIVATION
-    checkType(apiOrder: any) {
-        expect(apiOrder).toHaveProperty('type');
-        expect(typeof apiOrder.type).toBe('string');
-        expect(['ENERGY', 'BANDWIDTH', 'ACTIVATION']).toContain(apiOrder.type);
-    }
+  checkSellPrice(apiOrder: Order) {
+    expect(apiOrder).toHaveProperty("sellPrice");
+    expect(typeof apiOrder.sellPrice).toBe("number");
+  }
 
-    // Проверка поля amount: должно быть числом (number), обязательное поле
-    // Если передан expectedValue, дополнительно проверяется равенство значения
-    checkAmount(apiOrder: any, expectedValue?: number) {
-        expect(apiOrder).toHaveProperty('amount');
-        expect(typeof apiOrder.amount).toBe('number');
-        if (expectedValue !== undefined) {
-            expect(apiOrder.amount).toBe(expectedValue);
-        }
-    }
-
-    // Период действия заказа в миллисекундах (может быть null для некоторых типов заказов)
-    checkPeriod(apiOrder: any) {
-        expect(apiOrder).toHaveProperty('period');
-        
-        const period = apiOrder.period;
-        if (period !== null) {
-            expect(typeof period).toBe('number');
-            const validPeriods = [3600000, 21600000, 86400000, 259200000, 604800000, 1209600000];
-            expect(validPeriods).toContain(period);
-        } else {
-            expect(period).toBeNull();
-        }
-    }
-
-    // Проверка поля targetAddress: должно быть непустой строкой, обязательное поле
-    checkTargetAddress(apiOrder: any) {
-        expect(apiOrder).toHaveProperty('targetAddress');
-        expect(typeof apiOrder.targetAddress).toBe('string');
-        expect(apiOrder.targetAddress.length).toBeGreaterThan(0);
-    }
-
-    // Проверка поля blockchainTransaction: может быть строкой или null, обязательное поле
-    checkBlockchainTransaction(apiOrder: any) {
-        expect(apiOrder).toHaveProperty('blockchainTransaction');
-        if (apiOrder.blockchainTransaction !== null) {
-            expect(typeof apiOrder.blockchainTransaction).toBe('string');
-        } else {
-            expect(apiOrder.blockchainTransaction).toBeNull();
-        }
-    }
-
-    // Проверка поля sellPrice: должно быть числом (number), обязательное поле
-    checkSellPrice(apiOrder: any) {
-        expect(apiOrder).toHaveProperty('sellPrice');
-        expect(typeof apiOrder.sellPrice).toBe('number');
-    }
+  checkAllFields(apiOrder: Order, expectedAmount?: number) {
+    this.checkId(apiOrder);
+    this.checkCreatedAt(apiOrder);
+    this.checkStatus(apiOrder);
+    this.checkType(apiOrder);
+    this.checkAmount(apiOrder, expectedAmount);
+    this.checkPeriod(apiOrder);
+    this.checkTargetAddress(apiOrder);
+    this.checkBlockchainTransaction(apiOrder);
+    this.checkSellPrice(apiOrder);
+  }
 }
-
