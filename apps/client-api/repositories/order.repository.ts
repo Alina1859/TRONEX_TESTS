@@ -70,4 +70,13 @@ export class OrderRepository {
       LIMIT 1
     `;
   }
+
+  async getOrderUserId(orderId: number): Promise<string | null> {
+    const result = await coreDb.$queryRaw<{ userId: string }[]>`
+      SELECT "userId" FROM "Order"
+      WHERE id = ${orderId}
+      LIMIT 1
+    `;
+    return result[0]?.userId ?? null;
+  }
 }

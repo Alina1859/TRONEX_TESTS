@@ -15,3 +15,12 @@ export const VALID_ORDER_PERIODS = [
   OrderPeriod.ONE_WEEK,
   OrderPeriod.TWO_WEEKS,
 ] as const;
+
+export const ORDER_LIST_DEFAULT_OFFSET = 0;
+export const ORDER_LIST_MIN_OFFSET = 0;
+
+export const ORDER_LIST_DEFAULT_LIMIT = 10;
+export const ORDER_LIST_MIN_LIMIT = 1;
+export const ORDER_LIST_MAX_LIMIT = 200;
+
+export const ORDER_ID_MAX = 2147483647;

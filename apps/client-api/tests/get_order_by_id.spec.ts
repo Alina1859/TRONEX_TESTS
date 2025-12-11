@@ -16,7 +16,7 @@ test.describe("Get order by ID​", () => {
   const orderResponseTest = new OrderResponseTest();
   const orderFieldTest = new OrderFieldTest();
 
-  // Тест-кейс № 3: Проверка валидности полей ответа API для пользователя с заказами
+  // Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с заказами
   test("GET /api/v2/orders/{id} should return correct order data", async ({ request }) => {
     log.info("=== Тест: Проверка валидности полей ответа API ===");
 
@@ -40,7 +40,7 @@ test.describe("Get order by ID​", () => {
     log.info("✓ Все проверки пройдены успешно");
   });
 
-  // Тест-кейс № 4: Получение чужого заказа по orderId
+  // Тест-кейс № 2: Получение чужого заказа по orderId
   test("GET /api/v2/orders/{id} should not return order from another user", async ({ request }) => {
     log.info("=== Тест: Проверка безопасности доступа к заказам ===");
 
@@ -63,7 +63,7 @@ test.describe("Get order by ID​", () => {
     log.info("✓ Все проверки пройдены успешно. Доступ к чужому заказу заблокирован.");
   });
 
-  // Тест-кейс № 5: Получение несуществующего заказа по orderId
+  // Тест-кейс № 3: Получение несуществующего заказа по orderId
   test("GET /api/v2/orders/{id} should return 404 for non-existent order", async ({ request }) => {
     log.info("=== Тест: Проверка обработки несуществующего заказа ===");
 
@@ -84,7 +84,7 @@ test.describe("Get order by ID​", () => {
     log.info("✓ Все проверки пройдены успешно. Несуществующий заказ корректно обработан (404).");
   });
 
-  // Тест-кейс № 6: Получение заказа по orderId = 1 (существующий или несуществующий)
+  // Тест-кейс № 4: Получение заказа по orderId = 1 (существующий или несуществующий)
   test("GET /api/v2/orders/{id} should return order or 404 for order with id = 1", async ({
     request,
   }) => {
@@ -130,7 +130,7 @@ test.describe("Get order by ID​", () => {
     }
   });
 
-  // Тест-кейс № 7: Проверка граничных значений и базовых некорректных значений orderId
+  // Тест-кейс № 5: Проверка граничных значений и базовых некорректных значений orderId
   test("GET /api/v2/orders/{id} should validate boundary and invalid orderId values", async ({
     request,
   }) => {
@@ -167,7 +167,7 @@ test.describe("Get order by ID​", () => {
     );
   });
 
-  // Тест-кейс № 8: Получение заказа со статусом "COMPLETED"
+  // Тест-кейс № 6: Получение заказа со статусом "COMPLETED"
   test('GET /api/v2/orders/{id} should return order with status "COMPLETED"', async ({
     request,
   }) => {
@@ -198,7 +198,7 @@ test.describe("Get order by ID​", () => {
     log.info('✓ Все проверки пройдены успешно. Заказ со статусом "COMPLETED" корректно получен.');
   });
 
-  // Тест-кейс № 9: Получение заказа со статусом "FAILED"
+  // Тест-кейс № 7: Получение заказа со статусом "FAILED"
   test('GET /api/v2/orders/{id} should return order with status "FAILED"', async ({ request }) => {
     log.info('=== Тест: Проверка получения заказа со статусом "FAILED" ===');
 
@@ -227,7 +227,7 @@ test.describe("Get order by ID​", () => {
     log.info('✓ Все проверки пройдены успешно. Заказ со статусом "FAILED" корректно получен.');
   });
 
-  // Тест-кейс № 10: Получение заказа со type = "ENERGY"
+  // Тест-кейс № 8: Получение заказа со type = "ENERGY"
   test('GET /api/v2/orders/{id} should return order with type "ENERGY"', async ({ request }) => {
     log.info('=== Тест: Проверка получения заказа с типом "ENERGY" ===');
 
@@ -256,7 +256,7 @@ test.describe("Get order by ID​", () => {
     log.info('✓ Все проверки пройдены успешно. Заказ с типом "ENERGY" корректно получен.');
   });
 
-  // Тест-кейс № 11: Получение заказа со type = "BANDWIDTH"
+  // Тест-кейс № 9: Получение заказа со type = "BANDWIDTH"
   test('GET /api/v2/orders/{id} should return order with type "BANDWIDTH"', async ({ request }) => {
     log.info('=== Тест: Проверка получения заказа с типом "BANDWIDTH" ===');
 
@@ -285,7 +285,7 @@ test.describe("Get order by ID​", () => {
     log.info('✓ Все проверки пройдены успешно. Заказ с типом "BANDWIDTH" корректно получен.');
   });
 
-  // Тест-кейс № 12: Получение заказа со type = "ACTIVATION"
+  // Тест-кейс № 10: Получение заказа со type = "ACTIVATION"
   test('GET /api/v2/orders/{id} should return order with type "ACTIVATION"', async ({
     request,
   }) => {
@@ -315,4 +315,5 @@ test.describe("Get order by ID​", () => {
 
     log.info('✓ Все проверки пройдены успешно. Заказ с типом "ACTIVATION" корректно получен.');
   });
+
 });
