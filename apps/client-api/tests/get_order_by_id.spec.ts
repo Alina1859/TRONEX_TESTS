@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { OrderRepository } from "../repositories/order.repository";
 import { OrderApi } from "../api/order.api";
-import { OrderResponseTest } from "../TestObjects/OrderResponseTest";
-import { OrderFieldTest } from "../TestObjects/OrderFieldTest";
-import { ResponseStatusTest } from "../TestObjects/ResponseStatusTest";
+import { OrderResponseCheck } from "../TestObjects/OrderResponseCheck";
+import { OrderFieldCheck } from "../TestObjects/OrderFieldCheck";
+import { ResponseStatusCheck } from "../TestObjects/ResponseStatusCheck";
 import { boundaryAndInvalidOrderIdVariations } from "../TestObjects/InvalidOrderIdVariations";
 import { log } from "../../../shared/utils/logger";
 
@@ -12,9 +12,9 @@ test.describe("Get order by ID​", () => {
   const orderRepo = new OrderRepository();
   const userId = process.env.USER_ID_PRIMARY!;
   const otherUserId = process.env.USER_ID_SECONDARY!;
-  const responseStatusTest = new ResponseStatusTest();
-  const orderResponseTest = new OrderResponseTest();
-  const orderFieldTest = new OrderFieldTest();
+  const responseStatusCheck = new ResponseStatusCheck();
+  const orderResponseTest = new OrderResponseCheck();
+  const orderFieldTest = new OrderFieldCheck();
 
   // Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с заказами
   test("GET /api/v2/orders/{id} should return correct order data", async ({ request }) => {
@@ -28,7 +28,7 @@ test.describe("Get order by ID​", () => {
     const response = await orderApi.getOrderById(lastOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response);
+    responseStatusCheck.checkResponseStatus(response);
 
     const apiOrder = await response.json();
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
@@ -56,7 +56,7 @@ test.describe("Get order by ID​", () => {
     const response = await orderApi.getOrderById(lastOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response, 404);
+    responseStatusCheck.checkResponseStatus(response, 404);
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
@@ -77,7 +77,7 @@ test.describe("Get order by ID​", () => {
     const response = await orderApi.getOrderById(nonExistentOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response, 404);
+    responseStatusCheck.checkResponseStatus(response, 404);
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
@@ -110,7 +110,7 @@ test.describe("Get order by ID​", () => {
 
     if (orderExists) {
       log.info("Проверка корректности ответа для существующего заказа...");
-      responseStatusTest.checkResponseStatus(response);
+      responseStatusCheck.checkResponseStatus(response);
       const apiOrder = await response.json();
       log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
@@ -120,7 +120,7 @@ test.describe("Get order by ID​", () => {
       log.info("✓ Все проверки пройдены успешно. Заказ с ID = 1 корректно получен.");
     } else {
       log.info("Проверка обработки ошибки 404 для несуществующего заказа...");
-      responseStatusTest.checkResponseStatus(response, 404);
+      responseStatusCheck.checkResponseStatus(response, 404);
       const errorResponse = await response.json();
       log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
@@ -155,7 +155,7 @@ test.describe("Get order by ID​", () => {
         } else {
           log.warn(`  ✗ Неожиданный статус: ${status} (ожидался 400 или 404)`);
         }
-        responseStatusTest.checkResponseStatus(response, status);
+        responseStatusCheck.checkResponseStatus(response, status);
       } catch (error: any) {
         log.error(`  ✗ Ошибка при выполнении запроса: ${error.message}`);
       }
@@ -183,7 +183,7 @@ test.describe("Get order by ID​", () => {
     const response = await orderApi.getOrderById(completedOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response);
+    responseStatusCheck.checkResponseStatus(response);
     const apiOrder = await response.json();
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
@@ -212,7 +212,7 @@ test.describe("Get order by ID​", () => {
     const response = await orderApi.getOrderById(failedOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response);
+    responseStatusCheck.checkResponseStatus(response);
     const apiOrder = await response.json();
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
@@ -241,7 +241,7 @@ test.describe("Get order by ID​", () => {
     const response = await orderApi.getOrderById(energyOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response);
+    responseStatusCheck.checkResponseStatus(response);
     const apiOrder = await response.json();
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
@@ -270,7 +270,7 @@ test.describe("Get order by ID​", () => {
     const response = await orderApi.getOrderById(bandwidthOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response);
+    responseStatusCheck.checkResponseStatus(response);
     const apiOrder = await response.json();
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
@@ -301,7 +301,7 @@ test.describe("Get order by ID​", () => {
     const response = await orderApi.getOrderById(activationOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response);
+    responseStatusCheck.checkResponseStatus(response);
     const apiOrder = await response.json();
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 

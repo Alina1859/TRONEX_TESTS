@@ -1,5 +1,5 @@
 import { test } from "@playwright/test";
-import { ResponseStatusTest } from "../TestObjects/ResponseStatusTest";
+import { ResponseStatusCheck } from "../TestObjects/ResponseStatusCheck";
 import { log } from "../../../shared/utils/logger";
 import * as dotenv from "dotenv";
 
@@ -9,7 +9,7 @@ const apiUrl = process.env.API_URL!;
 const validOrderId = 1;
 
 test.describe("API Key Validation", () => {
-  const responseStatusTest = new ResponseStatusTest();
+  const responseStatusCheck = new ResponseStatusCheck();
   
 // Тестирует корректность работы эндпоинта GET /api/v2/orders/{id}
   test("GET /api/v2/orders/{id} should return 401 for empty API key", async ({
@@ -26,7 +26,7 @@ test.describe("API Key Validation", () => {
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response, 401);
+    responseStatusCheck.checkResponseStatus(response, 401);
 
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
@@ -51,7 +51,7 @@ test.describe("API Key Validation", () => {
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response, 401);
+    responseStatusCheck.checkResponseStatus(response, 401);
 
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
@@ -72,7 +72,7 @@ test.describe("API Key Validation", () => {
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response, 401);
+    responseStatusCheck.checkResponseStatus(response, 401);
 
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
@@ -95,12 +95,13 @@ test.describe("API Key Validation", () => {
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusTest.checkResponseStatus(response, 401);
+    responseStatusCheck.checkResponseStatus(response, 401);
 
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
     log.info("✓ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
   });
+
 });
 

@@ -1,5 +1,7 @@
 node_modules
 .env
 playwright-report/
+**/playwright-report/
 test-results/
 inspect.ts
+schema.prisma

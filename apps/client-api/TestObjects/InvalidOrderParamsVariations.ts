@@ -55,6 +55,7 @@ export const invalidOffsetLimitCombinations: OrderListParamVariation[] = [
   { params: { offset: ORDER_LIST_MIN_OFFSET - 1, limit: ORDER_LIST_MAX_LIMIT + 1 }, description: "offset меньше минимума, limit больше максимума" },
   { params: { offset: -5, limit: -1 }, description: "offset и limit отрицательные" },
   { params: { offset: 1.2, limit: 0.5 }, description: "offset дробный, limit дробный" },
+  { params: { offset: "", limit: "" }, description: "offset пустая строка, limit пустая строка" },
   { params: { offset: "abc", limit: "xyz" }, description: "offset и limit строковые нечисловые" },
   { params: { offset: "undefined", limit: "undefined" }, description: "offset undefined, limit undefined" },
   { params: { offset: Number.NaN, limit: Number.NaN }, description: "offset NaN, limit NaN" },

@@ -79,4 +79,15 @@ export class OrderRepository {
     `;
     return result[0]?.userId ?? null;
   }
+
+  async getOrdersByUserIdPaginated(userId: string, offset: number, limit: number): Promise<Order[]> {
+    return await coreDb.$queryRaw<Order[]>`
+      SELECT *
+      FROM "Order"
+      WHERE "userId" = ${userId}
+      ORDER BY "createdAt" DESC
+      OFFSET ${offset}
+      LIMIT ${limit}
+    `;
+  }
 }
