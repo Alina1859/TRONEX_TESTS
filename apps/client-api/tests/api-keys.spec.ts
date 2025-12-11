@@ -1,5 +1,5 @@
 import { test } from "@playwright/test";
-import { ResponseStatusCheck } from "../TestObjects/ResponseStatusCheck";
+import { ResponseStatusCheck } from "../test-objects/response-status-check";
 import { log } from "../../../shared/utils/logger";
 import * as dotenv from "dotenv";
 
@@ -10,11 +10,9 @@ const validOrderId = 1;
 
 test.describe("API Key Validation", () => {
   const responseStatusCheck = new ResponseStatusCheck();
-  
-// Тестирует корректность работы эндпоинта GET /api/v2/orders/{id}
-  test("GET /api/v2/orders/{id} should return 401 for empty API key", async ({
-    request,
-  }) => {
+
+  // Тестирует корректность работы эндпоинта GET /api/v2/orders/{id}
+  test("GET /api/v2/orders/{id} should return 401 for empty API key", async ({ request }) => {
     log.info("=== Тест: Проверка отправки пустого API ключа ===");
 
     const response = await request.get(`${apiUrl}/api/v2/orders/${validOrderId}`, {
@@ -34,9 +32,7 @@ test.describe("API Key Validation", () => {
     log.info("✓ Все проверки пройдены успешно. Пустой API ключ корректно отклонен (401).");
   });
 
-  test("GET /api/v2/orders/{id} should return 401 for invalid API key", async ({
-    request,
-  }) => {
+  test("GET /api/v2/orders/{id} should return 401 for invalid API key", async ({ request }) => {
     log.info("=== Тест: Проверка отправки невалидного API ключа ===");
 
     const invalidApiKey = "invalid_api_key_12345";
@@ -102,6 +98,4 @@ test.describe("API Key Validation", () => {
 
     log.info("✓ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
   });
-
 });
-

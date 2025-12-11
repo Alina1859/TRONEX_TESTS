@@ -7,8 +7,14 @@ export const boundaryAndInvalidOrderIdVariations = [
   { value: -1, description: "Отрицательное число -1 (граничное значение, должно быть > 0)" },
   { value: -2147483648, description: "Минимальное 32-битное signed integer (-2147483648)" },
   { value: -1000000, description: "Большое отрицательное число (-1000000)" },
-  { value: ORDER_ID_MAX + 1, description: `Число больше максимального 32-битного integer (${ORDER_ID_MAX + 1})` },
-  { value: ORDER_ID_MAX + 2, description: `Число больше максимального 32-битного integer (${ORDER_ID_MAX + 2})` },
+  {
+    value: ORDER_ID_MAX + 1,
+    description: `Число больше максимального 32-битного integer (${ORDER_ID_MAX + 1})`,
+  },
+  {
+    value: ORDER_ID_MAX + 2,
+    description: `Число больше максимального 32-битного integer (${ORDER_ID_MAX + 2})`,
+  },
   { value: 4294967295, description: "Максимальное 32-битное unsigned integer (4294967295)" },
 
   // Базовые некорректные значения
@@ -22,7 +28,10 @@ export const boundaryAndInvalidOrderIdVariations = [
   { value: "-1", description: 'Строка "-1"' },
   { value: "-2147483648", description: 'Строка "-2147483648" (минимальное 32-битное)' },
   { value: `${ORDER_ID_MAX}`, description: `Строка "${ORDER_ID_MAX}" (максимальное 32-битное)` },
-  { value: `${ORDER_ID_MAX + 1}`, description: `Строка "${ORDER_ID_MAX + 1}" (больше максимального)` },
+  {
+    value: `${ORDER_ID_MAX + 1}`,
+    description: `Строка "${ORDER_ID_MAX + 1}" (больше максимального)`,
+  },
   { value: "1" + "A".repeat(1000), description: "Очень длинная строка (1000 символов)" },
   { value: "abc", description: 'Строка "abc"' },
   { value: "1.5", description: 'Строка "1.5"' },

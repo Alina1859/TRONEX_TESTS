@@ -80,7 +80,11 @@ export class OrderRepository {
     return result[0]?.userId ?? null;
   }
 
-  async getOrdersByUserIdPaginated(userId: string, offset: number, limit: number): Promise<Order[]> {
+  async getOrdersByUserIdPaginated(
+    userId: string,
+    offset: number,
+    limit: number
+  ): Promise<Order[]> {
     return await coreDb.$queryRaw<Order[]>`
       SELECT *
       FROM "Order"

@@ -1,14 +1,14 @@
 import { test, expect } from "@playwright/test";
 import { OrderRepository } from "../repositories/order.repository";
 import { OrderApi } from "../api/order.api";
-import { OrderResponseCheck } from "../TestObjects/OrderResponseCheck";
-import { OrderFieldCheck } from "../TestObjects/OrderFieldCheck";
-import { ResponseStatusCheck } from "../TestObjects/ResponseStatusCheck";
-import { boundaryAndInvalidOrderIdVariations } from "../TestObjects/InvalidOrderIdVariations";
+import { OrderResponseCheck } from "../test-objects/order-response-check";
+import { OrderFieldCheck } from "../test-objects/order-field-check";
+import { ResponseStatusCheck } from "../test-objects/response-status-check";
+import { boundaryAndInvalidOrderIdVariations } from "../test-objects/invalid-orderId-variations";
 import { log } from "../../../shared/utils/logger";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/orders/{id}
-test.describe("Get order by ID​", () => {
+test.describe("Get order by ID", () => {
   const orderRepo = new OrderRepository();
   const userId = process.env.USER_ID_PRIMARY!;
   const otherUserId = process.env.USER_ID_SECONDARY!;
@@ -315,5 +315,4 @@ test.describe("Get order by ID​", () => {
 
     log.info('✓ Все проверки пройдены успешно. Заказ с типом "ACTIVATION" корректно получен.');
   });
-
 });

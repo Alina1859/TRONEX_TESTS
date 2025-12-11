@@ -1,16 +1,19 @@
 import { test, expect } from "@playwright/test";
 import { OrderApi, PRIMARY_USER_ID } from "../api/order.api";
-import { OrderFieldCheck } from "../TestObjects/OrderFieldCheck";
-import { ResponseStatusCheck } from "../TestObjects/ResponseStatusCheck";
-import { OrderResponseCheck } from "../TestObjects/OrderResponseCheck";
+import { OrderFieldCheck } from "../test-objects/order-field-check";
+import { ResponseStatusCheck } from "../test-objects/response-status-check";
+import { OrderResponseCheck } from "../test-objects/order-response-check";
 import {
   invalidOffsetVariations,
   invalidLimitVariations,
   invalidOffsetLimitCombinations,
-} from "../TestObjects/InvalidOrderParamsVariations";
+} from "../test-objects/invalid-order-params-variations";
 import { log } from "../../../shared/utils/logger";
 import { Order } from "../../../shared/utils/types";
-import { ORDER_LIST_DEFAULT_LIMIT, ORDER_LIST_DEFAULT_OFFSET } from "../../../shared/utils/constants";
+import {
+  ORDER_LIST_DEFAULT_LIMIT,
+  ORDER_LIST_DEFAULT_OFFSET,
+} from "../../../shared/utils/constants";
 import { OrderRepository } from "../repositories/order.repository";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/orders/
@@ -19,10 +22,8 @@ test.describe("Get order list", () => {
   const orderFieldCheck = new OrderFieldCheck();
   const orderResponseCheck = new OrderResponseCheck();
 
-// Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с заказами с дефолтными параметрами
-  test(`GET /api/v2/orders/ should return default paginated list`, async ({
-    request,
-  }) => {
+  // Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с заказами с дефолтными параметрами
+  test(`GET /api/v2/orders/ should return default paginated list`, async ({ request }) => {
     log.info("=== Тест: Получение списка заказов с параметрами по умолчанию ===");
 
     const orderApi = new OrderApi(request);
@@ -44,7 +45,9 @@ test.describe("Get order list", () => {
 
     const orderApi = new OrderApi(request);
     for (const variation of invalidOffsetVariations) {
-      log.info(`Проверка: ${variation.description} (offset: ${JSON.stringify(variation.params.offset)})`);
+      log.info(
+        `Проверка: ${variation.description} (offset: ${JSON.stringify(variation.params.offset)})`
+      );
 
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -65,12 +68,14 @@ test.describe("Get order list", () => {
 
     const orderApi = new OrderApi(request);
     for (const variation of invalidLimitVariations) {
-      log.info(`Проверка: ${variation.description} (limit: ${JSON.stringify(variation.params.limit)})`);
+      log.info(
+        `Проверка: ${variation.description} (limit: ${JSON.stringify(variation.params.limit)})`
+      );
 
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusCheck.checkResponseStatus(response, 400);
+      responseStatusCheck.checkResponseStatus(response, 400);
 
       const errorResponse = await response.json();
       log.info(`Ответ ошибки: ${JSON.stringify(errorResponse, null, 2)}`);
@@ -97,7 +102,7 @@ test.describe("Get order list", () => {
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusCheck.checkResponseStatus(response, 400);
+      responseStatusCheck.checkResponseStatus(response, 400);
 
       const errorResponse = await response.json();
       log.info(`Ответ ошибки: ${JSON.stringify(errorResponse, null, 2)}`);
@@ -133,7 +138,6 @@ test.describe("Get order list", () => {
     orderResponseCheck.checkOrderIdsMatch(orders, expectedOrders);
 
     log.info("✓ offset = 0: получены последние 10 заказов пользователя, отсортированы по убыванию");
-
   });
 
   // Тест-кейс № 6: Проверка значения offset = 10

@@ -15,9 +15,7 @@ export class OrderResponseCheck {
   }
 
   checkOrderIdsMatch(orders: Order[], expectedOrders: Order[]) {
-    expect(orders.map((order) => order.id)).toEqual(
-      expectedOrders.map((order) => order.id)
-    );
+    expect(orders.map((order) => order.id)).toEqual(expectedOrders.map((order) => order.id));
   }
 
   checkSortedByCreatedAtDesc(orders: Order[]) {

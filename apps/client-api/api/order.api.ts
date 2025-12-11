@@ -8,7 +8,6 @@ export const PRIMARY_USER_ID = process.env.USER_ID_PRIMARY!;
 const apiKey = process.env.API_KEY_PRIMARY!;
 const apiUrl = process.env.API_URL!;
 
-
 export class OrderApi {
   constructor(private request: APIRequestContext) {}
 
