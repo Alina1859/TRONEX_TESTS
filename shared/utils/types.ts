@@ -4,7 +4,9 @@ export type OrderResourceType = "ENERGY" | "BANDWIDTH" | "ACTIVATION";
 
 export type EnergyOrderPeriodMs = (typeof ENERGY_ORDER_PERIODS)[number];
 export type BandwidthOrderPeriodMs = (typeof BANDWIDTH_ORDER_PERIODS)[number];
-export type OrderPeriodMs = EnergyOrderPeriodMs | BandwidthOrderPeriodMs;
+export type ActivationOrderPeriod = null | 0;
+
+export type OrderPeriodMs = EnergyOrderPeriodMs | BandwidthOrderPeriodMs | ActivationOrderPeriod;
 
 export interface Order {
   id: number;

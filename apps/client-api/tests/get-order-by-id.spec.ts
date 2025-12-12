@@ -6,12 +6,11 @@ import { OrderFieldCheck } from "../test-objects/order-field-check";
 import { ResponseStatusCheck } from "../test-objects/response-status-check";
 import { boundaryAndInvalidOrderIdVariations } from "../test-objects/invalid-orderId-variations";
 import { log } from "../../../shared/utils/logger";
+import { userIdPrimary, userIdSecondary } from "../api/constants";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/orders/{id}
 test.describe("Get order by ID", () => {
   const orderRepo = new OrderRepository();
-  const userId = process.env.USER_ID_PRIMARY!;
-  const otherUserId = process.env.USER_ID_SECONDARY!;
   const responseStatusCheck = new ResponseStatusCheck();
   const orderResponseTest = new OrderResponseCheck();
   const orderFieldTest = new OrderFieldCheck();
@@ -20,8 +19,9 @@ test.describe("Get order by ID", () => {
   test("GET /api/v2/orders/{id} should return correct order data", async ({ request }) => {
     log.info("=== Тест: Проверка валидности полей ответа API ===");
 
-    const getLastOrderByUserId = await orderRepo.getLastOrderByUserId(userId);
-    const lastOrderId = getLastOrderByUserId[0].id;
+    const getLastOrderByUserId = await orderRepo.getLastOrderByUserId(userIdPrimary);
+    const lastOrder = getLastOrderByUserId[0]
+    const lastOrderId = lastOrder.id;
 
     const orderApi = new OrderApi(request);
     const response = await orderApi.getOrderById(lastOrderId);
@@ -33,7 +33,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderId(apiOrder, lastOrderId);
+    orderResponseTest.checkOrderFieldEquality(apiOrder, lastOrder);
     orderFieldTest.checkAllFields(apiOrder);
 
     log.info("✓ Все проверки пройдены успешно");
@@ -43,7 +43,7 @@ test.describe("Get order by ID", () => {
   test("GET /api/v2/orders/{id} should not return order from another user", async ({ request }) => {
     log.info("=== Тест: Проверка безопасности доступа к заказам ===");
 
-    const getLastOrderByUserId = await orderRepo.getLastOrderByUserId(otherUserId);
+    const getLastOrderByUserId = await orderRepo.getLastOrderByUserId(userIdSecondary);
     log.info(
       "Последний заказ другого пользователя:",
       JSON.stringify(getLastOrderByUserId, null, 2)
@@ -173,7 +173,7 @@ test.describe("Get order by ID", () => {
   }) => {
     log.info('=== Тест: Проверка получения заказа со статусом "COMPLETED" ===');
 
-    const completedOrder = await orderRepo.getCompletedOrderByUserId(userId);
+    const completedOrder = await orderRepo.getCompletedOrderByUserId(userIdPrimary);
 
     const completedOrderId = completedOrder[0].id;
     log.info(`Order ID со статусом "COMPLETED" для тестирования: ${completedOrderId}`);
@@ -202,7 +202,7 @@ test.describe("Get order by ID", () => {
   test('GET /api/v2/orders/{id} should return order with status "FAILED"', async ({ request }) => {
     log.info('=== Тест: Проверка получения заказа со статусом "FAILED" ===');
 
-    const failedOrder = await orderRepo.getFailedOrderByUserId(userId);
+    const failedOrder = await orderRepo.getFailedOrderByUserId(userIdPrimary);
 
     const failedOrderId = failedOrder[0].id;
     log.info(`Order ID со статусом "FAILED" для тестирования: ${failedOrderId}`);
@@ -231,7 +231,7 @@ test.describe("Get order by ID", () => {
   test('GET /api/v2/orders/{id} should return order with type "ENERGY"', async ({ request }) => {
     log.info('=== Тест: Проверка получения заказа с типом "ENERGY" ===');
 
-    const energyOrder = await orderRepo.getEnergyOrderByUserId(userId);
+    const energyOrder = await orderRepo.getEnergyOrderByUserId(userIdPrimary);
 
     const energyOrderId = energyOrder[0].id;
     log.info(`Order ID с типом "ENERGY" для тестирования: ${energyOrderId}`);
@@ -260,7 +260,7 @@ test.describe("Get order by ID", () => {
   test('GET /api/v2/orders/{id} should return order with type "BANDWIDTH"', async ({ request }) => {
     log.info('=== Тест: Проверка получения заказа с типом "BANDWIDTH" ===');
 
-    const bandwidthOrder = await orderRepo.getBandwidthOrderByUserId(userId);
+    const bandwidthOrder = await orderRepo.getBandwidthOrderByUserId(userIdPrimary);
 
     const bandwidthOrderId = bandwidthOrder[0].id;
     log.info(`Order ID с типом "BANDWIDTH" для тестирования: ${bandwidthOrderId}`);
@@ -291,7 +291,7 @@ test.describe("Get order by ID", () => {
   }) => {
     log.info('=== Тест: Проверка получения заказа с типом "ACTIVATION" ===');
 
-    const activationOrder = await orderRepo.getActivationOrderByUserId(userId);
+    const activationOrder = await orderRepo.getActivationOrderByUserId(userIdPrimary);
 
     const activationOrderId = activationOrder[0].id;
     log.info(`Order ID с типом "ACTIVATION" для тестирования: ${activationOrderId}`);

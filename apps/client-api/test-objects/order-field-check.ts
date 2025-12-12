@@ -28,12 +28,9 @@ export class OrderFieldCheck {
     expect(["ENERGY", "BANDWIDTH", "ACTIVATION"]).toContain(apiOrder.type);
   }
 
-  checkAmount(apiOrder: Order, expectedValue?: number) {
+  checkAmount(apiOrder: Order) {
     expect(apiOrder).toHaveProperty("amount");
     expect(typeof apiOrder.amount).toBe("number");
-    if (expectedValue !== undefined) {
-      expect(apiOrder.amount).toBe(expectedValue);
-    }
   }
 
   checkPeriod(apiOrder: Order) {
@@ -80,7 +77,7 @@ export class OrderFieldCheck {
     this.checkCreatedAt(apiOrder);
     this.checkStatus(apiOrder);
     this.checkType(apiOrder);
-    this.checkAmount(apiOrder, expectedAmount);
+    this.checkAmount(apiOrder);
     this.checkPeriod(apiOrder);
     this.checkTargetAddress(apiOrder);
     this.checkBlockchainTransaction(apiOrder);

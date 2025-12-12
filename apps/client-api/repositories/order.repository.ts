@@ -23,7 +23,17 @@ export class OrderRepository {
 
   async getOrderById(orderId: number): Promise<{ id: number }[]> {
     return await coreDb.$queryRaw<{ id: number }[]>`
-      SELECT id FROM "Order" 
+      SELECT 
+        id,
+        "createdAt",
+        status,
+        type,
+        amount,
+        period,
+        "targetAddress",
+        "blockchainTransaction",
+        "sellPrice"
+      FROM "Order" 
       WHERE id = ${orderId}
       LIMIT 1
     `;

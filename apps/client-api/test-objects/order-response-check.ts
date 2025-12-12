@@ -7,19 +7,21 @@ export class OrderResponseCheck {
   }
 
   checkOrderFieldEquality(apiOrder: Order, expected: Partial<Order>) {
-expect(apiOrder.id).toBe(expected.id);
- 
-      expect(new Date(apiOrder.createdAt).getTime()).toBe(
+
+    expect(apiOrder.id).toBe(expected.id);
+    expect(new Date(apiOrder.createdAt).getTime()).toBe(
         new Date(expected.createdAt as any).getTime()
       );
-  expect(apiOrder.status).toBe(expected.status);
-   expect(apiOrder.type).toBe(expected.type);
-   expect(apiOrder.amount).toBe(expected.amount);
-   expect(apiOrder.period).toBe(expected.period);
-    
-      expect(apiOrder.targetAddress).toBe(expected.targetAddress);
- 
-      expect(apiOrder.blockchainTransaction).toBe(expected.blockchainTransaction);
+    expect(apiOrder.status).toBe(expected.status);
+    expect(apiOrder.type).toBe(expected.type);
+    expect(apiOrder.amount).toBe(expected.amount);
+    if (expected.period === 0) {
+      expect(apiOrder.period).toBe(expected.period || null);
+    } else {
+      expect(apiOrder.period).toBe(expected.period);
+    }
+    expect(apiOrder.targetAddress).toBe(expected.targetAddress);
+    expect(apiOrder.blockchainTransaction).toBe(expected.blockchainTransaction);
     expect(apiOrder.sellPrice).toBe(expected.sellPrice);
   }
 
