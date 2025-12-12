@@ -22,7 +22,6 @@ test.describe("Get order by ID", () => {
 
     const getLastOrderByUserId = await orderRepo.getLastOrderByUserId(userId);
     const lastOrderId = getLastOrderByUserId[0].id;
-    log.info(`Order ID для тестирования: ${lastOrderId}`);
 
     const orderApi = new OrderApi(request);
     const response = await orderApi.getOrderById(lastOrderId);
@@ -113,8 +112,9 @@ test.describe("Get order by ID", () => {
       responseStatusCheck.checkResponseStatus(response);
       const apiOrder = await response.json();
       log.info("API Response:", JSON.stringify(apiOrder, null, 2));
+      console.log("[TC4] apiOrder:", apiOrder);
 
-      orderResponseTest.checkOrderId(apiOrder, orderId);
+      orderResponseTest.checkOrderFieldEquality(apiOrder, orderInDb[0] as any);
       orderFieldTest.checkAllFields(apiOrder);
 
       log.info("✓ Все проверки пройдены успешно. Заказ с ID = 1 корректно получен.");

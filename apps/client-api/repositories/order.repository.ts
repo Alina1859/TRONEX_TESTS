@@ -4,7 +4,17 @@ import { Order } from "../../../shared/utils/types";
 export class OrderRepository {
   async getLastOrderByUserId(userId: string): Promise<Order[]> {
     return await coreDb.$queryRaw<Order[]>`
-      SELECT id, status, amount FROM "Order" 
+      SELECT 
+        id,
+        "createdAt",
+        status,
+        type,
+        amount,
+        period,
+        "targetAddress",
+        "blockchainTransaction",
+        "sellPrice"
+      FROM "Order" 
       WHERE "userId" = ${userId}
       ORDER BY "createdAt" DESC 
       LIMIT 1

@@ -2,6 +2,7 @@ import { expect } from "@playwright/test";
 import { Order } from "../../../shared/utils/types";
 import { VALID_ORDER_PERIODS } from "../../../shared/utils/constants";
 
+
 export class OrderFieldCheck {
   checkId(apiOrder: Order) {
     expect(apiOrder).toHaveProperty("id");

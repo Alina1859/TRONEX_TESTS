@@ -16,6 +16,14 @@ export const VALID_ORDER_PERIODS = [
   OrderPeriod.TWO_WEEKS,
 ] as const;
 
+// Allowed lease durations per order type
+export const ENERGY_ORDER_PERIODS = [
+  OrderPeriod.ONE_HOUR,
+  OrderPeriod.ONE_DAY,
+  OrderPeriod.THREE_DAYS,
+] as const;
+export const BANDWIDTH_ORDER_PERIODS = [OrderPeriod.ONE_HOUR, OrderPeriod.ONE_DAY] as const;
+
 export const ORDER_LIST_DEFAULT_OFFSET = 0;
 export const ORDER_LIST_MIN_OFFSET = 0;
 
