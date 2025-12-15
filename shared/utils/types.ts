@@ -42,6 +42,10 @@ export type CreateOrderRequest =
       targetAddress: string;
       amount: number;
       period: BandwidthOrderPeriodMs;
+    }
+  | {
+      type: "ACTIVATION";
+      targetAddress: string;
     };
 
 export interface CreateActivationOrderRequest {

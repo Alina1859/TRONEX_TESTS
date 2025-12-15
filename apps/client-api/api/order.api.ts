@@ -1,7 +1,6 @@
 import { APIRequestContext } from "@playwright/test";
 import { apiKey, apiUrl } from "./constants";
 
-
 export class OrderApi {
   constructor(private request: APIRequestContext) {}
 

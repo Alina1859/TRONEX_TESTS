@@ -2,7 +2,6 @@ import { expect } from "@playwright/test";
 import { Order } from "../../../shared/utils/types";
 import { VALID_ORDER_PERIODS } from "../../../shared/utils/constants";
 
-
 export class OrderFieldCheck {
   checkId(apiOrder: Order) {
     expect(apiOrder).toHaveProperty("id");
@@ -72,7 +71,7 @@ export class OrderFieldCheck {
     expect(typeof apiOrder.sellPrice).toBe("number");
   }
 
-  checkAllFields(apiOrder: Order, expectedAmount?: number) {
+  checkAllFields(apiOrder: Order) {
     this.checkId(apiOrder);
     this.checkCreatedAt(apiOrder);
     this.checkStatus(apiOrder);

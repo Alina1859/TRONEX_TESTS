@@ -20,7 +20,7 @@ test.describe("Get order by ID", () => {
     log.info("=== Тест: Проверка валидности полей ответа API ===");
 
     const getLastOrderByUserId = await orderRepo.getLastOrderByUserId(userIdPrimary);
-    const lastOrder = getLastOrderByUserId[0]
+    const lastOrder = getLastOrderByUserId[0];
     const lastOrderId = lastOrder.id;
 
     const orderApi = new OrderApi(request);
@@ -112,9 +112,8 @@ test.describe("Get order by ID", () => {
       responseStatusCheck.checkResponseStatus(response);
       const apiOrder = await response.json();
       log.info("API Response:", JSON.stringify(apiOrder, null, 2));
-      console.log("[TC4] apiOrder:", apiOrder);
 
-      orderResponseTest.checkOrderFieldEquality(apiOrder, orderInDb[0] as any);
+      orderResponseTest.checkOrderFieldEquality(apiOrder, orderInDb[0]);
       orderFieldTest.checkAllFields(apiOrder);
 
       log.info("✓ Все проверки пройдены успешно. Заказ с ID = 1 корректно получен.");
@@ -188,7 +187,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderId(apiOrder, completedOrderId);
+    orderResponseTest.checkOrderFieldEquality(apiOrder, completedOrder[0]);
     orderFieldTest.checkAllFields(apiOrder);
 
     log.info("Проверка статуса заказа...");
@@ -217,7 +216,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderId(apiOrder, failedOrderId);
+    orderResponseTest.checkOrderFieldEquality(apiOrder, failedOrder[0]);
     orderFieldTest.checkAllFields(apiOrder);
 
     log.info("Проверка статуса заказа...");
@@ -246,7 +245,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderId(apiOrder, energyOrderId);
+    orderResponseTest.checkOrderFieldEquality(apiOrder, energyOrder[0]);
     orderFieldTest.checkAllFields(apiOrder);
 
     log.info("Проверка типа заказа...");
@@ -275,7 +274,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderId(apiOrder, bandwidthOrderId);
+    orderResponseTest.checkOrderFieldEquality(apiOrder, bandwidthOrder[0]);
     orderFieldTest.checkAllFields(apiOrder);
 
     log.info("Проверка типа заказа...");
@@ -306,7 +305,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderId(apiOrder, activationOrderId);
+    orderResponseTest.checkOrderFieldEquality(apiOrder, activationOrder[0]);
     orderFieldTest.checkAllFields(apiOrder, 1);
 
     log.info("Проверка типа заказа...");

@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { OrderApi, PRIMARY_USER_ID } from "../api/order.api";
+import { OrderApi } from "../api/order.api";
 import { OrderFieldCheck } from "../test-objects/order-field-check";
 import { ResponseStatusCheck } from "../test-objects/response-status-check";
 import { OrderResponseCheck } from "../test-objects/order-response-check";
@@ -15,6 +15,7 @@ import {
   ORDER_LIST_DEFAULT_OFFSET,
 } from "../../../shared/utils/constants";
 import { OrderRepository } from "../repositories/order.repository";
+import { userIdPrimary } from "../api/constants";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/orders/
 test.describe("Get order list", () => {
@@ -27,12 +28,23 @@ test.describe("Get order list", () => {
     log.info("=== Тест: Получение списка заказов с параметрами по умолчанию ===");
 
     const orderApi = new OrderApi(request);
+    const orderRepo = new OrderRepository();
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
+      userIdPrimary,
+      ORDER_LIST_DEFAULT_OFFSET,
+      ORDER_LIST_DEFAULT_LIMIT
+    );
     const response = await orderApi.getOrderList();
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     responseStatusCheck.checkResponseStatus(response);
     const orders = (await response.json()) as Order[];
 
+    orderResponseCheck.checkOrderListIsArray(orders);
+    orderResponseCheck.checkOrderListExactLength(orders, expectedOrders.length);
+    orders.forEach((order: Order, index: number) => {
+      orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
+    });
     orders.forEach((order: Order) => orderFieldCheck.checkAllFields(order));
     orderResponseCheck.checkSortedByCreatedAtDesc(orders);
 
@@ -119,7 +131,7 @@ test.describe("Get order list", () => {
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
     const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      PRIMARY_USER_ID,
+      userIdPrimary,
       0,
       ORDER_LIST_DEFAULT_LIMIT
     );
@@ -135,7 +147,9 @@ test.describe("Get order list", () => {
     orderResponseCheck.checkSortedByCreatedAtDesc(orders);
 
     orderResponseCheck.checkOrderListExactLength(orders, expectedOrders.length);
-    orderResponseCheck.checkOrderIdsMatch(orders, expectedOrders);
+    orders.forEach((order: Order, index: number) => {
+      orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
+    });
 
     log.info("✓ offset = 0: получены последние 10 заказов пользователя, отсортированы по убыванию");
   });
@@ -148,7 +162,7 @@ test.describe("Get order list", () => {
     const orderRepo = new OrderRepository();
 
     const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      PRIMARY_USER_ID,
+      userIdPrimary,
       10,
       ORDER_LIST_DEFAULT_LIMIT
     );
@@ -164,7 +178,9 @@ test.describe("Get order list", () => {
     orderResponseCheck.checkSortedByCreatedAtDesc(orders);
 
     orderResponseCheck.checkOrderListExactLength(orders, expectedOrders.length);
-    orderResponseCheck.checkOrderIdsMatch(orders, expectedOrders);
+    orders.forEach((order: Order, index: number) => {
+      orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
+    });
 
     log.info("✓ offset = 10: получены заказы второй страницы, без пересечений с первой");
   });
@@ -177,7 +193,7 @@ test.describe("Get order list", () => {
     const orderRepo = new OrderRepository();
 
     const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      PRIMARY_USER_ID,
+      userIdPrimary,
       ORDER_LIST_DEFAULT_OFFSET,
       5
     );
@@ -193,7 +209,9 @@ test.describe("Get order list", () => {
     orderResponseCheck.checkSortedByCreatedAtDesc(orders);
 
     orderResponseCheck.checkOrderListExactLength(orders, expectedOrders.length);
-    orderResponseCheck.checkOrderIdsMatch(orders, expectedOrders);
+    orders.forEach((order: Order, index: number) => {
+      orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
+    });
 
     log.info("✓ limit = 5: получены ожидаемые заказы пользователя, не более 5");
   });
@@ -208,7 +226,7 @@ test.describe("Get order list", () => {
     const orderRepo = new OrderRepository();
 
     const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      PRIMARY_USER_ID,
+      userIdPrimary,
       1000,
       ORDER_LIST_DEFAULT_LIMIT
     );
@@ -224,7 +242,9 @@ test.describe("Get order list", () => {
     if (expectedOrders.length > 0) {
       orders.forEach((order: Order) => orderFieldCheck.checkAllFields(order));
       orderResponseCheck.checkSortedByCreatedAtDesc(orders);
-      orderResponseCheck.checkOrderIdsMatch(orders, expectedOrders);
+      orders.forEach((order: Order, index: number) => {
+        orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
+      });
     } else {
       expect(orders.length).toBe(0);
       log.info("Получен пустой список заказов (offset превышает количество доступных заказов)");

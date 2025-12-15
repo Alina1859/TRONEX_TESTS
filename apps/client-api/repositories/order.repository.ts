@@ -2,18 +2,18 @@ import { coreDb } from "../../../shared/database/connection";
 import { Order } from "../../../shared/utils/types";
 
 export class OrderRepository {
+  async getOrderByIdFull(orderId: number): Promise<any[]> {
+    return await coreDb.$queryRaw<any[]>`
+      SELECT *
+      FROM "Order"
+      WHERE id = ${orderId}
+      LIMIT 1
+    `;
+  }
+
   async getLastOrderByUserId(userId: string): Promise<Order[]> {
     return await coreDb.$queryRaw<Order[]>`
-      SELECT 
-        id,
-        "createdAt",
-        status,
-        type,
-        amount,
-        period,
-        "targetAddress",
-        "blockchainTransaction",
-        "sellPrice"
+      SELECT *
       FROM "Order" 
       WHERE "userId" = ${userId}
       ORDER BY "createdAt" DESC 
@@ -23,16 +23,7 @@ export class OrderRepository {
 
   async getOrderById(orderId: number): Promise<{ id: number }[]> {
     return await coreDb.$queryRaw<{ id: number }[]>`
-      SELECT 
-        id,
-        "createdAt",
-        status,
-        type,
-        amount,
-        period,
-        "targetAddress",
-        "blockchainTransaction",
-        "sellPrice"
+      SELECT *
       FROM "Order" 
       WHERE id = ${orderId}
       LIMIT 1
@@ -48,7 +39,8 @@ export class OrderRepository {
 
   async getCompletedOrderByUserId(userId: string): Promise<Order[]> {
     return await coreDb.$queryRaw<Order[]>`
-      SELECT id, status, amount FROM "Order" 
+      SELECT *
+      FROM "Order" 
       WHERE "userId" = ${userId} AND status = 'COMPLETED'
       ORDER BY "createdAt" DESC 
       LIMIT 1
@@ -57,7 +49,8 @@ export class OrderRepository {
 
   async getFailedOrderByUserId(userId: string): Promise<Order[]> {
     return await coreDb.$queryRaw<Order[]>`
-      SELECT id, status, amount FROM "Order" 
+      SELECT *
+      FROM "Order" 
       WHERE "userId" = ${userId} AND status = 'FAILED'
       ORDER BY "createdAt" DESC 
       LIMIT 1
@@ -66,7 +59,8 @@ export class OrderRepository {
 
   async getEnergyOrderByUserId(userId: string): Promise<Order[]> {
     return await coreDb.$queryRaw<Order[]>`
-      SELECT id, status, amount, type FROM "Order" 
+      SELECT *
+      FROM "Order" 
       WHERE "userId" = ${userId} AND type = 'ENERGY'
       ORDER BY "createdAt" DESC 
       LIMIT 1
@@ -75,7 +69,8 @@ export class OrderRepository {
 
   async getBandwidthOrderByUserId(userId: string): Promise<Order[]> {
     return await coreDb.$queryRaw<Order[]>`
-      SELECT id, status, amount, type FROM "Order" 
+      SELECT *
+      FROM "Order" 
       WHERE "userId" = ${userId} AND type = 'BANDWIDTH'
       ORDER BY "createdAt" DESC 
       LIMIT 1
@@ -84,7 +79,8 @@ export class OrderRepository {
 
   async getActivationOrderByUserId(userId: string): Promise<Order[]> {
     return await coreDb.$queryRaw<Order[]>`
-      SELECT id, status, amount, type FROM "Order" 
+      SELECT *
+      FROM "Order" 
       WHERE "userId" = ${userId} AND type = 'ACTIVATION'
       ORDER BY "createdAt" DESC 
       LIMIT 1
