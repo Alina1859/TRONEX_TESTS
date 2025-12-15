@@ -7,6 +7,24 @@ export enum OrderPeriod {
   TWO_WEEKS = 1209600000,
 }
 
+export const ENERGY_AMOUNT_MIN = 65000;
+export const ENERGY_AMOUNT_MAX = 4000000;
+export const ENERGY_AMOUNT_DEFAULT = 65000;
+export const ENERGY_ALLOWED_PERIODS = [
+  OrderPeriod.ONE_HOUR,
+  OrderPeriod.ONE_DAY,
+  OrderPeriod.THREE_DAYS,
+] as const;
+
+
+export const BANDWIDTH_AMOUNT_MIN = 1000;
+export const BANDWIDTH_AMOUNT_MAX = 2000000;
+export const BANDWIDTH_AMOUNT_DEFAULT = 1000;
+export const BANDWIDTH_ALLOWED_PERIODS = [
+  OrderPeriod.ONE_HOUR,
+  OrderPeriod.ONE_DAY
+] as const; 
+
 export const VALID_ORDER_PERIODS = [
   OrderPeriod.ONE_HOUR,
   OrderPeriod.SIX_HOURS,
