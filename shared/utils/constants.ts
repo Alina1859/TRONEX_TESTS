@@ -16,14 +16,10 @@ export const ENERGY_ALLOWED_PERIODS = [
   OrderPeriod.THREE_DAYS,
 ] as const;
 
-
 export const BANDWIDTH_AMOUNT_MIN = 1000;
 export const BANDWIDTH_AMOUNT_MAX = 2000000;
 export const BANDWIDTH_AMOUNT_DEFAULT = 1000;
-export const BANDWIDTH_ALLOWED_PERIODS = [
-  OrderPeriod.ONE_HOUR,
-  OrderPeriod.ONE_DAY
-] as const; 
+export const BANDWIDTH_ALLOWED_PERIODS = [OrderPeriod.ONE_HOUR, OrderPeriod.ONE_DAY] as const;
 
 export const VALID_ORDER_PERIODS = [
   OrderPeriod.ONE_HOUR,

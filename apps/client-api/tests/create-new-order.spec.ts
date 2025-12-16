@@ -11,7 +11,11 @@ import {
 } from "../../../shared/utils/types";
 import { OrderApi } from "../api/order.api";
 import { OrderRepository } from "../repositories/order.repository";
-import { BANDWIDTH_AMOUNT_DEFAULT, ENERGY_AMOUNT_DEFAULT, OrderPeriod } from "../../../shared/utils/constants";
+import {
+  BANDWIDTH_AMOUNT_DEFAULT,
+  ENERGY_AMOUNT_DEFAULT,
+  OrderPeriod,
+} from "../../../shared/utils/constants";
 import { invalidCreateOrderRequestVariations } from "../test-objects/invalid-create-order-request-variations";
 
 test.describe("Create new order", () => {
@@ -156,9 +160,7 @@ test.describe("Create new order", () => {
     });
   }
   // Тест-кейс № 3: Создание одного заказа с type = ENERGY
-  test("POST /api/v2/orders/ should create single ENERGY order", async ({
-    request,
-  }) => {
+  test("POST /api/v2/orders/ should create single ENERGY order", async ({ request }) => {
     const orderApi = new OrderApi(request);
 
     const { wallet, activationOrder } = await createActivatedWallet(request);
@@ -179,7 +181,7 @@ test.describe("Create new order", () => {
     log.info(`API Response (ENERGY): ${JSON.stringify(apiOrder, null, 2)}`);
 
     orderFieldCheck.checkAllFields(apiOrder);
-   
+
     const dbFinalOrder = await waitForOrderCompleted(apiOrder.id);
     const getOrderResponse = await orderApi.getOrderById(apiOrder.id);
     statusCheck.checkResponseStatus(getOrderResponse);
@@ -188,7 +190,7 @@ test.describe("Create new order", () => {
     orderFieldCheck.checkAllFields(apiFinalOrder);
     orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
   });
-  
+
   // Тест-кейс № 4: Создание заказа с type = BANDWIDTH
   test("POST /api/v2/orders/ should create single BANDWIDTH order", async ({ request }) => {
     const orderApi = new OrderApi(request);
@@ -282,5 +284,4 @@ test.describe("Create new order", () => {
     orderFieldCheck.checkAllFields(apiFinalOrder);
     orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
   });
-
 });

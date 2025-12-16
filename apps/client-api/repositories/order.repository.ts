@@ -2,15 +2,6 @@ import { coreDb } from "../../../shared/database/connection";
 import { Order } from "../../../shared/utils/types";
 
 export class OrderRepository {
-  async getOrderByIdFull(orderId: number): Promise<any[]> {
-    return await coreDb.$queryRaw<any[]>`
-      SELECT *
-      FROM "Order"
-      WHERE id = ${orderId}
-      LIMIT 1
-    `;
-  }
-
   async getLastOrderByUserId(userId: string): Promise<Order[]> {
     return await coreDb.$queryRaw<Order[]>`
       SELECT *

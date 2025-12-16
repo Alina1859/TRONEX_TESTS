@@ -30,6 +30,34 @@ export interface Order {
   userId: string;
 }
 
+export const SMART_ORDER_STATUSES = [
+  "INIT",
+  "PENDING_ACTIVATION",
+  "PENDING_RESOURCES",
+  "COMPLETED",
+  "FAILED",
+] as const;
+
+export type SmartOrderStatus = (typeof SMART_ORDER_STATUSES)[number];
+
+export interface SmartOrder {
+  id: number;
+  fromAddress: string;
+  toAddress: string;
+  withActivation: boolean;
+  withEnergy: boolean;
+  withBandwidth: boolean;
+  userId: string;
+  status: SmartOrderStatus;
+  details?: any;
+}
+
+
+export type SmartOrderWithOrders = Omit<SmartOrder, "userId"> & {
+  userId?: string;
+  orders: Order[];
+};
+
 export type CreateOrderRequest =
   | {
       type: "ENERGY";
