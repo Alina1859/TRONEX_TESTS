@@ -45,4 +45,8 @@ export const ORDER_LIST_DEFAULT_LIMIT = 10;
 export const ORDER_LIST_MIN_LIMIT = 1;
 export const ORDER_LIST_MAX_LIMIT = 200;
 
+export const ORDER_ID_MIN = 1;
 export const ORDER_ID_MAX = 2147483647;
+
+export const SMART_ORDER_ID_MIN = 1;
+export const SMART_ORDER_ID_MAX = 2147483647;

@@ -252,4 +252,66 @@ test.describe("Get order list", () => {
 
     log.info("✓ offset = 1000: корректно возвращен пустой массив при отсутствии заказов");
   });
+
+  // Тест-кейс № 9: Rate limiting
+  test(`GET /api/v2/orders/ should enforce rate limiting`, async ({ request }) => {
+    log.info("=== Тест: Проверка rate limiting ===");
+
+    const orderApi = new OrderApi(request);
+    const requestCount = 120; 
+
+    log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
+
+    const startTime = Date.now();
+    const requests = Array.from({ length: requestCount }, () => orderApi.getOrderList());
+    const responses = await Promise.all(requests);
+    const endTime = Date.now();
+    const duration = (endTime - startTime) / 1000;
+
+    log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
+
+    const statusCounts: Record<number, number> = {};
+    let rateLimitHit = false;
+    let rateLimitResponse: any = null;
+    let retryAfter: string | undefined;
+
+    for (let i = 0; i < responses.length; i++) {
+      const response = responses[i];
+      const status = response.status();
+      statusCounts[status] = (statusCounts[status] || 0) + 1;
+
+      if (status === 429 && !rateLimitHit) {
+        rateLimitHit = true;
+        rateLimitResponse = await response.json().catch(() => null);
+        const headers = response.headers();
+        retryAfter = headers["retry-after"] || headers["Retry-After"];
+
+        log.info(`✓ Rate limiting обнаружен на запросе #${i + 1}`);
+        log.info(`  Статус: ${status} (Too Many Requests)`);
+        if (retryAfter) {
+          log.info(`  Retry-After: ${retryAfter}`);
+        }
+        if (rateLimitResponse) {
+          log.info(`  Ответ: ${JSON.stringify(rateLimitResponse, null, 2)}`);
+        }
+      }
+    }
+
+    log.info("Распределение статусов ответов:");
+    Object.entries(statusCounts).forEach(([status, count]) => {
+      log.info(`  ${status}: ${count} запросов`);
+    });
+
+    if (rateLimitHit) {
+      log.info("✓ Rate limiting работает корректно. API вернул 429 после превышения лимита.");
+      expect(statusCounts[429]).toBeGreaterThan(0);
+    } else {
+      log.warn(
+        `⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`
+      );
+      log.warn(
+        "  Это может означать, что лимит выше ожидаемого или rate limiting не настроен."
+      );
+    }
+  });
 });

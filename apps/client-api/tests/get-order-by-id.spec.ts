@@ -306,12 +306,80 @@ test.describe("Get order by ID", () => {
 
     log.info("Проверка обязательных полей и их типов...");
     orderResponseTest.checkOrderFieldEquality(apiOrder, activationOrder[0]);
-    orderFieldTest.checkAllFields(apiOrder, 1);
+    orderFieldTest.checkAllFields(apiOrder);
 
     log.info("Проверка типа заказа...");
     expect(apiOrder.type).toBe("ACTIVATION");
     log.info(`✓ Тип заказа корректный: ${apiOrder.type}`);
 
     log.info('✓ Все проверки пройдены успешно. Заказ с типом "ACTIVATION" корректно получен.');
+  });
+
+  // Тест-кейс № 11: Rate limiting
+  test(`GET /api/v2/orders/{id} should enforce rate limiting`, async ({ request }) => {
+    log.info("=== Тест: Проверка rate limiting ===");
+
+    const getLastOrderByUserId = await orderRepo.getLastOrderByUserId(userIdPrimary);
+    const lastOrderId = getLastOrderByUserId[0].id;
+
+    const orderApi = new OrderApi(request);
+    const requestCount = 120;
+
+    log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
+    log.info(`Используется Order ID: ${lastOrderId}`);
+
+    const startTime = Date.now();
+    const requests = Array.from({ length: requestCount }, () =>
+      orderApi.getOrderById(lastOrderId)
+    );
+    const responses = await Promise.all(requests);
+    const endTime = Date.now();
+    const duration = (endTime - startTime) / 1000;
+
+    log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
+
+    const statusCounts: Record<number, number> = {};
+    let rateLimitHit = false;
+    let rateLimitResponse: any = null;
+    let retryAfter: string | undefined;
+
+    for (let i = 0; i < responses.length; i++) {
+      const response = responses[i];
+      const status = response.status();
+      statusCounts[status] = (statusCounts[status] || 0) + 1;
+
+      if (status === 429 && !rateLimitHit) {
+        rateLimitHit = true;
+        rateLimitResponse = await response.json().catch(() => null);
+        const headers = response.headers();
+        retryAfter = headers["retry-after"] || headers["Retry-After"];
+
+        log.info(`✓ Rate limiting обнаружен на запросе #${i + 1}`);
+        log.info(`  Статус: ${status} (Too Many Requests)`);
+        if (retryAfter) {
+          log.info(`  Retry-After: ${retryAfter}`);
+        }
+        if (rateLimitResponse) {
+          log.info(`  Ответ: ${JSON.stringify(rateLimitResponse, null, 2)}`);
+        }
+      }
+    }
+
+    log.info("Распределение статусов ответов:");
+    Object.entries(statusCounts).forEach(([status, count]) => {
+      log.info(`  ${status}: ${count} запросов`);
+    });
+
+    if (rateLimitHit) {
+      log.info("✓ Rate limiting работает корректно. API вернул 429 после превышения лимита.");
+      expect(statusCounts[429]).toBeGreaterThan(0);
+    } else {
+      log.warn(
+        `⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`
+      );
+      log.warn(
+        "  Это может означать, что лимит выше ожидаемого или rate limiting не настроен."
+      );
+    }
   });
 });

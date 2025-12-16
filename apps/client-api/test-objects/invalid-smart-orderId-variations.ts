@@ -1,19 +1,19 @@
-import { ORDER_ID_MIN, ORDER_ID_MAX } from "../../../shared/utils/constants";
+import { SMART_ORDER_ID_MIN, SMART_ORDER_ID_MAX } from "../../../shared/utils/constants";
 
 // Граничные значения и базовые некорректные значения для проверки валидации
-export const boundaryAndInvalidOrderIdVariations = [
-  // Граничные значения для orderId (должен быть >= ORDER_ID_MIN и <= ORDER_ID_MAX)
-  { value: ORDER_ID_MIN - 1, description: `Ноль (граничное значение, должно быть >= ${ORDER_ID_MIN})` },
+export const boundaryAndInvalidSmartOrderIdVariations = [
+  // Граничные значения для smartOrderId (должен быть >= SMART_ORDER_ID_MIN и <= SMART_ORDER_ID_MAX)
+  { value: SMART_ORDER_ID_MIN - 1, description: `Ноль (граничное значение, должно быть >= ${SMART_ORDER_ID_MIN})` },
   { value: -1, description: "Отрицательное число -1 (граничное значение, должно быть > 0)" },
   { value: -2147483648, description: "Минимальное 32-битное signed integer (-2147483648)" },
   { value: -1000000, description: "Большое отрицательное число (-1000000)" },
   {
-    value: ORDER_ID_MAX + 1,
-    description: `Число больше максимального 32-битного integer (${ORDER_ID_MAX + 1})`,
+    value: SMART_ORDER_ID_MAX + 1,
+    description: `Число больше максимального 32-битного integer (${SMART_ORDER_ID_MAX + 1})`,
   },
   {
-    value: ORDER_ID_MAX + 2,
-    description: `Число больше максимального 32-битного integer (${ORDER_ID_MAX + 2})`,
+    value: SMART_ORDER_ID_MAX + 2,
+    description: `Число больше максимального 32-битного integer (${SMART_ORDER_ID_MAX + 2})`,
   },
   { value: 4294967295, description: "Максимальное 32-битное unsigned integer (4294967295)" },
 
@@ -24,13 +24,13 @@ export const boundaryAndInvalidOrderIdVariations = [
   { value: -0.1, description: "Отрицательное дробное число (-0.1)" },
   { value: Number.MAX_SAFE_INTEGER + 1, description: "Число больше MAX_SAFE_INTEGER" },
   { value: "9".repeat(100), description: "Очень длинное число (100 цифр)" },
-  { value: `${ORDER_ID_MIN - 1}`, description: `Строка "${ORDER_ID_MIN - 1}" (меньше минимального)` },
+  { value: `${SMART_ORDER_ID_MIN - 1}`, description: `Строка "${SMART_ORDER_ID_MIN - 1}" (меньше минимального)` },
   { value: "-1", description: 'Строка "-1"' },
   { value: "-2147483648", description: 'Строка "-2147483648" (минимальное 32-битное)' },
-  { value: `${ORDER_ID_MAX}`, description: `Строка "${ORDER_ID_MAX}" (максимальное 32-битное)` },
+  { value: `${SMART_ORDER_ID_MAX}`, description: `Строка "${SMART_ORDER_ID_MAX}" (максимальное 32-битное)` },
   {
-    value: `${ORDER_ID_MAX + 1}`,
-    description: `Строка "${ORDER_ID_MAX + 1}" (больше максимального)`,
+    value: `${SMART_ORDER_ID_MAX + 1}`,
+    description: `Строка "${SMART_ORDER_ID_MAX + 1}" (больше максимального)`,
   },
   { value: "1" + "A".repeat(1000), description: "Очень длинная строка (1000 символов)" },
   { value: "abc", description: 'Строка "abc"' },
@@ -77,4 +77,4 @@ export const boundaryAndInvalidOrderIdVariations = [
   { value: "1\r", description: "Строка с возвратом каретки" },
 ];
 
-export const invalidOrderIdVariations = [...boundaryAndInvalidOrderIdVariations];
+export const invalidSmartOrderIdVariations = [...boundaryAndInvalidSmartOrderIdVariations];
