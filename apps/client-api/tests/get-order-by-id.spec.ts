@@ -4,7 +4,7 @@ import { OrderApi } from "../api/order.api";
 import { OrderResponseCheck } from "../test-objects/order-response-check";
 import { OrderFieldCheck } from "../test-objects/order-field-check";
 import { ResponseStatusCheck } from "../test-objects/response-status-check";
-import { boundaryAndInvalidOrderIdVariations } from "../test-objects/invalid-orderId-variations";
+import { boundaryAndInvalidOrderIdVariations } from "../../../shared/utils/variations_constants/invalid-orderId-variations";
 import { log } from "../../../shared/utils/logger";
 import { userIdPrimary, userIdSecondary } from "../api/constants";
 

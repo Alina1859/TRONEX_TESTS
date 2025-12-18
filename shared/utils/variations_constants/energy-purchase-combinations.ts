@@ -1,23 +1,11 @@
-/**
- * Комбинации для тестирования покупки энергии
- * Каждая комбинация содержит: длительность периода, количество энергии, курс SUN и ожидаемую стоимость в TRX
- */
 export interface EnergyPurchaseCombination {
-  /** Длительность периода в формате "1h", "1d", "3d" */
   duration: "1h" | "1d" | "3d";
-  /** Количество энергии */
   energy: number;
-  /** Курс SUN (цена энергии) */
   sunRate: number;
-  /** Ожидаемая стоимость в TRX */
   expectedCost: number;
 }
 
-/**
- * Все комбинации для тестирования покупки энергии
- */
 export const ENERGY_PURCHASE_COMBINATIONS: EnergyPurchaseCombination[] = [
-  // 1 час
   { duration: "1h", energy: 65000, sunRate: 70, expectedCost: 4.55 },
   { duration: "1h", energy: 65000, sunRate: 127, expectedCost: 8.255 },
   { duration: "1h", energy: 65000, sunRate: 210, expectedCost: 13.65 },
@@ -28,7 +16,6 @@ export const ENERGY_PURCHASE_COMBINATIONS: EnergyPurchaseCombination[] = [
   // { duration: "1h", energy: 1000000, sunRate: 127, expectedCost: 127 },
   // { duration: "1h", energy: 1000000, sunRate: 210, expectedCost: 210 },
 
-  // 1 день
   { duration: "1d", energy: 65000, sunRate: 70, expectedCost: 4.55 },
   { duration: "1d", energy: 65000, sunRate: 127, expectedCost: 8.255 },
   { duration: "1d", energy: 65000, sunRate: 210, expectedCost: 13.65 },
@@ -39,7 +26,6 @@ export const ENERGY_PURCHASE_COMBINATIONS: EnergyPurchaseCombination[] = [
   // { duration: "1d", energy: 1000000, sunRate: 127, expectedCost: 127 },
   // { duration: "1d", energy: 1000000, sunRate: 210, expectedCost: 210 },
 
-  // 3 дня
   { duration: "3d", energy: 65000, sunRate: 70, expectedCost: 13.65 },
   { duration: "3d", energy: 65000, sunRate: 127, expectedCost: 24.765 },
   { duration: "3d", energy: 65000, sunRate: 210, expectedCost: 40.95 },

@@ -1,4 +1,4 @@
-import { ORDER_ID_MIN, ORDER_ID_MAX } from "../../../shared/utils/constants";
+import { ORDER_ID_MIN, ORDER_ID_MAX } from "../constants";
 
 // Граничные значения и базовые некорректные значения для проверки валидации
 export const boundaryAndInvalidOrderIdVariations = [

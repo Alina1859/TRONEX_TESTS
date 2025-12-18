@@ -11,6 +11,8 @@ import {
   VALID_ORDER_PERIODS,
 } from "../../../shared/utils/constants";
 
+export const validTargetAddress = "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh";
+
 type CreateOrderRequestVariation = {
   data: any;
   description: string;
@@ -33,8 +35,8 @@ const invalidOrderTypes = {
 const invalidTronAddresses = {
   empty: "",
   // валидный адрес, но с пробелами/переносами — часто забывают trim
-  surroundedSpaces: " TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh ",
-  wrappedNewlines: "\nTEawueJHVuwwn7M9xnVsB7oWXribW4hcwh\n",
+  surroundedSpaces: ` ${validTargetAddress} `,
+  wrappedNewlines: `\n${validTargetAddress}\n`,
   short: "T123",
   long: "T" + "A".repeat(100),
   wrongPrefix: "A" + "1".repeat(33),
@@ -128,7 +130,6 @@ const invalidOrderPeriods = {
 };
 
 // Валидный базовый payload, чтобы в кейсах "нет поля X" отсутствовало ровно одно поле.
-const validTargetAddress = "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh";
 
 const validEnergyBaseRequest = {
   type: "ENERGY",
@@ -214,7 +215,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: invalidOrderTypes.empty,
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: OrderPeriod.ONE_HOUR,
     },
@@ -224,7 +225,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: invalidOrderTypes.typo,
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: OrderPeriod.ONE_HOUR,
     },
@@ -234,7 +235,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: invalidOrderTypes.number,
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: OrderPeriod.ONE_HOUR,
     },
@@ -244,7 +245,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: invalidOrderTypes.zero,
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: OrderPeriod.ONE_HOUR,
     },
@@ -254,7 +255,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: invalidOrderTypes.nullValue,
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: OrderPeriod.ONE_HOUR,
     },
@@ -264,7 +265,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: invalidOrderTypes.undefinedValue,
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: OrderPeriod.ONE_HOUR,
     },
@@ -274,7 +275,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: invalidOrderTypes.lowerCase,
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: OrderPeriod.ONE_HOUR,
     },
@@ -284,7 +285,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: invalidOrderTypes.withSpaces,
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: OrderPeriod.ONE_HOUR,
     },
@@ -757,7 +758,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.zero,
     },
@@ -767,7 +768,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.zero,
     },
@@ -777,7 +778,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.negative,
     },
@@ -787,7 +788,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.negative,
     },
@@ -797,7 +798,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.notAllowed,
     },
@@ -807,7 +808,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.notAllowed,
     },
@@ -817,7 +818,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.belowMinAllowed,
     },
@@ -827,7 +828,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.belowMinAllowed,
     },
@@ -837,7 +838,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.aboveMaxAllowed,
     },
@@ -847,7 +848,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.aboveMaxAllowed,
     },
@@ -857,7 +858,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.maxSafeInteger,
     },
@@ -867,7 +868,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.maxSafeInteger,
     },
@@ -877,7 +878,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.infinityValue,
     },
@@ -887,7 +888,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.infinityValue,
     },
@@ -897,7 +898,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.nanValue,
     },
@@ -907,7 +908,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.nanValue,
     },
@@ -917,7 +918,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.stringValue,
     },
@@ -927,7 +928,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.stringValue,
     },
@@ -937,7 +938,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.emptyString,
     },
@@ -947,7 +948,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.emptyString,
     },
@@ -957,7 +958,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.floatValue,
     },
@@ -967,7 +968,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.floatValue,
     },
@@ -977,7 +978,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.randomNumber,
     },
@@ -987,7 +988,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.randomNumber,
     },
@@ -997,7 +998,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.objectValue,
     },
@@ -1007,7 +1008,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.objectValue,
     },
@@ -1017,7 +1018,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.arrayValue,
     },
@@ -1027,7 +1028,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.arrayValue,
     },
@@ -1037,7 +1038,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.booleanValue,
     },
@@ -1047,7 +1048,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.booleanValue,
     },
@@ -1057,7 +1058,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.nullValue,
     },
@@ -1067,7 +1068,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.nullValue,
     },
@@ -1077,7 +1078,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ENERGY",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.energy.undefinedValue,
     },
@@ -1087,7 +1088,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "BANDWIDTH",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: invalidOrderPeriods.bandwidth.undefinedValue,
     },
@@ -1099,7 +1100,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ACTIVATION",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
     },
     description: "ACTIVATION: лишнее поле amount",
@@ -1108,7 +1109,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ACTIVATION",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       period: OrderPeriod.ONE_HOUR,
     },
     description: "ACTIVATION: лишнее поле period",
@@ -1117,7 +1118,7 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
   {
     data: {
       type: "ACTIVATION",
-      targetAddress: "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh",
+      targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: OrderPeriod.ONE_HOUR,
     },

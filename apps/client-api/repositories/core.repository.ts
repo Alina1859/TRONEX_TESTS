@@ -1,6 +1,7 @@
-import { DefaultApiCoreConstantsKeyPutRequest, DefaultApiCoreConstantsKeyGetRequest, DefaultApiCoreUsersPostRequest } from "@tronex-shared/core-api/src";
-import { apiKey, coreApiToken } from "../api/constants";
-import { coreApi } from "../api/core";
+import { DefaultApiCoreConstantsKeyPutRequest, DefaultApiCoreUsersPostRequest, DefaultApi, Configuration } from "@tronex-shared/core-api/src";
+import { coreApiToken } from "../api/constants";
+
+export const coreApi = new DefaultApi(new Configuration({basePath: 'https://api.tronex-test.com'}));
 
 export class CoreRepository {
 
@@ -8,17 +9,15 @@ export class CoreRepository {
     key: string,
     options?: { headers?: Record<string, string> }
   ) {
-    const requestOptions = {
+    return await coreApi.coreConstantsKeyGet({
+      key,
+    }, {
       ...options,
       headers: {
         "X-Api-Token": coreApiToken,
         ...(options?.headers || {}),
       },
-    };
-
-    return await coreApi.coreConstantsKeyGet({
-      key,
-    }, requestOptions);
+    });
   }
 
   async coreConstantsKeyPut(
@@ -26,18 +25,16 @@ export class CoreRepository {
     coreUsersUserIdSettingsKeyPutRequest: DefaultApiCoreConstantsKeyPutRequest['coreUsersUserIdSettingsKeyPutRequest'],
     options?: { headers?: Record<string, string> }
   ) {
-    const requestOptions = {
+    return await coreApi.coreConstantsKeyPut({
+      key,
+      coreUsersUserIdSettingsKeyPutRequest,
+    }, {
       ...options,
       headers: {
         "X-Api-Token": coreApiToken,
         ...(options?.headers || {}),
       },
-    };
-
-    return await coreApi.coreConstantsKeyPut({
-      key,
-      coreUsersUserIdSettingsKeyPutRequest,
-    }, requestOptions);
+    });
   }
 
   async coreUsersPost(
@@ -46,6 +43,12 @@ export class CoreRepository {
   ) {
     return await coreApi.coreUsersPost({
       coreUsersPostRequest,
-    }, options);
+    }, {
+      ...options,
+      headers: {
+        "X-Api-Token": coreApiToken,
+        ...(options?.headers || {}),
+      },
+    });
   }
 }

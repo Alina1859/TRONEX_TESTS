@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { SmartOrderRepository } from "../repositories/smart-order.repository";
 import { ResponseStatusCheck } from "../test-objects/response-status-check";
-import { boundaryAndInvalidSmartOrderIdVariations } from "../test-objects/invalid-smart-orderId-variations";
+import { boundaryAndInvalidSmartOrderIdVariations } from "@shared/utils/variations_constants/invalid-smart-orderId-variations";
 import { log } from "../../../shared/utils/logger";
-import { userIdPrimary, userIdSecondary } from "../api/constants";
 import { SmartOrderApi } from "../api/smart-order.api";
 import { SmartOrderFieldCheck } from "../test-objects/smart-order-field-check";
 import { SmartOrderResponseCheck } from "../test-objects/smart-order-response-check";
+import { userIdPrimary, userIdSecondary } from "../api/constants";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/smart-orders/{smartOrderId}
 test.describe("Get smart order by ID", () => {

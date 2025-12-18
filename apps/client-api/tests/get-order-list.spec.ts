@@ -7,7 +7,7 @@ import {
   invalidOffsetVariations,
   invalidLimitVariations,
   invalidOffsetLimitCombinations,
-} from "../test-objects/invalid-order-params-variations";
+} from "../../../shared/utils/variations_constants/invalid-order-params-variations";
 import { log } from "../../../shared/utils/logger";
 import { Order } from "../../../shared/utils/types";
 import {

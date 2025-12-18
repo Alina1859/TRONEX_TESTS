@@ -80,3 +80,16 @@ export interface CreateActivationOrderRequest {
   type: Extract<OrderResourceType, "ACTIVATION">;
   targetAddress: string;
 }
+
+export interface EnergyPriceValues {
+  "1h": number;
+  "1d": number;
+  "3d": number;
+  "7d": number;
+  "14d": number;
+}
+
+export interface BandwidthPriceValues {
+  "1h": number;
+  "1d": number;
+}
