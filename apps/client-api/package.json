@@ -24,7 +24,8 @@
     "prisma": "^7.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "@tronex-shared/core-api": "workspace:*"
+    "@tronex-shared/core-api": "workspace:*",
+    "@tronex-shared/utils": "workspace:*"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.1.0",

@@ -292,7 +292,7 @@ test.describe("Create new order", () => {
     orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
   });
 
-    // Тест-кейс № 7: Создание заказов с различными комбинациями энергии, периодов и цен
+    // Тест-кейс № 7: Создание заказов с различными комбинациями энергии, периодов и цен для PRICE_ENERGY
   test("POST /api/v2/orders/ should create orders with different energy purchase combinations", async ({
     request,
   }) => {
@@ -309,6 +309,12 @@ test.describe("Create new order", () => {
     const { wallet, activationOrder } = await createActivatedWallet(request);
     const targetAddress = wallet.address?.base58 || "";
     await waitForActivationCompleted(activationOrder.id, targetAddress, 30000, 1000);
+
+    // Сохраняем начальное значение PRICE_ENERGY для восстановления после тестов
+    const initialPriceResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
+    const initialPriceData = initialPriceResponse.data?.data || initialPriceResponse.data || {};
+    const initialPriceEnergy = { ...initialPriceData };
+    log.info(`Начальное значение PRICE_ENERGY сохранено: ${JSON.stringify(initialPriceEnergy)}`);
 
     // Функция для конвертации строки периода в EnergyOrderPeriodMs
     function parsePeriod(duration: EnergyPurchaseCombination["duration"]): EnergyOrderPeriodMs {
@@ -414,6 +420,20 @@ test.describe("Create new order", () => {
     }
 
     log.info(`✓ Все ${combinations.length} комбинаций успешно проверены`);
+
+    // Восстанавливаем начальное значение PRICE_ENERGY
+    try {
+      await coreRepo.coreConstantsKeyPut("PRICE_ENERGY", { value: initialPriceEnergy });
+      log.info(`PRICE_ENERGY восстановлено в начальное состояние: ${JSON.stringify({ value: initialPriceEnergy })}`);
+
+      // Проверяем, что значение действительно восстановилось
+      const verifyRestoreResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
+      const verifyRestoreData = verifyRestoreResponse.data?.data || verifyRestoreResponse.data || {};
+      log.info(`Восстановленное значение PRICE_ENERGY проверено: ${JSON.stringify(verifyRestoreData)}`);
+    } catch (error) {
+      log.error(`Ошибка при восстановлении начального значения PRICE_ENERGY: ${error}`);
+      throw error;
+    }
   });
 
 });
