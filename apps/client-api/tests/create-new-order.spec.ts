@@ -296,13 +296,14 @@ test.describe("Create new order", () => {
   test("POST /api/v2/orders/ should create orders with different energy purchase combinations", async ({
     request,
   }) => {
+    test.setTimeout(300000); // Увеличиваем таймаут до 5 минут для теста с множеством комбинаций
     log.info("=== Тест: Создание заказов с различными комбинациями ===");
 
     const combinations = ENERGY_PURCHASE_COMBINATIONS;
     log.info(`Найдено ${combinations.length} комбинаций для тестирования`);
 
     const orderApi = new OrderApi(request);
-    const coreRepo = new CoreRepository(apiUrl);
+    const coreRepo = new CoreRepository();
 
     // Создаём активированный кошелёк один раз для всех тестов
     const { wallet, activationOrder } = await createActivatedWallet(request);
@@ -325,8 +326,38 @@ test.describe("Create new order", () => {
 
       // Устанавливаем PRICE_ENERGY через API
       try {
-        await coreRepo.coreConstantsKeyPut("PRICE_ENERGY", { value: combo.sunRate });
-        log.info(`PRICE_ENERGY установлен в ${combo.sunRate}`);
+        // Получаем текущие значения PRICE_ENERGY
+        const currentPriceResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
+        // Извлекаем данные из ответа (может быть response.data или response.data.data)
+        const responseData = currentPriceResponse.data?.data || currentPriceResponse.data || {};
+        
+        // Создаем объект со всеми значениями из coreConstantsKeyGet, обновляя только нужное
+        const priceValues: Record<string, number> = {
+          "1h": responseData["1h"],
+          "1d": responseData["1d"],
+          "3d": responseData["3d"],
+          "7d": responseData["7d"],
+          "14d": responseData["14d"],
+        };
+        
+        // Обновляем только нужное значение в зависимости от периода
+        priceValues[combo.duration] = combo.sunRate;
+        
+        // Устанавливаем обновленные значения (оборачиваем в объект с полем value)
+        await coreRepo.coreConstantsKeyPut("PRICE_ENERGY", { value: priceValues });
+        log.info(`PRICE_ENERGY установлен: ${JSON.stringify({ value: priceValues })}`);
+        
+        // Проверяем через GET, что значение действительно установилось
+        const verifyResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
+        const verifyData = verifyResponse.data?.data || verifyResponse.data || {};
+        const actualValue = verifyData[combo.duration];
+        
+        if (actualValue !== combo.sunRate) {
+          throw new Error(
+            `PRICE_ENERGY не установлен корректно. Ожидалось: ${combo.sunRate}, получено: ${actualValue}`
+          );
+        }
+        log.info(`PRICE_ENERGY проверен: ${combo.duration} = ${actualValue}`);
       } catch (error) {
         log.error(`Ошибка при установке PRICE_ENERGY: ${error}`);
         throw error;

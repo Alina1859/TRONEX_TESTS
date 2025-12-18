@@ -1,10 +1,24 @@
-import { DefaultApi, Configuration, DefaultApiCoreConstantsKeyPutRequest, DefaultApiCoreUsersPostRequest } from "@tronex-shared/core-api/src";
+import { DefaultApiCoreConstantsKeyPutRequest, DefaultApiCoreConstantsKeyGetRequest, DefaultApiCoreUsersPostRequest } from "@tronex-shared/core-api/src";
+import { apiKey, coreApiToken } from "../api/constants";
+import { coreApi } from "../api/core";
 
 export class CoreRepository {
-  private coreApi: DefaultApi;
 
-  constructor(basePath: string = 'https://api.tronex-test.com') {
-    this.coreApi = new DefaultApi(new Configuration({ basePath }));
+  async coreConstantsKeyGet(
+    key: string,
+    options?: { headers?: Record<string, string> }
+  ) {
+    const requestOptions = {
+      ...options,
+      headers: {
+        "X-Api-Token": coreApiToken,
+        ...(options?.headers || {}),
+      },
+    };
+
+    return await coreApi.coreConstantsKeyGet({
+      key,
+    }, requestOptions);
   }
 
   async coreConstantsKeyPut(
@@ -12,17 +26,25 @@ export class CoreRepository {
     coreUsersUserIdSettingsKeyPutRequest: DefaultApiCoreConstantsKeyPutRequest['coreUsersUserIdSettingsKeyPutRequest'],
     options?: { headers?: Record<string, string> }
   ) {
-    return await this.coreApi.coreConstantsKeyPut({
+    const requestOptions = {
+      ...options,
+      headers: {
+        "X-Api-Token": coreApiToken,
+        ...(options?.headers || {}),
+      },
+    };
+
+    return await coreApi.coreConstantsKeyPut({
       key,
       coreUsersUserIdSettingsKeyPutRequest,
-    }, options);
+    }, requestOptions);
   }
 
   async coreUsersPost(
     coreUsersPostRequest: DefaultApiCoreUsersPostRequest['coreUsersPostRequest'],
     options?: { headers?: Record<string, string> }
   ) {
-    return await this.coreApi.coreUsersPost({
+    return await coreApi.coreUsersPost({
       coreUsersPostRequest,
     }, options);
   }
