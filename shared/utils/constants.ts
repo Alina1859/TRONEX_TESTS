@@ -50,3 +50,31 @@ export const ORDER_ID_MAX = 2147483647;
 
 export const SMART_ORDER_ID_MIN = 1;
 export const SMART_ORDER_ID_MAX = 2147483647;
+
+// Price calculation formula
+// Formula: ((price * multiplier) / 1_000_000) * amount
+// where:
+//   price = цена из констант (например, 155.3)
+//   multiplier = число из периода (например, "1h" -> 1, "7d" -> 7, "14d" -> 14)
+//   amount = значение на которое покупаем (например, 65_000)
+// 
+// Examples:
+//   Для 1 часа: (155.3 * 1 / 1_000_000) * 65_000 = 6.5
+//   Для 14 дней: (155.3 * 14 / 1_000_000) * 65_000 = 109.20
+export const PRICE_CALCULATION_DIVISOR = 1_000_000;
+
+/**
+ * Calculates price based on formula: ((price * multiplier) / 1_000_000) * amount
+ * @param price - цена из констант (например, 155.3)
+ * @param period - период в формате "1h", "7d", "14d" и т.д.
+ * @param amount - значение на которое покупаем (например, 65_000)
+ * @returns рассчитанная цена
+ */
+export function calculatePrice(price: number, period: string, amount: number): number {
+  // Извлекаем множитель из периода (например, "1h" -> 1, "7d" -> 7, "14d" -> 14)
+  const multiplierMatch = period.match(/^(\d+)/);
+  const multiplier = multiplierMatch ? parseInt(multiplierMatch[1], 10) : 1;
+  
+  // Формула: ((price * multiplier) / 1_000_000) * amount
+  return ((price * multiplier) / PRICE_CALCULATION_DIVISOR) * amount;
+}

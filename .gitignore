@@ -5,3 +5,4 @@ playwright-report/
 test-results/
 inspect.ts
 schema.prisma
+shared/core-api

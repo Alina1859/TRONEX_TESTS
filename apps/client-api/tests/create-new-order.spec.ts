@@ -7,6 +7,7 @@ import { OrderResponseCheck } from "../test-objects/order-response-check";
 import {
   CreateActivationOrderRequest,
   CreateOrderRequest,
+  EnergyOrderPeriodMs,
   Order,
 } from "../../../shared/utils/types";
 import { OrderApi } from "../api/order.api";
@@ -17,6 +18,12 @@ import {
   OrderPeriod,
 } from "../../../shared/utils/constants";
 import { invalidCreateOrderRequestVariations } from "../test-objects/invalid-create-order-request-variations";
+import {
+  ENERGY_PURCHASE_COMBINATIONS,
+  EnergyPurchaseCombination,
+} from "../test-objects/energy-purchase-combinations";
+import { CoreRepository } from "../repositories/core.repository";
+import { apiUrl } from "../api/constants";
 
 test.describe("Create new order", () => {
   const orderFieldCheck = new OrderFieldCheck();
@@ -284,4 +291,98 @@ test.describe("Create new order", () => {
     orderFieldCheck.checkAllFields(apiFinalOrder);
     orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
   });
+
+    // Тест-кейс № 7: Создание заказов с различными комбинациями энергии, периодов и цен
+  test("POST /api/v2/orders/ should create orders with different energy purchase combinations", async ({
+    request,
+  }) => {
+    log.info("=== Тест: Создание заказов с различными комбинациями ===");
+
+    const combinations = ENERGY_PURCHASE_COMBINATIONS;
+    log.info(`Найдено ${combinations.length} комбинаций для тестирования`);
+
+    const orderApi = new OrderApi(request);
+    const coreRepo = new CoreRepository(apiUrl);
+
+    // Создаём активированный кошелёк один раз для всех тестов
+    const { wallet, activationOrder } = await createActivatedWallet(request);
+    const targetAddress = wallet.address?.base58 || "";
+    await waitForActivationCompleted(activationOrder.id, targetAddress, 30000, 1000);
+
+    // Функция для конвертации строки периода в EnergyOrderPeriodMs
+    function parsePeriod(duration: EnergyPurchaseCombination["duration"]): EnergyOrderPeriodMs {
+      if (duration === "1h") return OrderPeriod.ONE_HOUR as EnergyOrderPeriodMs;
+      if (duration === "1d") return OrderPeriod.ONE_DAY as EnergyOrderPeriodMs;
+      if (duration === "3d") return OrderPeriod.THREE_DAYS as EnergyOrderPeriodMs;
+      throw new Error(`Неизвестный период: ${duration}`);
+    }
+
+    // Тестируем каждую комбинацию
+    for (const combo of combinations) {
+      log.info(
+        `Тестируем комбинацию: период=${combo.duration}, энергия=${combo.energy}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${combo.expectedCost} TRX`
+      );
+
+      // Устанавливаем PRICE_ENERGY через API
+      try {
+        await coreRepo.coreConstantsKeyPut("PRICE_ENERGY", { value: combo.sunRate });
+        log.info(`PRICE_ENERGY установлен в ${combo.sunRate}`);
+      } catch (error) {
+        log.error(`Ошибка при установке PRICE_ENERGY: ${error}`);
+        throw error;
+      }
+
+      // Создаём заказ с указанными параметрами
+      const period = parsePeriod(combo.duration);
+      const energyRequest: CreateOrderRequest = {
+        type: "ENERGY",
+        targetAddress,
+        amount: combo.energy,
+        period: period,
+      };
+
+      const response = await orderApi.createNewOrder(energyRequest);
+      statusCheck.checkResponseStatus(response);
+
+      const apiOrder = (await response.json()) as Order;
+      log.info(
+        `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${combo.expectedCost}`
+      );
+
+      // Проверяем, что стоимость заказа соответствует ожидаемой (с небольшой погрешностью)
+      const actualCost = typeof apiOrder.sellPrice === "string" ? parseFloat(apiOrder.sellPrice) : apiOrder.sellPrice;
+      const costDifference = Math.abs(actualCost - combo.expectedCost);
+      const tolerance = 0.01; // Допустимая погрешность в 0.01 TRX
+
+      expect(
+        costDifference,
+        `Стоимость заказа ${actualCost} не совпадает с ожидаемой ${combo.expectedCost} (разница: ${costDifference})`
+      ).toBeLessThanOrEqual(tolerance);
+
+      // Проверяем поля заказа
+      orderFieldCheck.checkAllFields(apiOrder);
+
+      // Дожидаемся завершения заказа и проверяем финальное состояние
+      const dbFinalOrder = await waitForOrderCompleted(apiOrder.id);
+      const getOrderResponse = await orderApi.getOrderById(apiOrder.id);
+      statusCheck.checkResponseStatus(getOrderResponse);
+      const apiFinalOrder = (await getOrderResponse.json()) as Order;
+
+      orderFieldCheck.checkAllFields(apiFinalOrder);
+      orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
+
+      // Проверяем финальную стоимость после завершения
+      const finalCost = typeof apiFinalOrder.sellPrice === "string" ? parseFloat(apiFinalOrder.sellPrice) : apiFinalOrder.sellPrice;
+      const finalCostDifference = Math.abs(finalCost - combo.expectedCost);
+      expect(
+        finalCostDifference,
+        `Финальная стоимость заказа ${finalCost} не совпадает с ожидаемой ${combo.expectedCost}`
+      ).toBeLessThanOrEqual(tolerance);
+
+      log.info(`✓ Комбинация успешно проверена: период=${combo.duration}, энергия=${combo.energy}, курс=${combo.sunRate}`);
+    }
+
+    log.info(`✓ Все ${combinations.length} комбинаций успешно проверены`);
+  });
+
 });
