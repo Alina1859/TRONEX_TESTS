@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { OrderRepository } from "../repositories/order.repository";
-import { OrderApi } from "../api/order.api";
-import { OrderResponseCheck } from "../test-objects/order-response-check";
-import { OrderFieldCheck } from "../test-objects/order-field-check";
-import { ResponseStatusCheck } from "../test-objects/response-status-check";
-import { boundaryAndInvalidOrderIdVariations } from "../../../shared/utils/variations_constants/invalid-orderId-variations";
-import { log } from "../../../shared/utils/logger";
-import { userIdPrimary, userIdSecondary } from "../api/constants";
+import { OrderRepository } from "@apps/client-api/repositories/order.repository";
+import { OrderApi } from "@apps/client-api/api/order.api";
+import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response-check";
+import { OrderFieldCheck } from "@apps/client-api/test-objects/order-field-check";
+import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
+import { boundaryAndInvalidOrderIdVariations } from "@shared/utils/variations_constants/invalid-orderId-variations";
+import { log } from "@shared/utils/logger";
+import { userIdPrimary, userIdSecondary } from "@apps/client-api/api/constants";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/orders/{id}
 test.describe("Get order by ID", () => {
@@ -329,9 +329,7 @@ test.describe("Get order by ID", () => {
     log.info(`Используется Order ID: ${lastOrderId}`);
 
     const startTime = Date.now();
-    const requests = Array.from({ length: requestCount }, () =>
-      orderApi.getOrderById(lastOrderId)
-    );
+    const requests = Array.from({ length: requestCount }, () => orderApi.getOrderById(lastOrderId));
     const responses = await Promise.all(requests);
     const endTime = Date.now();
     const duration = (endTime - startTime) / 1000;
@@ -374,12 +372,8 @@ test.describe("Get order by ID", () => {
       log.info("✓ Rate limiting работает корректно. API вернул 429 после превышения лимита.");
       expect(statusCounts[429]).toBeGreaterThan(0);
     } else {
-      log.warn(
-        `⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`
-      );
-      log.warn(
-        "  Это может означать, что лимит выше ожидаемого или rate limiting не настроен."
-      );
+      log.warn(`⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`);
+      log.warn("  Это может означать, что лимит выше ожидаемого или rate limiting не настроен.");
     }
   });
 });

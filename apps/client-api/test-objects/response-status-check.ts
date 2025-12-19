@@ -1,5 +1,5 @@
 import { expect, APIResponse } from "@playwright/test";
-import { log } from "../../../shared/utils/logger";
+import { log } from "@shared/utils/logger";
 
 export class ResponseStatusCheck {
   checkResponseStatus(response: APIResponse, expectedStatus: number = 200) {

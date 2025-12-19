@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { SmartOrder, SmartOrderWithOrders, Order } from "../../../shared/utils/types";
+import { SmartOrder, SmartOrderWithOrders, Order } from "@shared/utils/types";
 import { OrderResponseCheck } from "./order-response-check";
 
 export class SmartOrderResponseCheck {

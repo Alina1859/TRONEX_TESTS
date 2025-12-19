@@ -1,5 +1,5 @@
 import { APIRequestContext } from "@playwright/test";
-import { apiKey, apiUrl } from "./constants";
+import { apiKeyPrimary, apiUrl } from "./constants";
 
 export class OrderApi {
   constructor(private request: APIRequestContext) {}
@@ -7,7 +7,7 @@ export class OrderApi {
   async getOrderList(params?: { offset?: any; limit?: any }) {
     return await this.request.get(`${apiUrl}/api/v2/orders/`, {
       headers: {
-        "X-API-KEY": apiKey,
+        "X-API-KEY": apiKeyPrimary,
       },
       params,
     });
@@ -18,7 +18,7 @@ export class OrderApi {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "X-API-KEY": apiKey,
+        "X-API-KEY": apiKeyPrimary,
       },
       data,
     });
@@ -27,7 +27,7 @@ export class OrderApi {
   async getOrderById(orderId: any) {
     return await this.request.get(`${apiUrl}/api/v2/orders/${orderId}`, {
       headers: {
-        "X-API-KEY": apiKey,
+        "X-API-KEY": apiKeyPrimary,
       },
     });
   }

@@ -3,7 +3,10 @@ import { ORDER_ID_MIN, ORDER_ID_MAX } from "../constants";
 // Граничные значения и базовые некорректные значения для проверки валидации
 export const boundaryAndInvalidOrderIdVariations = [
   // Граничные значения для orderId (должен быть >= ORDER_ID_MIN и <= ORDER_ID_MAX)
-  { value: ORDER_ID_MIN - 1, description: `Ноль (граничное значение, должно быть >= ${ORDER_ID_MIN})` },
+  {
+    value: ORDER_ID_MIN - 1,
+    description: `Ноль (граничное значение, должно быть >= ${ORDER_ID_MIN})`,
+  },
   { value: -1, description: "Отрицательное число -1 (граничное значение, должно быть > 0)" },
   { value: -2147483648, description: "Минимальное 32-битное signed integer (-2147483648)" },
   { value: -1000000, description: "Большое отрицательное число (-1000000)" },
@@ -24,7 +27,10 @@ export const boundaryAndInvalidOrderIdVariations = [
   { value: -0.1, description: "Отрицательное дробное число (-0.1)" },
   { value: Number.MAX_SAFE_INTEGER + 1, description: "Число больше MAX_SAFE_INTEGER" },
   { value: "9".repeat(100), description: "Очень длинное число (100 цифр)" },
-  { value: `${ORDER_ID_MIN - 1}`, description: `Строка "${ORDER_ID_MIN - 1}" (меньше минимального)` },
+  {
+    value: `${ORDER_ID_MIN - 1}`,
+    description: `Строка "${ORDER_ID_MIN - 1}" (меньше минимального)`,
+  },
   { value: "-1", description: 'Строка "-1"' },
   { value: "-2147483648", description: 'Строка "-2147483648" (минимальное 32-битное)' },
   { value: `${ORDER_ID_MAX}`, description: `Строка "${ORDER_ID_MAX}" (максимальное 32-битное)` },

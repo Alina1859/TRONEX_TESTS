@@ -52,7 +52,6 @@ export interface SmartOrder {
   details?: any;
 }
 
-
 export type SmartOrderWithOrders = Omit<SmartOrder, "userId"> & {
   userId?: string;
   orders: Order[];

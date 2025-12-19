@@ -1,11 +1,11 @@
-import { coreDb } from "../../../shared/database/connection";
+import { coreDb } from "@shared/database/connection";
 
 export class UserRepository {
-  async findUserIdByApiKey(apiKey: string): Promise<string | null> {
+  async findUserIdByApiKey(apiKeyPrimary: string): Promise<string | null> {
     const result = await coreDb.$queryRaw<{ userId: string }[]>`
       SELECT "userId" 
       FROM "AccessToken" 
-      WHERE token = ${apiKey}
+      WHERE token = ${apiKeyPrimary}
       LIMIT 1
     `;
 

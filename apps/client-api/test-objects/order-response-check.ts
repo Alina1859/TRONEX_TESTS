@@ -1,5 +1,5 @@
 import { expect } from "@playwright/test";
-import { Order } from "../../../shared/utils/types";
+import { Order } from "@shared/utils/types";
 
 export class OrderResponseCheck {
   checkOrderId(apiOrder: Order, expectedOrderId: string | number) {

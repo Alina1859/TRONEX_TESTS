@@ -9,7 +9,7 @@ import {
   ENERGY_AMOUNT_MIN,
   OrderPeriod,
   VALID_ORDER_PERIODS,
-} from "../../../shared/utils/constants";
+} from "@shared/utils/constants";
 
 export const validTargetAddress = "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh";
 

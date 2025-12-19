@@ -1,5 +1,5 @@
 import { APIRequestContext } from "@playwright/test";
-import { apiKey, apiUrl } from "./constants";
+import { apiKeyPrimary, apiUrl } from "./constants";
 
 export class SmartOrderApi {
   static getSmartOrderById(lastSmartOrderId: number) {
@@ -10,7 +10,7 @@ export class SmartOrderApi {
   async getSmartOrderById(smartOrderId: any) {
     return await this.request.get(`${apiUrl}/api/v2/smart-orders/${smartOrderId}`, {
       headers: {
-        "X-API-KEY": apiKey,
+        "X-API-KEY": apiKeyPrimary,
       },
     });
   }

@@ -1,5 +1,5 @@
-import { coreDb } from "../../../shared/database/connection";
-import { SmartOrder } from "../../../shared/utils/types";
+import { coreDb } from "@shared/database/connection";
+import { SmartOrder } from "@shared/utils/types";
 
 export class SmartOrderRepository {
   async getSmartOrderById(smartOrderId: number): Promise<SmartOrder[]> {

@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { OrderFieldCheck } from "./order-field-check";
-import { SMART_ORDER_STATUSES, SmartOrderWithOrders } from "../../../shared/utils/types";
+import { SMART_ORDER_STATUSES, SmartOrderWithOrders } from "@shared/utils/types";
 
 export class SmartOrderFieldCheck {
   checkId(apiSmartOrder: SmartOrderWithOrders) {

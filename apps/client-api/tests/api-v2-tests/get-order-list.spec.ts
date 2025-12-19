@@ -1,21 +1,18 @@
 import { test, expect } from "@playwright/test";
-import { OrderApi } from "../api/order.api";
-import { OrderFieldCheck } from "../test-objects/order-field-check";
-import { ResponseStatusCheck } from "../test-objects/response-status-check";
-import { OrderResponseCheck } from "../test-objects/order-response-check";
+import { OrderApi } from "@apps/client-api/api/order.api";
+import { OrderFieldCheck } from "@apps/client-api/test-objects/order-field-check";
+import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
+import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response-check";
 import {
   invalidOffsetVariations,
   invalidLimitVariations,
   invalidOffsetLimitCombinations,
-} from "../../../shared/utils/variations_constants/invalid-order-params-variations";
-import { log } from "../../../shared/utils/logger";
-import { Order } from "../../../shared/utils/types";
-import {
-  ORDER_LIST_DEFAULT_LIMIT,
-  ORDER_LIST_DEFAULT_OFFSET,
-} from "../../../shared/utils/constants";
-import { OrderRepository } from "../repositories/order.repository";
-import { userIdPrimary } from "../api/constants";
+} from "@shared/utils/variations_constants/invalid-order-params-variations";
+import { log } from "@shared/utils/logger";
+import { Order } from "@shared/utils/types";
+import { ORDER_LIST_DEFAULT_LIMIT, ORDER_LIST_DEFAULT_OFFSET } from "@shared/utils/constants";
+import { OrderRepository } from "@apps/client-api/repositories/order.repository";
+import { userIdPrimary } from "@apps/client-api/api/constants";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/orders/
 test.describe("Get order list", () => {
@@ -258,7 +255,7 @@ test.describe("Get order list", () => {
     log.info("=== Тест: Проверка rate limiting ===");
 
     const orderApi = new OrderApi(request);
-    const requestCount = 120; 
+    const requestCount = 120;
 
     log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
 
@@ -306,12 +303,8 @@ test.describe("Get order list", () => {
       log.info("✓ Rate limiting работает корректно. API вернул 429 после превышения лимита.");
       expect(statusCounts[429]).toBeGreaterThan(0);
     } else {
-      log.warn(
-        `⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`
-      );
-      log.warn(
-        "  Это может означать, что лимит выше ожидаемого или rate limiting не настроен."
-      );
+      log.warn(`⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`);
+      log.warn("  Это может означать, что лимит выше ожидаемого или rate limiting не настроен.");
     }
   });
 });

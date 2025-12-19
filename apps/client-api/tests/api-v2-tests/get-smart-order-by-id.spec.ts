@@ -1,22 +1,24 @@
 import { test, expect } from "@playwright/test";
-import { SmartOrderRepository } from "../repositories/smart-order.repository";
-import { ResponseStatusCheck } from "../test-objects/response-status-check";
+import { SmartOrderRepository } from "@apps/client-api/repositories/smart-order.repository";
+import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
 import { boundaryAndInvalidSmartOrderIdVariations } from "@shared/utils/variations_constants/invalid-smart-orderId-variations";
-import { log } from "../../../shared/utils/logger";
-import { SmartOrderApi } from "../api/smart-order.api";
-import { SmartOrderFieldCheck } from "../test-objects/smart-order-field-check";
-import { SmartOrderResponseCheck } from "../test-objects/smart-order-response-check";
-import { userIdPrimary, userIdSecondary } from "../api/constants";
+import { log } from "@shared/utils/logger";
+import { SmartOrderApi } from "@apps/client-api/api/smart-order.api";
+import { SmartOrderFieldCheck } from "@apps/client-api/test-objects/smart-order-field-check";
+import { SmartOrderResponseCheck } from "@apps/client-api/test-objects/smart-order-response-check";
+import { userIdPrimary, userIdSecondary } from "@apps/client-api/api/constants";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/smart-orders/{smartOrderId}
 test.describe("Get smart order by ID", () => {
   const smartOrderRepo = new SmartOrderRepository();
   const responseStatusCheck = new ResponseStatusCheck();
-    const smartOrderResponseCheck = new SmartOrderResponseCheck();
+  const smartOrderResponseCheck = new SmartOrderResponseCheck();
   const smartOrderFieldTest = new SmartOrderFieldCheck();
 
   // Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с смарт заказами и Orders
-  test("GET /api/v2/smart-orders/{id} should return correct smart order data", async ({ request }) => {
+  test("GET /api/v2/smart-orders/{id} should return correct smart order data", async ({
+    request,
+  }) => {
     log.info("=== Тест: Проверка валидности полей ответа API ===");
 
     const getLastSmartOrderByUserId = await smartOrderRepo.getLastSmartOrderByUserId(userIdPrimary);
@@ -40,7 +42,9 @@ test.describe("Get smart order by ID", () => {
   });
 
   // Тест-кейс № 2: Проверка получения смарт заказа по несуществующему ID
-  test("GET /api/v2/smart-orders/{id} should return 404 for non-existent smart order", async ({ request }) => {
+  test("GET /api/v2/smart-orders/{id} should return 404 for non-existent smart order", async ({
+    request,
+  }) => {
     log.info("=== Тест: Проверка обработки несуществующего смарт заказа ===");
 
     const maxSmartOrderId = await smartOrderRepo.getMaxSmartOrderId();
@@ -57,20 +61,27 @@ test.describe("Get smart order by ID", () => {
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Несуществующий смарт заказ корректно обработан (404).");
+    log.info(
+      "✓ Все проверки пройдены успешно. Несуществующий смарт заказ корректно обработан (404)."
+    );
   });
 
   // Тест-кейс № 3: Проверка получения чужого смарт заказа по ID
-  test("GET /api/v2/smart-orders/{id} should not return smart order from another user", async ({ request }) => {
+  test("GET /api/v2/smart-orders/{id} should not return smart order from another user", async ({
+    request,
+  }) => {
     log.info("=== Тест: Проверка безопасности доступа к смарт заказам ===");
 
-    const getLastSmartOrderByUserId = await smartOrderRepo.getLastSmartOrderByUserId(userIdSecondary);
+    const getLastSmartOrderByUserId =
+      await smartOrderRepo.getLastSmartOrderByUserId(userIdSecondary);
     log.info(
       "Последний смарт заказ другого пользователя:",
       JSON.stringify(getLastSmartOrderByUserId, null, 2)
     );
     const lastSmartOrderId = getLastSmartOrderByUserId[0].id;
-    log.info(`Попытка доступа к Smart Order ID: ${lastSmartOrderId} (принадлежит другому пользователю)`);
+    log.info(
+      `Попытка доступа к Smart Order ID: ${lastSmartOrderId} (принадлежит другому пользователю)`
+    );
 
     const smartOrderApi = new SmartOrderApi(request);
     const response = await smartOrderApi.getSmartOrderById(lastSmartOrderId);
@@ -98,9 +109,13 @@ test.describe("Get smart order by ID", () => {
     const smartOrderExists = smartOrderInDb && smartOrderInDb.length > 0;
 
     if (smartOrderExists) {
-      log.info(`✓ Смарт заказ с ID ${smartOrderId} существует в БД. Проверяем корректность ответа API.`);
+      log.info(
+        `✓ Смарт заказ с ID ${smartOrderId} существует в БД. Проверяем корректность ответа API.`
+      );
     } else {
-      log.info(`✓ Смарт заказ с ID ${smartOrderId} не существует в БД. Проверяем обработку ошибки 404.`);
+      log.info(
+        `✓ Смарт заказ с ID ${smartOrderId} не существует в БД. Проверяем обработку ошибки 404.`
+      );
     }
 
     const smartOrderApi = new SmartOrderApi(request);
@@ -129,47 +144,49 @@ test.describe("Get smart order by ID", () => {
     }
   });
 
-//   // Тест-кейс № 4: Проверка получения смарт заказа без Orders
-//   test("GET /api/v2/smart-orders/{id} should return smart order without orders", async ({ request }) => {
-//     log.info("=== Тест: Проверка получения смарт заказа без связанных Orders ===");
+  //   // Тест-кейс № 4: Проверка получения смарт заказа без Orders
+  //   test("GET /api/v2/smart-orders/{id} should return smart order without orders", async ({ request }) => {
+  //     log.info("=== Тест: Проверка получения смарт заказа без связанных Orders ===");
 
-//     const smartOrderWithoutOrders = await smartOrderRepo.getSmartOrderWithoutOrdersByUserId(userIdPrimary);
-    
-//     if (!smartOrderWithoutOrders || smartOrderWithoutOrders.length === 0) {
-//       log.warn("Не найден смарт заказ без Orders для тестирования. Пропускаем тест.");
-//       return;
-//     }
+  //     const smartOrderWithoutOrders = await smartOrderRepo.getSmartOrderWithoutOrdersByUserId(userIdPrimary);
 
-//     const smartOrderId = smartOrderWithoutOrders[0].id;
-//     log.info(`Smart Order ID без Orders для тестирования: ${smartOrderId}`);
-//     log.info("Смарт заказ из БД:", JSON.stringify(smartOrderWithoutOrders[0], null, 2));
+  //     if (!smartOrderWithoutOrders || smartOrderWithoutOrders.length === 0) {
+  //       log.warn("Не найден смарт заказ без Orders для тестирования. Пропускаем тест.");
+  //       return;
+  //     }
 
-//     const smartOrderApi = new SmartOrderApi(request);
-//     const response = await smartOrderApi.getSmartOrderById(smartOrderId);
-//     log.info(`API запрос выполнен. Статус: ${response.status()}`);
+  //     const smartOrderId = smartOrderWithoutOrders[0].id;
+  //     log.info(`Smart Order ID без Orders для тестирования: ${smartOrderId}`);
+  //     log.info("Смарт заказ из БД:", JSON.stringify(smartOrderWithoutOrders[0], null, 2));
 
-//     responseStatusCheck.checkResponseStatus(response);
+  //     const smartOrderApi = new SmartOrderApi(request);
+  //     const response = await smartOrderApi.getSmartOrderById(smartOrderId);
+  //     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-//     const apiSmartOrder = await response.json();
-//     log.info("API Response:", JSON.stringify(apiSmartOrder, null, 2));
+  //     responseStatusCheck.checkResponseStatus(response);
 
-//     log.info("Проверка обязательных полей и их типов...");
-//     smartOrderFieldTest.checkAllFields(apiSmartOrder);
-//     smartOrderResponseCheck.checkSmartOrderFieldEquality(apiSmartOrder, smartOrderWithoutOrders[0]);
+  //     const apiSmartOrder = await response.json();
+  //     log.info("API Response:", JSON.stringify(apiSmartOrder, null, 2));
 
-//     log.info("Проверка, что массив orders пустой...");
-//     expect(Array.isArray(apiSmartOrder.orders)).toBe(true);
-//     expect(apiSmartOrder.orders.length).toBe(0);
-//     log.info(`✓ Массив orders пустой: ${apiSmartOrder.orders.length} элементов`);
+  //     log.info("Проверка обязательных полей и их типов...");
+  //     smartOrderFieldTest.checkAllFields(apiSmartOrder);
+  //     smartOrderResponseCheck.checkSmartOrderFieldEquality(apiSmartOrder, smartOrderWithoutOrders[0]);
 
-//     log.info("✓ Все проверки пройдены успешно. Смарт заказ без Orders корректно получен.");
-//   });
+  //     log.info("Проверка, что массив orders пустой...");
+  //     expect(Array.isArray(apiSmartOrder.orders)).toBe(true);
+  //     expect(apiSmartOrder.orders.length).toBe(0);
+  //     log.info(`✓ Массив orders пустой: ${apiSmartOrder.orders.length} элементов`);
+
+  //     log.info("✓ Все проверки пройдены успешно. Смарт заказ без Orders корректно получен.");
+  //   });
 
   // Тест-кейс № 5: Проверка граничных значений и базовых некорректных значений smartOrderId
   test("GET /api/v2/smart-orders/{id} should validate boundary and invalid smartOrderId values", async ({
     request,
   }) => {
-    log.info("=== Тест: Проверка граничных значений и базовых некорректных значений smartOrderId ===");
+    log.info(
+      "=== Тест: Проверка граничных значений и базовых некорректных значений smartOrderId ==="
+    );
 
     const smartOrderApi = new SmartOrderApi(request);
 
@@ -261,12 +278,8 @@ test.describe("Get smart order by ID", () => {
       log.info("✓ Rate limiting работает корректно. API вернул 429 после превышения лимита.");
       expect(statusCounts[429]).toBeGreaterThan(0);
     } else {
-      log.warn(
-        `⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`
-      );
-      log.warn(
-        "  Это может означать, что лимит выше ожидаемого или rate limiting не настроен."
-      );
+      log.warn(`⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`);
+      log.warn("  Это может означать, что лимит выше ожидаемого или rate limiting не настроен.");
     }
   });
 });

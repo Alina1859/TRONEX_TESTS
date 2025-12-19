@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
-import { ResponseStatusCheck } from "../test-objects/response-status-check";
-import { log } from "../../../shared/utils/logger";
-import { createWallet } from "../repositories/tronweb";
+import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
+import { log } from "@shared/utils/logger";
+import { createWallet } from "@apps/client-api/repositories/tronweb";
 import * as dotenv from "dotenv";
 
 dotenv.config();
@@ -217,7 +217,9 @@ test.describe("API Key Validation", () => {
   });
 
   // Тестирует корректность работы эндпоинта GET /api/v2/smart-orders/{smartOrderId}
-  test("GET /api/v2/smart-orders/{smartOrderId} should return 401 for empty API key", async ({ request }) => {
+  test("GET /api/v2/smart-orders/{smartOrderId} should return 401 for empty API key", async ({
+    request,
+  }) => {
     log.info("=== Тест: Проверка отправки пустого API ключа для smart order ===");
 
     const response = await request.get(`${apiUrl}/api/v2/smart-orders/${validOrderId}`, {
@@ -238,7 +240,9 @@ test.describe("API Key Validation", () => {
   });
 
   // Тестирует корректность работы эндпоинта GET /api/v2/smart-orders/{smartOrderId}
-  test("GET /api/v2/smart-orders/{smartOrderId} should return 401 for invalid API key", async ({ request }) => {
+  test("GET /api/v2/smart-orders/{smartOrderId} should return 401 for invalid API key", async ({
+    request,
+  }) => {
     log.info("=== Тест: Проверка отправки невалидного API ключа для smart order ===");
 
     const invalidApiKey = "invalid_api_key_12345";
