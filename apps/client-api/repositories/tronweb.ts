@@ -1,7 +1,8 @@
 import { TronWeb } from "tronweb";
+import { fullHost } from "../api/constants";
 
 const tronWeb = new TronWeb({
-  fullHost: "https://api.shasta.trongrid.io",
+  fullHost: fullHost,
 });
 
 export async function createWallet() {

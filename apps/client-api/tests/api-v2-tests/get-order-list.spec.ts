@@ -17,6 +17,7 @@ import {
 } from "@shared/utils/constants";
 import { OrderRepository } from "@apps/client-api/repositories/order.repository";
 import { userIdPrimary, userIdZero, apiKeyZero, apiUrl } from "@apps/client-api/api/constants";
+import { getHeaders } from "@shared/utils/headers";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/orders/
 test.describe("Get order list", () => {
@@ -313,19 +314,13 @@ test.describe("Get order list", () => {
   });
 
   // Тест-кейс № 10: Проверка комбинации offset = 10, limit = 5
-  test(`GET /api/v2/orders/ should work with offset = 10 and limit = 5`, async ({
-    request,
-  }) => {
+  test(`GET /api/v2/orders/ should work with offset = 10 and limit = 5`, async ({ request }) => {
     log.info("=== Тест: Проверка offset = 10, limit = 5 ===");
 
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      10,
-      5
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(userIdPrimary, 10, 5);
 
     const response = await orderApi.getOrderList({ offset: 10, limit: 5 });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -360,9 +355,7 @@ test.describe("Get order list", () => {
     );
 
     const response = await request.get(`${apiUrl}/api/v2/orders/`, {
-      headers: {
-        "X-API-KEY": apiKeyZero,
-      },
+      headers: getHeaders(apiKeyZero),
       params: {
         offset: ORDER_LIST_DEFAULT_OFFSET,
         limit: ORDER_LIST_DEFAULT_LIMIT,
@@ -409,6 +402,8 @@ test.describe("Get order list", () => {
       orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
     });
 
-    log.info(`✓ limit = ${ORDER_LIST_MAX_LIMIT}: получены ожидаемые заказы пользователя, не более ${ORDER_LIST_MAX_LIMIT}`);
+    log.info(
+      `✓ limit = ${ORDER_LIST_MAX_LIMIT}: получены ожидаемые заказы пользователя, не более ${ORDER_LIST_MAX_LIMIT}`
+    );
   });
 });

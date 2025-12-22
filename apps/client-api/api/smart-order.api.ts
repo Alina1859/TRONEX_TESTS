@@ -1,5 +1,6 @@
 import { APIRequestContext } from "@playwright/test";
-import { apiKeyPrimary, apiUrl } from "./constants";
+import { apiUrl } from "./constants";
+import { getHeaders } from "../../../shared/utils/headers";
 
 export class SmartOrderApi {
   static getSmartOrderById(lastSmartOrderId: number) {
@@ -9,9 +10,7 @@ export class SmartOrderApi {
 
   async getSmartOrderById(smartOrderId: any) {
     return await this.request.get(`${apiUrl}/api/v2/smart-orders/${smartOrderId}`, {
-      headers: {
-        "X-API-KEY": apiKeyPrimary,
-      },
+      headers: getHeaders(),
     });
   }
 }

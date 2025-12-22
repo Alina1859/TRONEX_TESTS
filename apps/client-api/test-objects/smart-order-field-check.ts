@@ -64,6 +64,7 @@ export class SmartOrderFieldCheck {
       expect(order).not.toBeNull();
       expect(typeof order).toBe("object");
       orderFieldCheck.checkAllFields(order);
+      expect(order.status).toBe("COMPLETED");
     }
   }
 

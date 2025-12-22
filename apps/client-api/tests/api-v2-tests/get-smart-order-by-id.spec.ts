@@ -282,4 +282,80 @@ test.describe("Get smart order by ID", () => {
       log.warn("  Это может означать, что лимит выше ожидаемого или rate limiting не настроен.");
     }
   });
+
+  // Тест-кейс № 7: Получение smart order со статусом "COMPLETED"
+  test('GET /api/v2/smart-orders/{id} should return smart order with status "COMPLETED"', async ({
+    request,
+  }) => {
+    log.info('=== Тест: Проверка получения smart order со статусом "COMPLETED" ===');
+
+    const completedSmartOrder = await smartOrderRepo.getCompletedSmartOrderByUserId(userIdPrimary);
+
+    if (!completedSmartOrder || completedSmartOrder.length === 0) {
+      log.warn("Не найден smart order со статусом COMPLETED для тестирования. Пропускаем тест.");
+      return;
+    }
+
+    const completedSmartOrderId = completedSmartOrder[0].id;
+    log.info(`Smart Order ID со статусом "COMPLETED" для тестирования: ${completedSmartOrderId}`);
+    log.info(`Статус smart order в БД: ${completedSmartOrder[0].status}`);
+
+    const smartOrderApi = new SmartOrderApi(request);
+    const response = await smartOrderApi.getSmartOrderById(completedSmartOrderId);
+    log.info(`API запрос выполнен. Статус: ${response.status()}`);
+
+    responseStatusCheck.checkResponseStatus(response);
+    const apiSmartOrder = await response.json();
+    log.info("API Response:", JSON.stringify(apiSmartOrder, null, 2));
+
+    log.info("Проверка обязательных полей и их типов...");
+    smartOrderResponseCheck.checkSmartOrderFieldEquality(apiSmartOrder, completedSmartOrder[0]);
+    smartOrderFieldTest.checkAllFields(apiSmartOrder);
+
+    log.info("Проверка статуса smart order...");
+    smartOrderResponseCheck.checkSmartOrderStatus(apiSmartOrder, "COMPLETED");
+    log.info(`✓ Статус smart order корректный: ${apiSmartOrder.status}`);
+
+    log.info(
+      '✓ Все проверки пройдены успешно. Smart order со статусом "COMPLETED" корректно получен.'
+    );
+  });
+
+  // Тест-кейс № 8: Получение smart order со статусом "FAILED"
+  test('GET /api/v2/smart-orders/{id} should return smart order with status "FAILED"', async ({
+    request,
+  }) => {
+    log.info('=== Тест: Проверка получения smart order со статусом "FAILED" ===');
+
+    const failedSmartOrder = await smartOrderRepo.getFailedSmartOrderByUserId(userIdPrimary);
+
+    if (!failedSmartOrder || failedSmartOrder.length === 0) {
+      log.warn("Не найден smart order со статусом FAILED для тестирования. Пропускаем тест.");
+      return;
+    }
+
+    const failedSmartOrderId = failedSmartOrder[0].id;
+    log.info(`Smart Order ID со статусом "FAILED" для тестирования: ${failedSmartOrderId}`);
+    log.info(`Статус smart order в БД: ${failedSmartOrder[0].status}`);
+
+    const smartOrderApi = new SmartOrderApi(request);
+    const response = await smartOrderApi.getSmartOrderById(failedSmartOrderId);
+    log.info(`API запрос выполнен. Статус: ${response.status()}`);
+
+    responseStatusCheck.checkResponseStatus(response);
+    const apiSmartOrder = await response.json();
+    log.info("API Response:", JSON.stringify(apiSmartOrder, null, 2));
+
+    log.info("Проверка обязательных полей и их типов...");
+    smartOrderResponseCheck.checkSmartOrderFieldEquality(apiSmartOrder, failedSmartOrder[0]);
+    smartOrderFieldTest.checkAllFields(apiSmartOrder);
+
+    log.info("Проверка статуса smart order...");
+    smartOrderResponseCheck.checkSmartOrderStatus(apiSmartOrder, "FAILED");
+    log.info(`✓ Статус smart order корректный: ${apiSmartOrder.status}`);
+
+    log.info(
+      '✓ Все проверки пройдены успешно. Smart order со статусом "FAILED" корректно получен.'
+    );
+  });
 });

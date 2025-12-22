@@ -45,4 +45,8 @@ export class SmartOrderResponseCheck {
       expectedSmartOrders.map((smartOrder) => smartOrder.id)
     );
   }
+
+  checkSmartOrderStatus(apiSmartOrder: SmartOrder, expectedStatus: string) {
+    expect(apiSmartOrder.status).toBe(expectedStatus);
+  }
 }

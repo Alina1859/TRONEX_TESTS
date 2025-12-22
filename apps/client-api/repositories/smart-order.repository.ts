@@ -28,6 +28,26 @@ export class SmartOrderRepository {
     return result[0]?.max_id || 0;
   }
 
+  async getCompletedSmartOrderByUserId(userId: string): Promise<SmartOrder[]> {
+    return await coreDb.$queryRaw<SmartOrder[]>`
+      SELECT *
+      FROM "SmartOrder" 
+      WHERE "userId" = ${userId} AND status = 'COMPLETED'
+      ORDER BY "createdAt" DESC 
+      LIMIT 1
+    `;
+  }
+
+  async getFailedSmartOrderByUserId(userId: string): Promise<SmartOrder[]> {
+    return await coreDb.$queryRaw<SmartOrder[]>`
+      SELECT *
+      FROM "SmartOrder" 
+      WHERE "userId" = ${userId} AND status = 'FAILED'
+      ORDER BY "createdAt" DESC 
+      LIMIT 1
+    `;
+  }
+
   // async getSmartOrderWithoutOrdersByUserId(userId: string): Promise<SmartOrder[]> {
   //   return await coreDb.$queryRaw<SmartOrder[]>`
   //     SELECT so.*

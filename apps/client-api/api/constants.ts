@@ -13,3 +13,5 @@ export const apiKeyZero = process.env.API_KEY_USER_ZERO!;
 
 export const apiUrl = process.env.API_URL!;
 export const coreApiToken = process.env.CORE_API_TOKEN!;
+
+export const fullHost = process.env.FULL_HOST!;
