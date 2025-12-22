@@ -14,7 +14,6 @@
   "license": "ISC",
   "packageManager": "pnpm@10.24.0",
   "devDependencies": {
-    "@playwright/test": "^1.57.0",
     "@types/node": "^24.10.1",
     "@types/pg": "^8.15.6",
     "pino": "^10.1.0",

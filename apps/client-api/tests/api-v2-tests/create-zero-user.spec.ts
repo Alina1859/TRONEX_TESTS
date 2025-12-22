@@ -24,7 +24,6 @@ test("Create test user without orders and with zero balance", async () => {
     expect(typeof userId).toBe("string");
     expect(userId.length).toBeGreaterThan(0);
 
-    // Получаем access token для созданного пользователя
     const tokenResponse = await coreRepo.coreUserUserIdAccessTokenGet(userId);
     const accessToken = tokenResponse.data.token;
 

@@ -20,7 +20,7 @@ import {
   ENERGY_AMOUNT_DEFAULT,
   OrderPeriod,
 } from "@shared/utils/constants";
-import { invalidCreateOrderRequestVariations } from "@apps/client-api/test-objects/invalid-create-order-request-variations";
+import { invalidCreateOrderRequestVariations } from "@shared/utils/variations_constants/invalid-create-order-request-variations";
 import {
   ENERGY_PURCHASE_COMBINATIONS,
   EnergyPurchaseCombination,
@@ -432,7 +432,6 @@ test.describe("Create new order", () => {
   });
 
   // Тест-кейс № 8: Создание заказов с различными комбинациями полосы пропускания, периодов и цен для PRICE_BANDWIDTH
-
   test("POST /api/v2/orders/ should create orders with different bandwidth purchase combinations", async ({
     request,
   }) => {
@@ -610,4 +609,6 @@ test.describe("Create new order", () => {
 
     log.info("✓ Тест завершен: проверка создания заказа для пользователя с нулевым балансом");
   });
+
+  
 });

@@ -43,4 +43,9 @@ export class OrderResponseCheck {
       expect(prev).toBeGreaterThanOrEqual(curr);
     }
   }
+
+  checkOrderListIsEmpty(orders: Order[], expectedOrders: Order[]) {
+    expect(orders.length).toBe(0);
+    expect(expectedOrders.length).toBe(0);
+  }
 }

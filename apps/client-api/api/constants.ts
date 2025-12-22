@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv";
 import * as path from "path";
 
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 export const userIdPrimary = process.env.USER_ID_PRIMARY!;
 export const apiKeyPrimary = process.env.API_KEY_PRIMARY!;

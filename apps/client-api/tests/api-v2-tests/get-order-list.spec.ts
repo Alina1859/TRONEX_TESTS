@@ -10,9 +10,13 @@ import {
 } from "@shared/utils/variations_constants/invalid-order-params-variations";
 import { log } from "@shared/utils/logger";
 import { Order } from "@shared/utils/types";
-import { ORDER_LIST_DEFAULT_LIMIT, ORDER_LIST_DEFAULT_OFFSET } from "@shared/utils/constants";
+import {
+  ORDER_LIST_DEFAULT_LIMIT,
+  ORDER_LIST_DEFAULT_OFFSET,
+  ORDER_LIST_MAX_LIMIT,
+} from "@shared/utils/constants";
 import { OrderRepository } from "@apps/client-api/repositories/order.repository";
-import { userIdPrimary } from "@apps/client-api/api/constants";
+import { userIdPrimary, userIdZero, apiKeyZero, apiUrl } from "@apps/client-api/api/constants";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/orders/
 test.describe("Get order list", () => {
@@ -306,5 +310,105 @@ test.describe("Get order list", () => {
       log.warn(`⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`);
       log.warn("  Это может означать, что лимит выше ожидаемого или rate limiting не настроен.");
     }
+  });
+
+  // Тест-кейс № 10: Проверка комбинации offset = 10, limit = 5
+  test(`GET /api/v2/orders/ should work with offset = 10 and limit = 5`, async ({
+    request,
+  }) => {
+    log.info("=== Тест: Проверка offset = 10, limit = 5 ===");
+
+    const orderApi = new OrderApi(request);
+    const orderRepo = new OrderRepository();
+
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
+      userIdPrimary,
+      10,
+      5
+    );
+
+    const response = await orderApi.getOrderList({ offset: 10, limit: 5 });
+    log.info(`API запрос выполнен. Статус: ${response.status()}`);
+
+    responseStatusCheck.checkResponseStatus(response);
+    const orders = (await response.json()) as Order[];
+
+    orderResponseCheck.checkOrderListIsArray(orders);
+    orders.forEach((order: Order) => orderFieldCheck.checkAllFields(order));
+    orderResponseCheck.checkSortedByCreatedAtDesc(orders);
+
+    orderResponseCheck.checkOrderListExactLength(orders, expectedOrders.length);
+    orders.forEach((order: Order, index: number) => {
+      orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
+    });
+
+    log.info("✓ offset = 10, limit = 5: получены ожидаемые 5 заказов, начиная с 11-го");
+  });
+
+  // Тест-кейс № 11: Проверка возврата пустого массива для пользователя без заказов
+  test(`GET /api/v2/orders/ should return empty array for user with zero orders`, async ({
+    request,
+  }) => {
+    log.info("=== Тест: Проверка возврата пустого массива для пользователя без заказов ===");
+
+    const orderRepo = new OrderRepository();
+
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
+      userIdZero,
+      ORDER_LIST_DEFAULT_OFFSET,
+      ORDER_LIST_DEFAULT_LIMIT
+    );
+
+    const response = await request.get(`${apiUrl}/api/v2/orders/`, {
+      headers: {
+        "X-API-KEY": apiKeyZero,
+      },
+      params: {
+        offset: ORDER_LIST_DEFAULT_OFFSET,
+        limit: ORDER_LIST_DEFAULT_LIMIT,
+      },
+    });
+
+    log.info(`API запрос выполнен. Статус: ${response.status()}`);
+
+    responseStatusCheck.checkResponseStatus(response);
+    const orders = (await response.json()) as Order[];
+
+    orderResponseCheck.checkOrderListIsArray(orders);
+    orderResponseCheck.checkOrderListExactLength(orders, expectedOrders.length);
+    orderResponseCheck.checkOrderListIsEmpty(orders, expectedOrders);
+
+    log.info("✓ API корректно возвращает пустой массив для пользователя без заказов");
+  });
+
+  // Тест-кейс № 12: Проверка значения limit = ORDER_LIST_MAX_LIMIT
+  test(`GET /api/v2/orders/ should respect limit = ORDER_LIST_MAX_LIMIT`, async ({ request }) => {
+    log.info(`=== Тест: Проверка limit = ${ORDER_LIST_MAX_LIMIT} ===`);
+
+    const orderApi = new OrderApi(request);
+    const orderRepo = new OrderRepository();
+
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
+      userIdPrimary,
+      ORDER_LIST_DEFAULT_OFFSET,
+      ORDER_LIST_MAX_LIMIT
+    );
+
+    const response = await orderApi.getOrderList({ limit: ORDER_LIST_MAX_LIMIT });
+    log.info(`API запрос выполнен. Статус: ${response.status()}`);
+
+    responseStatusCheck.checkResponseStatus(response);
+    const orders = (await response.json()) as Order[];
+
+    orderResponseCheck.checkOrderListIsArray(orders);
+    orders.forEach((order: Order) => orderFieldCheck.checkAllFields(order));
+    orderResponseCheck.checkSortedByCreatedAtDesc(orders);
+
+    orderResponseCheck.checkOrderListExactLength(orders, expectedOrders.length);
+    orders.forEach((order: Order, index: number) => {
+      orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
+    });
+
+    log.info(`✓ limit = ${ORDER_LIST_MAX_LIMIT}: получены ожидаемые заказы пользователя, не более ${ORDER_LIST_MAX_LIMIT}`);
   });
 });
