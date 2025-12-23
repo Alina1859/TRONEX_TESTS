@@ -49,4 +49,8 @@ export class SmartOrderResponseCheck {
   checkSmartOrderStatus(apiSmartOrder: SmartOrder, expectedStatus: string) {
     expect(apiSmartOrder.status).toBe(expectedStatus);
   }
+
+  checkRateLimitEnforcement(statusCounts: Record<number, number>): void {
+    expect(statusCounts[429]).toBeGreaterThan(0);
+  }
 }

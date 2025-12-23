@@ -48,4 +48,8 @@ export class OrderResponseCheck {
     expect(orders.length).toBe(0);
     expect(expectedOrders.length).toBe(0);
   }
+
+  checkRateLimitEnforcement(statusCounts: Record<number, number>): void {
+    expect(statusCounts[429]).toBeGreaterThan(0);
+  }
 }

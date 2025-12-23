@@ -202,10 +202,12 @@ test.describe("Get smart order by ID", () => {
         const response = await smartOrderApi.getSmartOrderById(variation.value as any);
         const status = response.status();
 
-        if (status === 400 || status === 404) {
+        if (variation.expectedStatus.includes(status)) {
           log.info(`  ✓ Корректно обработано: статус ${status}`);
         } else {
-          log.warn(`  ✗ Неожиданный статус: ${status} (ожидался 400 или 404)`);
+          log.warn(
+            `  ✗ Неожиданный статус: ${status} (ожидался один из: ${variation.expectedStatus.join(", ")})`
+          );
         }
         responseStatusCheck.checkResponseStatus(response, status);
       } catch (error: any) {
@@ -242,45 +244,11 @@ test.describe("Get smart order by ID", () => {
 
     log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
 
-    const statusCounts: Record<number, number> = {};
-    let rateLimitHit = false;
-    let rateLimitResponse: any = null;
-    let retryAfter: string | undefined;
-
-    for (let i = 0; i < responses.length; i++) {
-      const response = responses[i];
-      const status = response.status();
-      statusCounts[status] = (statusCounts[status] || 0) + 1;
-
-      if (status === 429 && !rateLimitHit) {
-        rateLimitHit = true;
-        rateLimitResponse = await response.json().catch(() => null);
-        const headers = response.headers();
-        retryAfter = headers["retry-after"] || headers["Retry-After"];
-
-        log.info(`✓ Rate limiting обнаружен на запросе #${i + 1}`);
-        log.info(`  Статус: ${status} (Too Many Requests)`);
-        if (retryAfter) {
-          log.info(`  Retry-After: ${retryAfter}`);
-        }
-        if (rateLimitResponse) {
-          log.info(`  Ответ: ${JSON.stringify(rateLimitResponse, null, 2)}`);
-        }
-      }
-    }
-
-    log.info("Распределение статусов ответов:");
-    Object.entries(statusCounts).forEach(([status, count]) => {
-      log.info(`  ${status}: ${count} запросов`);
-    });
-
-    if (rateLimitHit) {
-      log.info("✓ Rate limiting работает корректно. API вернул 429 после превышения лимита.");
-      expect(statusCounts[429]).toBeGreaterThan(0);
-    } else {
-      log.warn(`⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`);
-      log.warn("  Это может означать, что лимит выше ожидаемого или rate limiting не настроен.");
-    }
+    const statusCounts = await responseStatusCheck.processRateLimitResponses(
+      responses,
+      requestCount
+    );
+    smartOrderResponseCheck.checkRateLimitEnforcement(statusCounts);
   });
 
   // Тест-кейс № 7: Получение smart order со статусом "COMPLETED"

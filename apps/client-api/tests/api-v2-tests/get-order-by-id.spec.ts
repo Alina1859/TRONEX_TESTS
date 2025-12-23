@@ -12,7 +12,7 @@ import { userIdPrimary, userIdSecondary } from "@apps/client-api/api/constants";
 test.describe("Get order by ID", () => {
   const orderRepo = new OrderRepository();
   const responseStatusCheck = new ResponseStatusCheck();
-  const orderResponseTest = new OrderResponseCheck();
+  const orderResponseCheck = new OrderResponseCheck();
   const orderFieldTest = new OrderFieldCheck();
 
   // Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с заказами
@@ -33,7 +33,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderFieldEquality(apiOrder, lastOrder);
+    orderResponseCheck.checkOrderFieldEquality(apiOrder, lastOrder);
     orderFieldTest.checkAllFields(apiOrder);
 
     log.info("✓ Все проверки пройдены успешно");
@@ -113,7 +113,7 @@ test.describe("Get order by ID", () => {
       const apiOrder = await response.json();
       log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
-      orderResponseTest.checkOrderFieldEquality(apiOrder, orderInDb[0]);
+      orderResponseCheck.checkOrderFieldEquality(apiOrder, orderInDb[0]);
       orderFieldTest.checkAllFields(apiOrder);
 
       log.info("✓ Все проверки пройдены успешно. Заказ с ID = 1 корректно получен.");
@@ -187,7 +187,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderFieldEquality(apiOrder, completedOrder[0]);
+    orderResponseCheck.checkOrderFieldEquality(apiOrder, completedOrder[0]);
     orderFieldTest.checkAllFields(apiOrder);
 
     log.info("Проверка статуса заказа...");
@@ -216,7 +216,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderFieldEquality(apiOrder, failedOrder[0]);
+    orderResponseCheck.checkOrderFieldEquality(apiOrder, failedOrder[0]);
     orderFieldTest.checkAllFields(apiOrder);
 
     log.info("Проверка статуса заказа...");
@@ -245,7 +245,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderFieldEquality(apiOrder, energyOrder[0]);
+    orderResponseCheck.checkOrderFieldEquality(apiOrder, energyOrder[0]);
     orderFieldTest.checkAllFields(apiOrder);
 
     log.info("Проверка типа заказа...");
@@ -274,7 +274,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderFieldEquality(apiOrder, bandwidthOrder[0]);
+    orderResponseCheck.checkOrderFieldEquality(apiOrder, bandwidthOrder[0]);
     orderFieldTest.checkAllFields(apiOrder);
 
     log.info("Проверка типа заказа...");
@@ -305,7 +305,7 @@ test.describe("Get order by ID", () => {
     log.info("API Response:", JSON.stringify(apiOrder, null, 2));
 
     log.info("Проверка обязательных полей и их типов...");
-    orderResponseTest.checkOrderFieldEquality(apiOrder, activationOrder[0]);
+    orderResponseCheck.checkOrderFieldEquality(apiOrder, activationOrder[0]);
     orderFieldTest.checkAllFields(apiOrder);
 
     log.info("Проверка типа заказа...");
@@ -336,44 +336,10 @@ test.describe("Get order by ID", () => {
 
     log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
 
-    const statusCounts: Record<number, number> = {};
-    let rateLimitHit = false;
-    let rateLimitResponse: any = null;
-    let retryAfter: string | undefined;
-
-    for (let i = 0; i < responses.length; i++) {
-      const response = responses[i];
-      const status = response.status();
-      statusCounts[status] = (statusCounts[status] || 0) + 1;
-
-      if (status === 429 && !rateLimitHit) {
-        rateLimitHit = true;
-        rateLimitResponse = await response.json().catch(() => null);
-        const headers = response.headers();
-        retryAfter = headers["retry-after"] || headers["Retry-After"];
-
-        log.info(`✓ Rate limiting обнаружен на запросе #${i + 1}`);
-        log.info(`  Статус: ${status} (Too Many Requests)`);
-        if (retryAfter) {
-          log.info(`  Retry-After: ${retryAfter}`);
-        }
-        if (rateLimitResponse) {
-          log.info(`  Ответ: ${JSON.stringify(rateLimitResponse, null, 2)}`);
-        }
-      }
-    }
-
-    log.info("Распределение статусов ответов:");
-    Object.entries(statusCounts).forEach(([status, count]) => {
-      log.info(`  ${status}: ${count} запросов`);
-    });
-
-    if (rateLimitHit) {
-      log.info("✓ Rate limiting работает корректно. API вернул 429 после превышения лимита.");
-      expect(statusCounts[429]).toBeGreaterThan(0);
-    } else {
-      log.warn(`⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`);
-      log.warn("  Это может означать, что лимит выше ожидаемого или rate limiting не настроен.");
-    }
+    const statusCounts = await responseStatusCheck.processRateLimitResponses(
+      responses,
+      requestCount
+    );
+    orderResponseCheck.checkRateLimitEnforcement(statusCounts);
   });
 });

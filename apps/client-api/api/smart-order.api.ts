@@ -13,4 +13,10 @@ export class SmartOrderApi {
       headers: getHeaders(),
     });
   }
+
+  async getSmartOrderByIdWithApiKey(smartOrderId: any, apiKey: string) {
+    return await this.request.get(`${apiUrl}/api/v2/smart-orders/${smartOrderId}`, {
+      headers: getHeaders(apiKey),
+    });
+  }
 }
