@@ -1,8 +1,9 @@
 import { expect, APIResponse } from "@playwright/test";
 import { log } from "@shared/utils/logger";
+import { HTTP_STATUS_OK } from "@shared/utils/constants";
 
 export class ResponseStatusCheck {
-  checkResponseStatus(response: APIResponse, expectedStatus: number = 200) {
+  checkResponseStatus(response: APIResponse, expectedStatus: number = HTTP_STATUS_OK) {
     const actualStatus = response.status();
     log.info(`Проверка статуса ответа: ожидаемый ${expectedStatus}, фактический ${actualStatus}`);
 

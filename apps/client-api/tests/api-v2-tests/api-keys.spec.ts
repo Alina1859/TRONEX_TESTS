@@ -5,6 +5,10 @@ import { createWallet } from "@apps/client-api/repositories/tronweb";
 import { OrderApi } from "@apps/client-api/api/order.api";
 import { SmartOrderApi } from "@apps/client-api/api/smart-order.api";
 import * as dotenv from "dotenv";
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE,
+} from "@shared/utils/constants";
 
 dotenv.config();
 
@@ -148,7 +152,7 @@ test.describe("API key validation", () => {
     const status = response.status();
     log.info(`API запрос выполнен. Статус: ${status}`);
 
-    expect([400, 415]).toContain(status);
+    expect([HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE]).toContain(status);
 
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
@@ -266,7 +270,7 @@ test.describe("API key validation", () => {
     const status = response.status();
     log.info(`API запрос выполнен. Статус: ${status}`);
 
-    expect([400, 415]).toContain(status);
+    expect([HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE]).toContain(status);
 
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));

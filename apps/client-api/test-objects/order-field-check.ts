@@ -1,9 +1,9 @@
 import { expect } from "@playwright/test";
 import { Order } from "@shared/utils/types";
 import { VALID_ORDER_PERIODS, ORDER_STATUSES, ORDER_TYPES } from "@shared/utils/constants";
-import { AddressCheck } from "../address-check";
+import { AddressCheck } from "./address-check";
 
-export class OrderFieldCheck {  
+export class OrderFieldCheck {
   private addressCheck = new AddressCheck();
   checkId(apiOrder: Order) {
     expect(apiOrder).toHaveProperty("id");

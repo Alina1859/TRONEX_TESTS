@@ -1,9 +1,9 @@
 import { test, expect, APIRequestContext } from "@playwright/test";
 import { createWallet } from "@apps/client-api/repositories/tronweb";
 import { log } from "@shared/utils/logger";
-import { OrderFieldCheck } from "@apps/client-api/test-objects/order-check/order-field-check";
+import { OrderFieldCheck } from "@apps/client-api/test-objects/order-field-check";
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
-import { OrderResponseCheck } from "@apps/client-api/test-objects/order-check/order-response-check";
+import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response-check";
 import {
   CreateActivationOrderRequest,
   CreateOrderRequest,
@@ -20,6 +20,7 @@ import { OrderRepository } from "@apps/client-api/repositories/order.repository"
 import {
   BANDWIDTH_AMOUNT_DEFAULT,
   ENERGY_AMOUNT_DEFAULT,
+  HTTP_STATUS_BAD_REQUEST,
   OrderPeriod,
 } from "@shared/utils/constants";
 import { invalidCreateOrderRequestVariations } from "@shared/utils/variations_constants/invalid-create-order-request-variations";
@@ -27,12 +28,7 @@ import { ENERGY_PURCHASE_COMBINATIONS } from "@shared/utils/variations_constants
 import { ENERGY_PURCHASE_COMBINATIONS_FOR_USER } from "@shared/utils/variations_constants/energy-purchase-combinations-for-user";
 import { BANDWIDTH_PURCHASE_COMBINATIONS } from "@shared/utils/variations_constants/bandwidth-purchase-combinations";
 import { CoreRepository } from "@apps/client-api/repositories/core.repository";
-import {
-  userIdPrimary,
-  apiKeyZero,
-  apiUrl,
-  apiKeyPrimary,
-} from "@apps/client-api/api/constants";
+import { userIdPrimary, apiKeyZero, apiUrl, apiKeyPrimary } from "@apps/client-api/api/constants";
 import { getPostHeaders } from "@shared/utils/headers";
 
 test.describe("Create new order", () => {
@@ -162,7 +158,7 @@ test.describe("Create new order", () => {
       const orderApi = new OrderApi(request);
 
       const response = await orderApi.createNewOrder(variation.data);
-      statusCheck.checkResponseStatus(response, variation.expectedStatus ?? 400);
+      statusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
 
       const headers = response.headers();
       const contentType = headers["content-type"] ?? headers["Content-Type"] ?? "";
@@ -256,7 +252,7 @@ test.describe("Create new order", () => {
     };
 
     const response = await orderApi.createNewOrder(secondActivationRequest);
-    statusCheck.checkResponseStatus(response, 400);
+    statusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
 
     const headers = response.headers();
     const contentType = headers["content-type"] ?? headers["Content-Type"] ?? "";

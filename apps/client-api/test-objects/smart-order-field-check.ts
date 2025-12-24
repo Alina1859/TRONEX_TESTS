@@ -1,7 +1,7 @@
 import { expect } from "@playwright/test";
-import { OrderFieldCheck } from "../order-check";
-import { AddressCheck } from "../address-check";
+import { AddressCheck } from "@apps/client-api/test-objects/address-check";
 import { SMART_ORDER_STATUSES, SmartOrderWithOrders } from "@shared/utils/types";
+import { OrderFieldCheck } from "./order-field-check";
 
 export class SmartOrderFieldCheck {
   private addressCheck = new AddressCheck();
@@ -56,6 +56,21 @@ export class SmartOrderFieldCheck {
       orderFieldCheck.checkAllFields(order);
       expect(order.status).toBe("COMPLETED");
     }
+  }
+
+  checkRequestResponseMatch(
+    apiSmartOrder: SmartOrderWithOrders,
+    fromAddress: string,
+    toAddress: string,
+    withActivation: boolean,
+    withEnergy: boolean,
+    withBandwidth: boolean
+  ) {
+    expect(apiSmartOrder.fromAddress).toBe(fromAddress);
+    expect(apiSmartOrder.toAddress).toBe(toAddress);
+    expect(apiSmartOrder.withActivation).toBe(withActivation);
+    expect(apiSmartOrder.withEnergy).toBe(withEnergy);
+    expect(apiSmartOrder.withBandwidth).toBe(withBandwidth);
   }
 
   checkAllFields(apiSmartOrder: SmartOrderWithOrders) {

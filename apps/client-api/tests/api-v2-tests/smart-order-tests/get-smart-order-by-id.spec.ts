@@ -4,9 +4,10 @@ import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-stat
 import { boundaryAndInvalidSmartOrderIdVariations } from "@shared/utils/variations_constants/invalid-smart-orderId-variations";
 import { log } from "@shared/utils/logger";
 import { SmartOrderApi } from "@apps/client-api/api/smart-order.api";
-import { SmartOrderFieldCheck } from "@apps/client-api/test-objects/smart-order-check/smart-order-field-check";
-import { SmartOrderResponseCheck } from "@apps/client-api/test-objects/smart-order-check/smart-order-response-check";
+import { SmartOrderFieldCheck } from "@apps/client-api/test-objects/smart-order-field-check";
+import { SmartOrderResponseCheck } from "@apps/client-api/test-objects/smart-order-response-check";
 import { userIdPrimary, userIdSecondary } from "@apps/client-api/api/constants";
+import { HTTP_STATUS_NOT_FOUND } from "@shared/utils/constants";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/smart-orders/{smartOrderId}
 test.describe("Get smart order by ID", () => {
@@ -57,7 +58,7 @@ test.describe("Get smart order by ID", () => {
     const response = await smartOrderApi.getSmartOrderById(nonExistentSmartOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusCheck.checkResponseStatus(response, 404);
+    responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_NOT_FOUND);
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
@@ -87,7 +88,7 @@ test.describe("Get smart order by ID", () => {
     const response = await smartOrderApi.getSmartOrderById(lastSmartOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusCheck.checkResponseStatus(response, 404);
+    responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_NOT_FOUND);
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
@@ -134,7 +135,7 @@ test.describe("Get smart order by ID", () => {
       log.info("✓ Все проверки пройдены успешно. Смарт заказ с ID = 1 корректно получен.");
     } else {
       log.info("Проверка обработки ошибки 404 для несуществующего смарт заказа...");
-      responseStatusCheck.checkResponseStatus(response, 404);
+      responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_NOT_FOUND);
       const errorResponse = await response.json();
       log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 

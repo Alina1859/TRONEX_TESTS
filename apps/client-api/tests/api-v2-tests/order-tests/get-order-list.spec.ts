@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { OrderApi } from "@apps/client-api/api/order.api";
-import { OrderFieldCheck } from "@apps/client-api/test-objects/order-check/order-field-check";
+import { OrderFieldCheck } from "@apps/client-api/test-objects/order-field-check";
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
-import { OrderResponseCheck } from "@apps/client-api/test-objects/order-check/order-response-check";
+import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response-check";
 import {
   invalidOffsetVariations,
   invalidLimitVariations,
@@ -11,6 +11,7 @@ import {
 import { log } from "@shared/utils/logger";
 import { Order } from "@shared/utils/types";
 import {
+  HTTP_STATUS_BAD_REQUEST,
   ORDER_LIST_DEFAULT_LIMIT,
   ORDER_LIST_DEFAULT_OFFSET,
   ORDER_LIST_MAX_LIMIT,
@@ -66,7 +67,7 @@ test.describe("Get order list", () => {
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-      responseStatusCheck.checkResponseStatus(response, 400);
+      responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
 
       const errorResponse = await response.json();
       log.info(`Ответ ошибки: ${JSON.stringify(errorResponse, null, 2)}`);
@@ -89,7 +90,7 @@ test.describe("Get order list", () => {
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-      responseStatusCheck.checkResponseStatus(response, 400);
+      responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
 
       const errorResponse = await response.json();
       log.info(`Ответ ошибки: ${JSON.stringify(errorResponse, null, 2)}`);
@@ -116,7 +117,7 @@ test.describe("Get order list", () => {
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-      responseStatusCheck.checkResponseStatus(response, 400);
+      responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
 
       const errorResponse = await response.json();
       log.info(`Ответ ошибки: ${JSON.stringify(errorResponse, null, 2)}`);
@@ -254,7 +255,6 @@ test.describe("Get order list", () => {
 
     log.info("✓ offset = 1000: корректно возвращен пустой массив при отсутствии заказов");
   });
-
 
   // Тест-кейс № 10: Проверка комбинации offset = 10, limit = 5
   test(`GET /api/v2/orders/ should work with offset = 10 and limit = 5`, async ({ request }) => {

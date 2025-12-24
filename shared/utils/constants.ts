@@ -53,3 +53,8 @@ export const SMART_ORDER_ID_MAX = 2147483647;
 export const ORDER_STATUSES = ["INIT", "PENDING", "COMPLETED", "FAILED", "CANCELLED"] as const;
 
 export const ORDER_TYPES = ["ENERGY", "BANDWIDTH", "ACTIVATION"] as const;
+
+export const HTTP_STATUS_OK = 200;
+export const HTTP_STATUS_BAD_REQUEST = 400;
+export const HTTP_STATUS_NOT_FOUND = 404;
+export const HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE = 415;

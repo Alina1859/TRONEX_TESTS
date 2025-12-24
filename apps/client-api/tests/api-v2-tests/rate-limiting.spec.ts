@@ -4,8 +4,8 @@ import { SmartOrderRepository } from "@apps/client-api/repositories/smart-order.
 import { OrderApi } from "@apps/client-api/api/order.api";
 import { SmartOrderApi } from "@apps/client-api/api/smart-order.api";
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
-import { OrderResponseCheck } from "@apps/client-api/test-objects/order-check/order-response-check";
-import { SmartOrderResponseCheck } from "@apps/client-api/test-objects/smart-order-check/smart-order-response-check";
+import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response-check";
+import { SmartOrderResponseCheck } from "@apps/client-api/test-objects/smart-order-response-check";
 import { log } from "@shared/utils/logger";
 import { userIdPrimary } from "@apps/client-api/api/constants";
 
@@ -95,4 +95,3 @@ test.describe("rate limiting tests", () => {
     smartOrderResponseCheck.checkRateLimitEnforcement(statusCounts);
   });
 });
-

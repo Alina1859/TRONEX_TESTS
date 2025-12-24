@@ -1,12 +1,13 @@
 import { test, expect } from "@playwright/test";
 import { OrderRepository } from "@apps/client-api/repositories/order.repository";
 import { OrderApi } from "@apps/client-api/api/order.api";
-import { OrderResponseCheck } from "@apps/client-api/test-objects/order-check/order-response-check";
-import { OrderFieldCheck } from "@apps/client-api/test-objects/order-check/order-field-check";
+import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response-check";
+import { OrderFieldCheck } from "@apps/client-api/test-objects/order-field-check";
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
 import { boundaryAndInvalidOrderIdVariations } from "@shared/utils/variations_constants/invalid-orderId-variations";
 import { log } from "@shared/utils/logger";
 import { userIdPrimary, userIdSecondary } from "@apps/client-api/api/constants";
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND } from "@shared/utils/constants";
 
 // Тестирует корректность работы эндпоинта GET /api/v2/orders/{id}
 test.describe("Get order by ID", () => {
@@ -55,7 +56,7 @@ test.describe("Get order by ID", () => {
     const response = await orderApi.getOrderById(lastOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusCheck.checkResponseStatus(response, 404);
+    responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_NOT_FOUND);
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
@@ -76,7 +77,7 @@ test.describe("Get order by ID", () => {
     const response = await orderApi.getOrderById(nonExistentOrderId);
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusCheck.checkResponseStatus(response, 404);
+    responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_NOT_FOUND);
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
@@ -119,7 +120,7 @@ test.describe("Get order by ID", () => {
       log.info("✓ Все проверки пройдены успешно. Заказ с ID = 1 корректно получен.");
     } else {
       log.info("Проверка обработки ошибки 404 для несуществующего заказа...");
-      responseStatusCheck.checkResponseStatus(response, 404);
+      responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_NOT_FOUND);
       const errorResponse = await response.json();
       log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
@@ -149,10 +150,12 @@ test.describe("Get order by ID", () => {
         const response = await orderApi.getOrderById(variation.value as any);
         const status = response.status();
 
-        if (status === 400 || status === 404) {
+        if (status === HTTP_STATUS_BAD_REQUEST || status === HTTP_STATUS_NOT_FOUND) {
           log.info(`  ✓ Корректно обработано: статус ${status}`);
         } else {
-          log.warn(`  ✗ Неожиданный статус: ${status} (ожидался 400 или 404)`);
+          log.warn(
+            `  ✗ Неожиданный статус: ${status} (ожидался ${HTTP_STATUS_BAD_REQUEST} или ${HTTP_STATUS_NOT_FOUND})`
+          );
         }
         responseStatusCheck.checkResponseStatus(response, status);
       } catch (error: any) {
@@ -314,5 +317,4 @@ test.describe("Get order by ID", () => {
 
     log.info('✓ Все проверки пройдены успешно. Заказ с типом "ACTIVATION" корректно получен.');
   });
-
 });

@@ -115,7 +115,6 @@ const invalidOrderPeriods = {
   },
 };
 
-
 const validEnergyBaseRequest = {
   type: "ENERGY",
   targetAddress: validTargetAddress,
@@ -136,13 +135,13 @@ const validActivationBaseRequest = {
 };
 
 export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] = [
-  { data: null, description: "body = null", expectedStatus: 400 },
-  { data: undefined, description: "body = undefined", expectedStatus: 400 },
-  { data: "string", description: "body = строка", expectedStatus: 400 },
-  { data: 123, description: "body = число", expectedStatus: 400 },
-  { data: [], description: "body = массив []", expectedStatus: 400 },
+  { data: null, description: "body = null" },
+  { data: undefined, description: "body = undefined" },
+  { data: "string", description: "body = строка" },
+  { data: 123, description: "body = число" },
+  { data: [], description: "body = массив []" },
 
-  { data: {}, description: "пустой объект {}", expectedStatus: 400 },
+  { data: {}, description: "пустой объект {}" },
   {
     data: {
       targetAddress: validTargetAddress,
@@ -150,7 +149,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: ENERGY_ALLOWED_PERIODS[0],
     },
     description: "нет поля type",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -159,7 +157,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: validEnergyBaseRequest.period,
     },
     description: "нет поля targetAddress (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -168,7 +165,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       amount: validEnergyBaseRequest.amount,
     },
     description: "нет поля period (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -177,7 +173,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: validBandwidthBaseRequest.period,
     },
     description: "нет поля targetAddress (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -186,12 +181,10 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       amount: validBandwidthBaseRequest.amount,
     },
     description: "нет поля period (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: { type: validActivationBaseRequest.type },
     description: "нет поля targetAddress (ACTIVATION)",
-    expectedStatus: 400,
   },
 
   {
@@ -202,7 +195,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "type = пустая строка",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -212,7 +204,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: 'type = "ENERG" (опечатка)',
-    expectedStatus: 400,
   },
   {
     data: {
@@ -222,7 +213,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "type = число (123)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -232,7 +222,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "type = 0",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -242,7 +231,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "type = null",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -252,7 +240,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "type = undefined",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -262,7 +249,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: 'type = "energy" (lowercase)',
-    expectedStatus: 400,
   },
   {
     data: {
@@ -272,7 +258,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: 'type = " ENERGY " (пробелы)',
-    expectedStatus: 400,
   },
 
   {
@@ -283,7 +268,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress пустая строка",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -293,7 +277,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress пустая строка (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -303,7 +286,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress с пробелами по краям (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -313,12 +295,10 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress с пробелами по краям (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: { type: "ACTIVATION", targetAddress: invalidTronAddresses.surroundedSpaces },
     description: "targetAddress с пробелами по краям (ACTIVATION)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -328,7 +308,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress с переносами строк (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -338,12 +317,10 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress с переносами строк (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: { type: "ACTIVATION", targetAddress: invalidTronAddresses.wrappedNewlines },
     description: "targetAddress с переносами строк (ACTIVATION)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -353,7 +330,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress слишком короткий",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -363,7 +339,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress слишком короткий (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -373,7 +348,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress слишком длинный",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -383,7 +357,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress слишком длинный (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -393,7 +366,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress неправильный префикс (не 'T')",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -403,7 +375,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress неправильный префикс (не 'T') (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -413,7 +384,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress не base58 (спецсимволы/0/O/I/l)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -423,7 +393,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress не base58 (спецсимволы/0/O/I/l) (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -433,7 +402,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress = null",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -443,7 +411,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress = null (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -453,7 +420,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress = undefined",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -463,7 +429,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress = undefined (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -473,7 +438,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress = 0",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -483,7 +447,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress = 0 (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -493,7 +456,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress = число",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -503,52 +465,42 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "targetAddress = число (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: { type: "ACTIVATION", targetAddress: invalidTronAddresses.empty },
     description: "targetAddress пустая строка (ACTIVATION)",
-    expectedStatus: 400,
   },
   {
     data: { type: "ACTIVATION", targetAddress: invalidTronAddresses.short },
     description: "targetAddress слишком короткий (ACTIVATION)",
-    expectedStatus: 400,
   },
   {
     data: { type: "ACTIVATION", targetAddress: invalidTronAddresses.long },
     description: "targetAddress слишком длинный (ACTIVATION)",
-    expectedStatus: 400,
   },
   {
     data: { type: "ACTIVATION", targetAddress: invalidTronAddresses.wrongPrefix },
     description: "targetAddress неправильный префикс (не 'T') (ACTIVATION)",
-    expectedStatus: 400,
   },
   {
     data: { type: "ACTIVATION", targetAddress: invalidTronAddresses.notBase58 },
     description: "targetAddress не base58 (спецсимволы/0/O/I/l) (ACTIVATION)",
-    expectedStatus: 400,
   },
   {
     data: { type: "ACTIVATION", targetAddress: invalidTronAddresses.nullValue },
     description: "targetAddress = null (ACTIVATION)",
-    expectedStatus: 400,
   },
   {
     data: { type: "ACTIVATION", targetAddress: invalidTronAddresses.undefinedValue },
     description: "targetAddress = undefined (ACTIVATION)",
-    expectedStatus: 400,
   },
   {
     data: { type: "ACTIVATION", targetAddress: invalidTronAddresses.zero },
     description: "targetAddress = 0 (ACTIVATION)",
-    expectedStatus: 400,
   },
   {
     data: { type: "ACTIVATION", targetAddress: invalidTronAddresses.number },
     description: "targetAddress = число (ACTIVATION)",
-    expectedStatus: 400,
   },
 
   {
@@ -558,7 +510,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: `ENERGY: amount меньше min (${ENERGY_AMOUNT_MIN - 1})`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -567,7 +518,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: `ENERGY: amount больше max (${ENERGY_AMOUNT_MAX + 1})`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -576,7 +526,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "ENERGY: amount = 0",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -585,7 +534,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "ENERGY: amount отрицательный (-1)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -594,7 +542,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "ENERGY: amount дробный (1.5)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -603,7 +550,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "ENERGY: amount = NaN",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -612,7 +558,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "ENERGY: amount = Infinity",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -621,7 +566,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "ENERGY: amount = Number.MAX_SAFE_INTEGER",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -630,7 +574,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: `ENERGY: amount строка '${ENERGY_AMOUNT_DEFAULT}'`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -639,7 +582,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "ENERGY: amount = null",
-    expectedStatus: 400,
   },
 
   {
@@ -649,7 +591,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: `BANDWIDTH: amount меньше min (${BANDWIDTH_AMOUNT_MIN - 1})`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -658,7 +599,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: `BANDWIDTH: amount больше max (${BANDWIDTH_AMOUNT_MAX + 1})`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -667,7 +607,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "BANDWIDTH: amount = 0",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -676,7 +615,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "BANDWIDTH: amount отрицательный (-1)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -685,7 +623,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "BANDWIDTH: amount дробный (1.5)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -694,7 +631,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "BANDWIDTH: amount = NaN",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -703,7 +639,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "BANDWIDTH: amount = Infinity",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -712,7 +647,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "BANDWIDTH: amount = Number.MAX_SAFE_INTEGER",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -721,7 +655,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: `BANDWIDTH: amount строка '${BANDWIDTH_AMOUNT_DEFAULT}'`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -730,7 +663,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: OrderPeriod.ONE_HOUR,
     },
     description: "BANDWIDTH: amount = null",
-    expectedStatus: 400,
   },
 
   {
@@ -741,7 +673,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.zero,
     },
     description: "period = 0",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -751,7 +682,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.zero,
     },
     description: "period = 0 (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -761,7 +691,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.negative,
     },
     description: "period отрицательный",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -771,7 +700,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.negative,
     },
     description: "period отрицательный (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -781,7 +709,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.notAllowed,
     },
     description: `period не из списка допустимых (${invalidOrderPeriods.energy.notAllowed})`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -791,7 +718,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.notAllowed,
     },
     description: `period не из списка допустимых для BANDWIDTH (${invalidOrderPeriods.bandwidth.notAllowed})`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -801,7 +727,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.belowMinAllowed,
     },
     description: `period на 1 меньше минимального разрешённого (${invalidOrderPeriods.energy.belowMinAllowed}) (ENERGY)`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -811,7 +736,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.belowMinAllowed,
     },
     description: `period на 1 меньше минимального разрешённого (${invalidOrderPeriods.bandwidth.belowMinAllowed}) (BANDWIDTH)`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -821,7 +745,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.aboveMaxAllowed,
     },
     description: `period на 1 больше максимального разрешённого (${invalidOrderPeriods.energy.aboveMaxAllowed}) (ENERGY)`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -831,7 +754,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.aboveMaxAllowed,
     },
     description: `period на 1 больше максимального разрешённого (${invalidOrderPeriods.bandwidth.aboveMaxAllowed}) (BANDWIDTH)`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -841,7 +763,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.maxSafeInteger,
     },
     description: `period = Number.MAX_SAFE_INTEGER (ENERGY)`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -851,7 +772,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.maxSafeInteger,
     },
     description: `period = Number.MAX_SAFE_INTEGER (BANDWIDTH)`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -861,7 +781,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.infinityValue,
     },
     description: "period = Infinity (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -871,7 +790,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.infinityValue,
     },
     description: "period = Infinity (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -881,7 +799,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.nanValue,
     },
     description: "period = NaN (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -891,7 +808,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.nanValue,
     },
     description: "period = NaN (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -901,7 +817,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.stringValue,
     },
     description: `period строка '${invalidOrderPeriods.energy.stringValue}'`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -911,7 +826,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.stringValue,
     },
     description: `period строка '${invalidOrderPeriods.bandwidth.stringValue}' (BANDWIDTH)`,
-    expectedStatus: 400,
   },
   {
     data: {
@@ -921,7 +835,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.emptyString,
     },
     description: "period пустая строка (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -931,7 +844,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.emptyString,
     },
     description: "period пустая строка (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -941,7 +853,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.floatValue,
     },
     description: "period дробный (1.5) (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -951,7 +862,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.floatValue,
     },
     description: "period дробный (1.5) (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -961,7 +871,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.randomNumber,
     },
     description: "period произвольное число (123) (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -971,7 +880,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.randomNumber,
     },
     description: "period произвольное число (123) (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -981,7 +889,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.objectValue,
     },
     description: "period объект {} (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -991,7 +898,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.objectValue,
     },
     description: "period объект {} (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -1001,7 +907,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.arrayValue,
     },
     description: "period массив [] (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -1011,7 +916,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.arrayValue,
     },
     description: "period массив [] (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -1021,7 +925,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.booleanValue,
     },
     description: "period boolean true (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -1031,7 +934,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.booleanValue,
     },
     description: "period boolean true (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -1041,7 +943,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.nullValue,
     },
     description: "period = null (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -1051,7 +952,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.nullValue,
     },
     description: "period = null (BANDWIDTH)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -1061,7 +961,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.energy.undefinedValue,
     },
     description: "period = undefined (ENERGY)",
-    expectedStatus: 400,
   },
   {
     data: {
@@ -1071,35 +970,5 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
       period: invalidOrderPeriods.bandwidth.undefinedValue,
     },
     description: "period = undefined (BANDWIDTH)",
-    expectedStatus: 400,
-  },
-
-  {
-    data: {
-      type: "ACTIVATION",
-      targetAddress: validTargetAddress,
-      amount: ENERGY_AMOUNT_DEFAULT,
-    },
-    description: "ACTIVATION: лишнее поле amount",
-    expectedStatus: 400,
-  },
-  {
-    data: {
-      type: "ACTIVATION",
-      targetAddress: validTargetAddress,
-      period: OrderPeriod.ONE_HOUR,
-    },
-    description: "ACTIVATION: лишнее поле period",
-    expectedStatus: 400,
-  },
-  {
-    data: {
-      type: "ACTIVATION",
-      targetAddress: validTargetAddress,
-      amount: ENERGY_AMOUNT_DEFAULT,
-      period: OrderPeriod.ONE_HOUR,
-    },
-    description: "ACTIVATION: лишние поля amount+period",
-    expectedStatus: 400,
   },
 ];

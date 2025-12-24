@@ -8,5 +8,9 @@ export class AddressCheck {
     const base58Regex = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
     expect(base58Regex.test(address)).toBe(true);
   }
-}
 
+  validateAddresses(fromAddress: string, toAddress: string): void {
+    expect(fromAddress).not.toBe("");
+    expect(toAddress).not.toBe("");
+  }
+}
