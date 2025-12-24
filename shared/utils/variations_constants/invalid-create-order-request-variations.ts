@@ -10,16 +10,10 @@ import {
   OrderPeriod,
   VALID_ORDER_PERIODS,
 } from "@shared/utils/constants";
+import { CreateOrderRequestVariation } from "@shared/utils/types";
 
 export const validTargetAddress = "TEawueJHVuwwn7M9xnVsB7oWXribW4hcwh";
 
-type CreateOrderRequestVariation = {
-  data: any;
-  description: string;
-  expectedStatus?: number;
-};
-
-// Примеры заведомо невалидных значений type
 const invalidOrderTypes = {
   empty: "",
   typo: "ENERG",
@@ -31,10 +25,8 @@ const invalidOrderTypes = {
   undefinedValue: undefined,
 };
 
-// Примеры заведомо невалидных адресов TRON (base58)
 const invalidTronAddresses = {
   empty: "",
-  // валидный адрес, но с пробелами/переносами — часто забывают trim
   surroundedSpaces: ` ${validTargetAddress} `,
   wrappedNewlines: `\n${validTargetAddress}\n`,
   short: "T123",
@@ -47,7 +39,6 @@ const invalidTronAddresses = {
   number: 123,
 };
 
-// Примеры заведомо невалидных значений amount (с учётом min/max для каждого типа)
 const invalidOrderAmounts = {
   energy: {
     belowMin: ENERGY_AMOUNT_MIN - 1,
@@ -77,17 +68,14 @@ const invalidOrderAmounts = {
   },
 };
 
-// Примеры заведомо невалидных значений period (с учётом allowed periods для каждого типа)
 const invalidOrderPeriods = {
   energy: {
     zero: 0,
     negative: -OrderPeriod.ONE_HOUR,
-    // Берём валидный OrderPeriod, который НЕ разрешён для ENERGY
     notAllowed:
       VALID_ORDER_PERIODS.find(
         (p) => !(ENERGY_ALLOWED_PERIODS as readonly OrderPeriod[]).includes(p)
       ) ?? OrderPeriod.SIX_HOURS,
-    // Граничные значения (вокруг разрешённых)
     belowMinAllowed: ENERGY_ALLOWED_PERIODS[0] - 1,
     aboveMaxAllowed: ENERGY_ALLOWED_PERIODS[ENERGY_ALLOWED_PERIODS.length - 1] + 1,
     maxSafeInteger: Number.MAX_SAFE_INTEGER,
@@ -106,12 +94,10 @@ const invalidOrderPeriods = {
   bandwidth: {
     zero: 0,
     negative: -OrderPeriod.ONE_HOUR,
-    // Для BANDWIDTH удобно брать период, разрешённый для ENERGY, но не разрешённый для BANDWIDTH (например, THREE_DAYS)
     notAllowed:
       (ENERGY_ALLOWED_PERIODS as readonly OrderPeriod[]).find(
         (p) => !(BANDWIDTH_ALLOWED_PERIODS as readonly OrderPeriod[]).includes(p)
       ) ?? OrderPeriod.THREE_DAYS,
-    // Граничные значения (вокруг разрешённых)
     belowMinAllowed: BANDWIDTH_ALLOWED_PERIODS[0] - 1,
     aboveMaxAllowed: BANDWIDTH_ALLOWED_PERIODS[BANDWIDTH_ALLOWED_PERIODS.length - 1] + 1,
     maxSafeInteger: Number.MAX_SAFE_INTEGER,
@@ -129,7 +115,6 @@ const invalidOrderPeriods = {
   },
 };
 
-// Валидный базовый payload, чтобы в кейсах "нет поля X" отсутствовало ровно одно поле.
 
 const validEnergyBaseRequest = {
   type: "ENERGY",
@@ -151,14 +136,12 @@ const validActivationBaseRequest = {
 };
 
 export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] = [
-  // Тело запроса не объект
   { data: null, description: "body = null", expectedStatus: 400 },
   { data: undefined, description: "body = undefined", expectedStatus: 400 },
   { data: "string", description: "body = строка", expectedStatus: 400 },
   { data: 123, description: "body = число", expectedStatus: 400 },
   { data: [], description: "body = массив []", expectedStatus: 400 },
 
-  // Отсутствуют обязательные поля
   { data: {}, description: "пустой объект {}", expectedStatus: 400 },
   {
     data: {
@@ -211,7 +194,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
     expectedStatus: 400,
   },
 
-  // Некорректный type
   {
     data: {
       type: invalidOrderTypes.empty,
@@ -293,7 +275,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
     expectedStatus: 400,
   },
 
-  // Некорректный targetAddress
   {
     data: {
       type: "ENERGY",
@@ -570,7 +551,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
     expectedStatus: 400,
   },
 
-  // Некорректный amount (ENERGY)
   {
     data: {
       ...validEnergyBaseRequest,
@@ -662,7 +642,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
     expectedStatus: 400,
   },
 
-  // Некорректный amount (BANDWIDTH)
   {
     data: {
       ...validBandwidthBaseRequest,
@@ -754,7 +733,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
     expectedStatus: 400,
   },
 
-  // Некорректный period (для ENERGY/BANDWIDTH)
   {
     data: {
       type: "ENERGY",
@@ -1096,7 +1074,6 @@ export const invalidCreateOrderRequestVariations: CreateOrderRequestVariation[] 
     expectedStatus: 400,
   },
 
-  // Лишние поля для ACTIVATION
   {
     data: {
       type: "ACTIVATION",

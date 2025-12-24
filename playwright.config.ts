@@ -22,6 +22,13 @@ export default defineConfig({
       name: "client-api",
       testDir: "./apps/client-api/tests",
       testMatch: /.*\.spec\.ts$/,
+      testIgnore: /rate-limiting\.spec\.ts$/,
+    },
+    {
+      name: "rate-limiting",
+      testDir: "./apps/client-api/tests",
+      testMatch: /rate-limiting\.spec\.ts$/,
+      dependencies: ["client-api"],
     },
   ],
 });

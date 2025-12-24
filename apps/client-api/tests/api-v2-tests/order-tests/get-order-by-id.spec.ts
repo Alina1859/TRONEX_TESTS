@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { OrderRepository } from "@apps/client-api/repositories/order.repository";
 import { OrderApi } from "@apps/client-api/api/order.api";
-import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response-check";
-import { OrderFieldCheck } from "@apps/client-api/test-objects/order-field-check";
+import { OrderResponseCheck } from "@apps/client-api/test-objects/order-check/order-response-check";
+import { OrderFieldCheck } from "@apps/client-api/test-objects/order-check/order-field-check";
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
 import { boundaryAndInvalidOrderIdVariations } from "@shared/utils/variations_constants/invalid-orderId-variations";
 import { log } from "@shared/utils/logger";
@@ -315,31 +315,4 @@ test.describe("Get order by ID", () => {
     log.info('✓ Все проверки пройдены успешно. Заказ с типом "ACTIVATION" корректно получен.');
   });
 
-  // Тест-кейс № 11: Rate limiting
-  test(`GET /api/v2/orders/{id} should enforce rate limiting`, async ({ request }) => {
-    log.info("=== Тест: Проверка rate limiting ===");
-
-    const getLastOrderByUserId = await orderRepo.getLastOrderByUserId(userIdPrimary);
-    const lastOrderId = getLastOrderByUserId[0].id;
-
-    const orderApi = new OrderApi(request);
-    const requestCount = 120;
-
-    log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
-    log.info(`Используется Order ID: ${lastOrderId}`);
-
-    const startTime = Date.now();
-    const requests = Array.from({ length: requestCount }, () => orderApi.getOrderById(lastOrderId));
-    const responses = await Promise.all(requests);
-    const endTime = Date.now();
-    const duration = (endTime - startTime) / 1000;
-
-    log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
-
-    const statusCounts = await responseStatusCheck.processRateLimitResponses(
-      responses,
-      requestCount
-    );
-    orderResponseCheck.checkRateLimitEnforcement(statusCounts);
-  });
 });

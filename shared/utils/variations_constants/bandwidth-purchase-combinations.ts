@@ -1,9 +1,4 @@
-export interface BandwidthPurchaseCombination {
-  duration: "1h" | "1d";
-  bandwidth: number;
-  sunRate: number;
-  expectedCost: number;
-}
+import { BandwidthPurchaseCombination } from "../types";
 
 export const BANDWIDTH_PURCHASE_COMBINATIONS: BandwidthPurchaseCombination[] = [
   { duration: "1h", bandwidth: 1000, sunRate: 976, expectedCost: 1.271 },

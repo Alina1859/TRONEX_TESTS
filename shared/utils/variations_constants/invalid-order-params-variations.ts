@@ -1,9 +1,5 @@
 import { ORDER_LIST_MAX_LIMIT, ORDER_LIST_MIN_LIMIT, ORDER_LIST_MIN_OFFSET } from "../constants";
-
-type OrderListParamVariation = {
-  params: { offset?: any; limit?: any };
-  description: string;
-};
+import { OrderListParamVariation } from "../types";
 
 export const invalidOffsetVariations: OrderListParamVariation[] = [
   {

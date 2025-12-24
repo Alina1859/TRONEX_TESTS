@@ -46,10 +46,7 @@ export class OrderApi {
 
   async createNewOrderWithoutContentType(data: any, apiKey: string) {
     return await this.request.post(`${apiUrl}/api/v2/orders/`, {
-      headers: {
-        Accept: "application/json",
-        "X-API-KEY": apiKey,
-      },
+      headers: getHeaders(apiKey),
       data: JSON.stringify(data),
     });
   }

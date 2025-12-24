@@ -1,8 +1,10 @@
 import { expect } from "@playwright/test";
-import { OrderFieldCheck } from "./order-field-check";
+import { OrderFieldCheck } from "../order-check";
+import { AddressCheck } from "../address-check";
 import { SMART_ORDER_STATUSES, SmartOrderWithOrders } from "@shared/utils/types";
 
 export class SmartOrderFieldCheck {
+  private addressCheck = new AddressCheck();
   checkId(apiSmartOrder: SmartOrderWithOrders) {
     expect(apiSmartOrder).toHaveProperty("id");
     expect(typeof apiSmartOrder.id).toBe("number");
@@ -19,12 +21,7 @@ export class SmartOrderFieldCheck {
     expect(typeof apiSmartOrder.fromAddress).toBe("string");
     expect(apiSmartOrder.fromAddress.length).toBeGreaterThan(0);
 
-    const address = apiSmartOrder.fromAddress;
-    expect(address.length).toBe(34);
-    expect(address.startsWith("T")).toBe(true);
-
-    const base58Regex = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
-    expect(base58Regex.test(address)).toBe(true);
+    this.addressCheck.checkTronAddress(apiSmartOrder.fromAddress);
   }
 
   checkToAddress(apiSmartOrder: SmartOrderWithOrders) {
@@ -32,12 +29,7 @@ export class SmartOrderFieldCheck {
     expect(typeof apiSmartOrder.toAddress).toBe("string");
     expect(apiSmartOrder.toAddress.length).toBeGreaterThan(0);
 
-    const address = apiSmartOrder.toAddress;
-    expect(address.length).toBe(34);
-    expect(address.startsWith("T")).toBe(true);
-
-    const base58Regex = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
-    expect(base58Regex.test(address)).toBe(true);
+    this.addressCheck.checkTronAddress(apiSmartOrder.toAddress);
   }
 
   checkWithActivation(apiSmartOrder: SmartOrderWithOrders) {
@@ -61,8 +53,6 @@ export class SmartOrderFieldCheck {
 
     const orderFieldCheck = new OrderFieldCheck();
     for (const order of apiSmartOrder.orders) {
-      expect(order).not.toBeNull();
-      expect(typeof order).toBe("object");
       orderFieldCheck.checkAllFields(order);
       expect(order.status).toBe("COMPLETED");
     }

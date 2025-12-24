@@ -1,9 +1,4 @@
-export interface EnergyPurchaseCombination {
-  duration: "1h" | "1d" | "3d";
-  energy: number;
-  sunRate: number;
-  expectedCost: number;
-}
+import { EnergyPurchaseCombination } from "../types";
 
 export const ENERGY_PURCHASE_COMBINATIONS_FOR_USER: EnergyPurchaseCombination[] = [
   { duration: "1h", energy: 65000, sunRate: 37, expectedCost: 2.405 },

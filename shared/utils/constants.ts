@@ -49,3 +49,7 @@ export const ORDER_ID_MAX = 2147483647;
 
 export const SMART_ORDER_ID_MIN = 1;
 export const SMART_ORDER_ID_MAX = 2147483647;
+
+export const ORDER_STATUSES = ["INIT", "PENDING", "COMPLETED", "FAILED", "CANCELLED"] as const;
+
+export const ORDER_TYPES = ["ENERGY", "BANDWIDTH", "ACTIVATION"] as const;

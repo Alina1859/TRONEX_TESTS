@@ -92,3 +92,28 @@ export interface BandwidthPriceValues {
   "1h": number;
   "1d": number;
 }
+
+export interface EnergyPurchaseCombination {
+  duration: "1h" | "1d" | "3d";
+  energy: number;
+  sunRate: number;
+  expectedCost: number;
+}
+
+export interface BandwidthPurchaseCombination {
+  duration: "1h" | "1d";
+  bandwidth: number;
+  sunRate: number;
+  expectedCost: number;
+}
+
+export interface CreateOrderRequestVariation {
+  data: any;
+  description: string;
+  expectedStatus?: number;
+}
+
+export interface OrderListParamVariation {
+  params: { offset?: any; limit?: any };
+  description: string;
+}

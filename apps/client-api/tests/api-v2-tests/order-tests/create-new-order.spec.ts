@@ -1,9 +1,9 @@
 import { test, expect, APIRequestContext } from "@playwright/test";
 import { createWallet } from "@apps/client-api/repositories/tronweb";
 import { log } from "@shared/utils/logger";
-import { OrderFieldCheck } from "@apps/client-api/test-objects/order-field-check";
+import { OrderFieldCheck } from "@apps/client-api/test-objects/order-check/order-field-check";
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
-import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response-check";
+import { OrderResponseCheck } from "@apps/client-api/test-objects/order-check/order-response-check";
 import {
   CreateActivationOrderRequest,
   CreateOrderRequest,
@@ -12,6 +12,8 @@ import {
   EnergyOrderPeriodMs,
   EnergyPriceValues,
   Order,
+  EnergyPurchaseCombination,
+  BandwidthPurchaseCombination,
 } from "@shared/utils/types";
 import { OrderApi } from "@apps/client-api/api/order.api";
 import { OrderRepository } from "@apps/client-api/repositories/order.repository";
@@ -21,16 +23,11 @@ import {
   OrderPeriod,
 } from "@shared/utils/constants";
 import { invalidCreateOrderRequestVariations } from "@shared/utils/variations_constants/invalid-create-order-request-variations";
-import {
-  ENERGY_PURCHASE_COMBINATIONS,
-  EnergyPurchaseCombination,
-} from "@shared/utils/variations_constants/energy-purchase-combinations";
+import { ENERGY_PURCHASE_COMBINATIONS } from "@shared/utils/variations_constants/energy-purchase-combinations";
 import { ENERGY_PURCHASE_COMBINATIONS_FOR_USER } from "@shared/utils/variations_constants/energy-purchase-combinations-for-user";
 import { BANDWIDTH_PURCHASE_COMBINATIONS } from "@shared/utils/variations_constants/bandwidth-purchase-combinations";
-import { BandwidthPurchaseCombination } from "@shared/utils/variations_constants/bandwidth-purchase-combinations";
 import { CoreRepository } from "@apps/client-api/repositories/core.repository";
 import {
-  userIdZero,
   userIdPrimary,
   apiKeyZero,
   apiUrl,

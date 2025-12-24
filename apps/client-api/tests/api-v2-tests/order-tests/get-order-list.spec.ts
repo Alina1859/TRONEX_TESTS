@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { OrderApi } from "@apps/client-api/api/order.api";
-import { OrderFieldCheck } from "@apps/client-api/test-objects/order-field-check";
+import { OrderFieldCheck } from "@apps/client-api/test-objects/order-check/order-field-check";
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
-import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response-check";
+import { OrderResponseCheck } from "@apps/client-api/test-objects/order-check/order-response-check";
 import {
   invalidOffsetVariations,
   invalidLimitVariations,
@@ -255,29 +255,6 @@ test.describe("Get order list", () => {
     log.info("✓ offset = 1000: корректно возвращен пустой массив при отсутствии заказов");
   });
 
-  // Тест-кейс № 9: Rate limiting
-  test(`GET /api/v2/orders/ should enforce rate limiting`, async ({ request }) => {
-    log.info("=== Тест: Проверка rate limiting ===");
-
-    const orderApi = new OrderApi(request);
-    const requestCount = 120;
-
-    log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
-
-    const startTime = Date.now();
-    const requests = Array.from({ length: requestCount }, () => orderApi.getOrderList());
-    const responses = await Promise.all(requests);
-    const endTime = Date.now();
-    const duration = (endTime - startTime) / 1000;
-
-    log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
-
-    const statusCounts = await responseStatusCheck.processRateLimitResponses(
-      responses,
-      requestCount
-    );
-    orderResponseCheck.checkRateLimitEnforcement(statusCounts);
-  });
 
   // Тест-кейс № 10: Проверка комбинации offset = 10, limit = 5
   test(`GET /api/v2/orders/ should work with offset = 10 and limit = 5`, async ({ request }) => {
