@@ -779,4 +779,14 @@ export const invalidCreateSmartOrderRequestVariations: CreateOrderRequestVariati
     },
     description: "все поля невалидные",
   },
+  {
+    data: {
+      fromAddress: validFromAddress,
+      toAddress: validFromAddress,
+      withActivation: true,
+      withEnergy: true,
+      withBandwidth: true,
+    },
+    description: "toAddress = fromAddress (адреса совпадают)",
+  },
 ];

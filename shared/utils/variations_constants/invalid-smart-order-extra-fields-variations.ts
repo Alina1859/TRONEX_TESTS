@@ -1,5 +1,5 @@
 import { CreateOrderRequestVariation } from "@shared/utils/types";
-import { validFromAddress, validToAddress } from "./invalid-smart-order-request-variations";
+import { validFromAddress, validToAddress } from "./invalid-create-smart-order-request-variations";
 
 const validSmartOrderBaseRequest = {
   fromAddress: validFromAddress,
