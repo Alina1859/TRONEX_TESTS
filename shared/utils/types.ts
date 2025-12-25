@@ -117,3 +117,19 @@ export interface OrderListParamVariation {
   params: { offset?: any; limit?: any };
   description: string;
 }
+
+export interface CreateUserRequest {
+  profile: {
+    firstName: string;
+    tgId: string;
+    tgUsername: string;
+  };
+}
+
+export interface CreateUserResponse {
+  id: string;
+}
+
+export interface GetAccessTokenResponse {
+  token: string;
+}

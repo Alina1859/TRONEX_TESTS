@@ -20,3 +20,10 @@ export function getCoreApiHeaders(token: string = coreApiToken) {
     "X-Api-Token": token,
   };
 }
+
+export function getCoreApiPostHeaders(token: string = coreApiToken) {
+  return {
+    "Content-Type": "application/json",
+    "X-Api-Token": token,
+  };
+}

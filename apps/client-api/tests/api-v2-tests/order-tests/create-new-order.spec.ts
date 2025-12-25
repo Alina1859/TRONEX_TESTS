@@ -151,27 +151,29 @@ test.describe("Create new order", () => {
   });
 
   // Тест-кейс № 2: Проверка невалидных значений в запросе
-  for (const variation of invalidCreateOrderRequestVariations) {
-    test(`POST /api/v2/orders/ should reject invalid request: ${variation.description}`, async ({
-      request,
-    }) => {
-      const orderApi = new OrderApi(request);
+  test.describe("POST /api/v2/orders/ - Invalid request validation", () => {
+    for (const variation of invalidCreateOrderRequestVariations) {
+      test(`should reject invalid request: ${variation.description}`, async ({
+        request,
+      }) => {
+        const orderApi = new OrderApi(request);
 
-      const response = await orderApi.createNewOrder(variation.data);
-      statusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
+        const response = await orderApi.createNewOrder(variation.data);
+        statusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
 
-      const headers = response.headers();
-      const contentType = headers["content-type"] ?? headers["Content-Type"] ?? "";
+        const headers = response.headers();
+        const contentType = headers["content-type"] ?? headers["Content-Type"] ?? "";
 
-      if (contentType.includes("application/json")) {
-        const jsonBody = await response.json().catch(() => undefined);
-        log.info(`Error response JSON: ${JSON.stringify(jsonBody, null, 2)}`);
-      } else {
-        const textBody = await response.text().catch(() => "");
-        log.info(`Error response text: ${textBody}`);
-      }
-    });
-  }
+        if (contentType.includes("application/json")) {
+          const jsonBody = await response.json().catch(() => undefined);
+          log.info(`Error response JSON: ${JSON.stringify(jsonBody, null, 2)}`);
+        } else {
+          const textBody = await response.text().catch(() => "");
+          log.info(`Error response text: ${textBody}`);
+        }
+      });
+    }
+  });
   // Тест-кейс № 3: Создание одного заказа с type = ENERGY
   test("POST /api/v2/orders/ should create single ENERGY order", async ({ request }) => {
     const orderApi = new OrderApi(request);
@@ -299,25 +301,9 @@ test.describe("Create new order", () => {
   });
 
   // Тест-кейс № 7: Создание заказов с различными комбинациями энергии, периодов и цен для PRICE_ENERGY
-  test("POST /api/v2/orders/ should create orders with different energy purchase combinations", async ({
-    request,
-  }) => {
-    test.setTimeout(300000);
-    log.info("=== Тест: Создание заказов с различными комбинациями ENERGY ===");
-
+  test.describe("POST /api/v2/orders/ - Energy purchase combinations", () => {
     const combinations = ENERGY_PURCHASE_COMBINATIONS;
     log.info(`Найдено ${combinations.length} комбинаций для тестирования`);
-
-    const orderApi = new OrderApi(request);
-    const coreRepo = new CoreRepository();
-
-    const { wallet, activationOrder } = await createActivatedWallet(request);
-    const targetAddress = wallet.address?.base58 || "";
-    await waitForActivationCompleted(activationOrder.id, targetAddress, 30000, 1000);
-
-    const initialPriceResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
-    const initialPriceEnergy: EnergyPriceValues = { ...initialPriceResponse.data };
-    log.info(`Начальное значение PRICE_ENERGY сохранено: ${JSON.stringify(initialPriceEnergy)}`);
 
     function parsePeriod(duration: EnergyPurchaseCombination["duration"]): EnergyOrderPeriodMs {
       if (duration === "1h") return OrderPeriod.ONE_HOUR as EnergyOrderPeriodMs;
@@ -327,133 +313,122 @@ test.describe("Create new order", () => {
     }
 
     for (const combo of combinations) {
-      log.info(
-        `Тестируем комбинацию: период=${combo.duration}, энергия=${combo.energy}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${combo.expectedCost} TRX`
-      );
+      test(`should create order with energy=${combo.energy}, period=${combo.duration}, sunRate=${combo.sunRate}`, async ({
+        request,
+      }) => {
+        test.setTimeout(300000);
+        log.info(
+          `=== Тест: Создание заказа ENERGY (период=${combo.duration}, энергия=${combo.energy}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${combo.expectedCost} TRX) ===`
+        );
 
-      try {
-        const currentPriceResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
-        const responseData = currentPriceResponse.data;
+        const orderApi = new OrderApi(request);
+        const coreRepo = new CoreRepository();
 
-        const priceValues: EnergyPriceValues = {
-          "1h": responseData["1h"],
-          "1d": responseData["1d"],
-          "3d": responseData["3d"],
-          "7d": responseData["7d"],
-          "14d": responseData["14d"],
+        const { wallet, activationOrder } = await createActivatedWallet(request);
+        const targetAddress = wallet.address?.base58 || "";
+        await waitForActivationCompleted(activationOrder.id, targetAddress, 30000, 1000);
+
+        const initialPriceResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
+        const initialPriceEnergy: EnergyPriceValues = { ...initialPriceResponse.data };
+        log.info(`Начальное значение PRICE_ENERGY сохранено: ${JSON.stringify(initialPriceEnergy)}`);
+
+        try {
+          const currentPriceResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
+          const responseData = currentPriceResponse.data;
+
+          const priceValues: EnergyPriceValues = {
+            "1h": responseData["1h"],
+            "1d": responseData["1d"],
+            "3d": responseData["3d"],
+            "7d": responseData["7d"],
+            "14d": responseData["14d"],
+          };
+
+          priceValues[combo.duration] = combo.sunRate;
+
+          await coreRepo.coreConstantsKeyPut("PRICE_ENERGY", { value: priceValues });
+          log.info(`PRICE_ENERGY установлен: ${JSON.stringify({ value: priceValues })}`);
+
+          const verifyResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
+          const verifyData = verifyResponse.data;
+          const actualValue = verifyData[combo.duration];
+
+          if (actualValue !== combo.sunRate) {
+            throw new Error(
+              `PRICE_ENERGY не установлен корректно. Ожидалось: ${combo.sunRate}, получено: ${actualValue}`
+            );
+          }
+          log.info(`PRICE_ENERGY проверен: ${combo.duration} = ${actualValue}`);
+        } catch (error) {
+          log.error(`Ошибка при установке PRICE_ENERGY: ${error}`);
+          throw error;
+        }
+
+        const period = parsePeriod(combo.duration);
+        const energyRequest: CreateOrderRequest = {
+          type: "ENERGY",
+          targetAddress,
+          amount: combo.energy,
+          period: period,
         };
 
-        priceValues[combo.duration] = combo.sunRate;
+        const response = await orderApi.createNewOrder(energyRequest);
+        statusCheck.checkResponseStatus(response);
 
-        await coreRepo.coreConstantsKeyPut("PRICE_ENERGY", { value: priceValues });
-        log.info(`PRICE_ENERGY установлен: ${JSON.stringify({ value: priceValues })}`);
+        const apiOrder = (await response.json()) as Order;
+        log.info(
+          `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${combo.expectedCost}`
+        );
 
-        const verifyResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
-        const verifyData = verifyResponse.data;
-        const actualValue = verifyData[combo.duration];
+        const actualCost =
+          typeof apiOrder.sellPrice === "string"
+            ? parseFloat(apiOrder.sellPrice)
+            : apiOrder.sellPrice;
+        const costDifference = Math.abs(actualCost - combo.expectedCost);
+        const tolerance = 0.01;
+        expect(
+          costDifference,
+          `Стоимость заказа ${actualCost} не совпадает с ожидаемой ${combo.expectedCost} (разница: ${costDifference})`
+        ).toBeLessThanOrEqual(tolerance);
 
-        if (actualValue !== combo.sunRate) {
-          throw new Error(
-            `PRICE_ENERGY не установлен корректно. Ожидалось: ${combo.sunRate}, получено: ${actualValue}`
+        const dbFinalOrder = await waitForOrderCompleted(apiOrder.id);
+        const getOrderResponse = await orderApi.getOrderById(apiOrder.id);
+        statusCheck.checkResponseStatus(getOrderResponse);
+        const apiFinalOrder = (await getOrderResponse.json()) as Order;
+
+        orderFieldCheck.checkAllFields(apiFinalOrder);
+        orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
+
+        const finalCost =
+          typeof apiFinalOrder.sellPrice === "string"
+            ? parseFloat(apiFinalOrder.sellPrice)
+            : apiFinalOrder.sellPrice;
+        const finalCostDifference = Math.abs(finalCost - combo.expectedCost);
+        expect(
+          finalCostDifference,
+          `Финальная стоимость заказа ${finalCost} не совпадает с ожидаемой ${combo.expectedCost}`
+        ).toBeLessThanOrEqual(tolerance);
+
+        try {
+          await coreRepo.coreConstantsKeyPut("PRICE_ENERGY", { value: initialPriceEnergy });
+          log.info(
+            `PRICE_ENERGY восстановлено в начальное состояние: ${JSON.stringify({ value: initialPriceEnergy })}`
           );
+        } catch (error) {
+          log.error(`Ошибка при восстановлении начального значения PRICE_ENERGY: ${error}`);
         }
-        log.info(`PRICE_ENERGY проверен: ${combo.duration} = ${actualValue}`);
-      } catch (error) {
-        log.error(`Ошибка при установке PRICE_ENERGY: ${error}`);
-        throw error;
-      }
 
-      const period = parsePeriod(combo.duration);
-      const energyRequest: CreateOrderRequest = {
-        type: "ENERGY",
-        targetAddress,
-        amount: combo.energy,
-        period: period,
-      };
-
-      const response = await orderApi.createNewOrder(energyRequest);
-      statusCheck.checkResponseStatus(response);
-
-      const apiOrder = (await response.json()) as Order;
-      log.info(
-        `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${combo.expectedCost}`
-      );
-
-      const actualCost =
-        typeof apiOrder.sellPrice === "string"
-          ? parseFloat(apiOrder.sellPrice)
-          : apiOrder.sellPrice;
-      const costDifference = Math.abs(actualCost - combo.expectedCost);
-      const tolerance = 0.01;
-      expect(
-        costDifference,
-        `Стоимость заказа ${actualCost} не совпадает с ожидаемой ${combo.expectedCost} (разница: ${costDifference})`
-      ).toBeLessThanOrEqual(tolerance);
-
-      const dbFinalOrder = await waitForOrderCompleted(apiOrder.id);
-      const getOrderResponse = await orderApi.getOrderById(apiOrder.id);
-      statusCheck.checkResponseStatus(getOrderResponse);
-      const apiFinalOrder = (await getOrderResponse.json()) as Order;
-
-      orderFieldCheck.checkAllFields(apiFinalOrder);
-      orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
-
-      const finalCost =
-        typeof apiFinalOrder.sellPrice === "string"
-          ? parseFloat(apiFinalOrder.sellPrice)
-          : apiFinalOrder.sellPrice;
-      const finalCostDifference = Math.abs(finalCost - combo.expectedCost);
-      expect(
-        finalCostDifference,
-        `Финальная стоимость заказа ${finalCost} не совпадает с ожидаемой ${combo.expectedCost}`
-      ).toBeLessThanOrEqual(tolerance);
-
-      log.info(
-        `✓ Комбинация успешно проверена: период=${combo.duration}, энергия=${combo.energy}, курс=${combo.sunRate}`
-      );
-    }
-
-    log.info(`✓ Все ${combinations.length} комбинаций успешно проверены`);
-
-    try {
-      await coreRepo.coreConstantsKeyPut("PRICE_ENERGY", { value: initialPriceEnergy });
-      log.info(
-        `PRICE_ENERGY восстановлено в начальное состояние: ${JSON.stringify({ value: initialPriceEnergy })}`
-      );
-
-      const verifyRestoreResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
-      const verifyRestoreData = verifyRestoreResponse.data;
-      log.info(
-        `Восстановленное значение PRICE_ENERGY проверено: ${JSON.stringify(verifyRestoreData)}`
-      );
-    } catch (error) {
-      log.error(`Ошибка при восстановлении начального значения PRICE_ENERGY: ${error}`);
-      throw error;
+        log.info(
+          `✓ Комбинация успешно проверена: период=${combo.duration}, энергия=${combo.energy}, курс=${combo.sunRate}`
+        );
+      });
     }
   });
 
   // Тест-кейс № 8: Создание заказов с различными комбинациями полосы пропускания, периодов и цен для PRICE_BANDWIDTH
-  test("POST /api/v2/orders/ should create orders with different bandwidth purchase combinations", async ({
-    request,
-  }) => {
-    test.setTimeout(300000);
-    log.info("=== Тест: Создание заказов с различными комбинациями BANDWIDTH ===");
-
+  test.describe("POST /api/v2/orders/ - Bandwidth purchase combinations", () => {
     const combinations = BANDWIDTH_PURCHASE_COMBINATIONS;
     log.info(`Найдено ${combinations.length} комбинаций для тестирования`);
-
-    const orderApi = new OrderApi(request);
-    const coreRepo = new CoreRepository();
-
-    const { wallet, activationOrder } = await createActivatedWallet(request);
-    const targetAddress = wallet.address?.base58 || "";
-    await waitForActivationCompleted(activationOrder.id, targetAddress, 30000, 1000);
-
-    const initialPriceResponse = await coreRepo.coreConstantsKeyGet("PRICE_BANDWIDTH");
-    const initialPriceBandwidth: BandwidthPriceValues = { ...initialPriceResponse.data };
-    log.info(
-      `Начальное значение PRICE_BANDWIDTH сохранено: ${JSON.stringify(initialPriceBandwidth)}`
-    );
 
     function parsePeriod(
       duration: BandwidthPurchaseCombination["duration"]
@@ -464,105 +439,114 @@ test.describe("Create new order", () => {
     }
 
     for (const combo of combinations) {
-      log.info(
-        `Тестируем комбинацию: период=${combo.duration}, bandwidth=${combo.bandwidth}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${combo.expectedCost} TRX`
-      );
+      test(`should create order with bandwidth=${combo.bandwidth}, period=${combo.duration}, sunRate=${combo.sunRate}`, async ({
+        request,
+      }) => {
+        test.setTimeout(300000);
+        log.info(
+          `=== Тест: Создание заказа BANDWIDTH (период=${combo.duration}, bandwidth=${combo.bandwidth}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${combo.expectedCost} TRX) ===`
+        );
 
-      try {
-        const currentPriceResponse = await coreRepo.coreConstantsKeyGet("PRICE_BANDWIDTH");
-        const responseData = currentPriceResponse.data;
+        const orderApi = new OrderApi(request);
+        const coreRepo = new CoreRepository();
 
-        const priceValues: BandwidthPriceValues = {
-          "1h": responseData["1h"],
-          "1d": responseData["1d"],
+        const { wallet, activationOrder } = await createActivatedWallet(request);
+        const targetAddress = wallet.address?.base58 || "";
+        await waitForActivationCompleted(activationOrder.id, targetAddress, 30000, 1000);
+
+        const initialPriceResponse = await coreRepo.coreConstantsKeyGet("PRICE_BANDWIDTH");
+        const initialPriceBandwidth: BandwidthPriceValues = { ...initialPriceResponse.data };
+        log.info(
+          `Начальное значение PRICE_BANDWIDTH сохранено: ${JSON.stringify(initialPriceBandwidth)}`
+        );
+
+        try {
+          const currentPriceResponse = await coreRepo.coreConstantsKeyGet("PRICE_BANDWIDTH");
+          const responseData = currentPriceResponse.data;
+
+          const priceValues: BandwidthPriceValues = {
+            "1h": responseData["1h"],
+            "1d": responseData["1d"],
+          };
+
+          priceValues[combo.duration as keyof BandwidthPriceValues] = combo.sunRate;
+
+          await coreRepo.coreConstantsKeyPut("PRICE_BANDWIDTH", { value: priceValues });
+          log.info(`PRICE_BANDWIDTH установлен: ${JSON.stringify({ value: priceValues })}`);
+
+          const verifyResponse = await coreRepo.coreConstantsKeyGet("PRICE_BANDWIDTH");
+          const verifyData = verifyResponse.data;
+          const actualValue = verifyData[combo.duration];
+
+          if (actualValue !== combo.sunRate) {
+            throw new Error(
+              `PRICE_BANDWIDTH не установлен корректно. Ожидалось: ${combo.sunRate}, получено: ${actualValue}`
+            );
+          }
+          log.info(`PRICE_BANDWIDTH проверен: ${combo.duration} = ${actualValue}`);
+        } catch (error) {
+          log.error(`Ошибка при установке PRICE_BANDWIDTH: ${error}`);
+          throw error;
+        }
+
+        const period = parsePeriod(combo.duration);
+        const bandwidthRequest: CreateOrderRequest = {
+          type: "BANDWIDTH",
+          targetAddress,
+          amount: combo.bandwidth,
+          period: period,
         };
 
-        priceValues[combo.duration as keyof BandwidthPriceValues] = combo.sunRate;
+        const response = await orderApi.createNewOrder(bandwidthRequest);
+        statusCheck.checkResponseStatus(response);
 
-        await coreRepo.coreConstantsKeyPut("PRICE_BANDWIDTH", { value: priceValues });
-        log.info(`PRICE_BANDWIDTH установлен: ${JSON.stringify({ value: priceValues })}`);
+        const apiOrder = (await response.json()) as Order;
+        log.info(
+          `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${combo.expectedCost}`
+        );
 
-        const verifyResponse = await coreRepo.coreConstantsKeyGet("PRICE_BANDWIDTH");
-        const verifyData = verifyResponse.data;
-        const actualValue = verifyData[combo.duration];
+        const actualCost =
+          typeof apiOrder.sellPrice === "string"
+            ? parseFloat(apiOrder.sellPrice)
+            : apiOrder.sellPrice;
+        const costDifference = Math.abs(actualCost - combo.expectedCost);
+        const tolerance = 0.01;
+        expect(
+          costDifference,
+          `Стоимость заказа ${actualCost} не совпадает с ожидаемой ${combo.expectedCost} (разница: ${costDifference})`
+        ).toBeLessThanOrEqual(tolerance);
 
-        if (actualValue !== combo.sunRate) {
-          throw new Error(
-            `PRICE_BANDWIDTH не установлен корректно. Ожидалось: ${combo.sunRate}, получено: ${actualValue}`
+        const dbFinalOrder = await waitForOrderCompleted(apiOrder.id);
+        const getOrderResponse = await orderApi.getOrderById(apiOrder.id);
+        statusCheck.checkResponseStatus(getOrderResponse);
+        const apiFinalOrder = (await getOrderResponse.json()) as Order;
+
+        orderFieldCheck.checkAllFields(apiFinalOrder);
+        orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
+
+        const finalCost =
+          typeof apiFinalOrder.sellPrice === "string"
+            ? parseFloat(apiFinalOrder.sellPrice)
+            : apiFinalOrder.sellPrice;
+        const finalCostDifference = Math.abs(finalCost - combo.expectedCost);
+        expect(
+          finalCostDifference,
+          `Финальная стоимость заказа ${finalCost} не совпадает с ожидаемой ${combo.expectedCost}`
+        ).toBeLessThanOrEqual(tolerance);
+
+        try {
+          await coreRepo.coreConstantsKeyPut("PRICE_BANDWIDTH", { value: initialPriceBandwidth });
+          log.info(
+            `PRICE_BANDWIDTH восстановлено в начальное состояние: ${JSON.stringify({ value: initialPriceBandwidth })}`
           );
+        } catch (error) {
+          log.error(`Ошибка при восстановлении начального значения PRICE_BANDWIDTH: ${error}`);
         }
-        log.info(`PRICE_BANDWIDTH проверен: ${combo.duration} = ${actualValue}`);
-      } catch (error) {
-        log.error(`Ошибка при установке PRICE_BANDWIDTH: ${error}`);
-        throw error;
-      }
 
-      const period = parsePeriod(combo.duration);
-      const bandwidthRequest: CreateOrderRequest = {
-        type: "BANDWIDTH",
-        targetAddress,
-        amount: combo.bandwidth,
-        period: period,
-      };
-
-      const response = await orderApi.createNewOrder(bandwidthRequest);
-      statusCheck.checkResponseStatus(response);
-
-      const apiOrder = (await response.json()) as Order;
-      log.info(
-        `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${combo.expectedCost}`
-      );
-
-      const actualCost =
-        typeof apiOrder.sellPrice === "string"
-          ? parseFloat(apiOrder.sellPrice)
-          : apiOrder.sellPrice;
-      const costDifference = Math.abs(actualCost - combo.expectedCost);
-      const tolerance = 0.01;
-      expect(
-        costDifference,
-        `Стоимость заказа ${actualCost} не совпадает с ожидаемой ${combo.expectedCost} (разница: ${costDifference})`
-      ).toBeLessThanOrEqual(tolerance);
-
-      const dbFinalOrder = await waitForOrderCompleted(apiOrder.id);
-      const getOrderResponse = await orderApi.getOrderById(apiOrder.id);
-      statusCheck.checkResponseStatus(getOrderResponse);
-      const apiFinalOrder = (await getOrderResponse.json()) as Order;
-
-      orderFieldCheck.checkAllFields(apiFinalOrder);
-      orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
-
-      const finalCost =
-        typeof apiFinalOrder.sellPrice === "string"
-          ? parseFloat(apiFinalOrder.sellPrice)
-          : apiFinalOrder.sellPrice;
-      const finalCostDifference = Math.abs(finalCost - combo.expectedCost);
-      expect(
-        finalCostDifference,
-        `Финальная стоимость заказа ${finalCost} не совпадает с ожидаемой ${combo.expectedCost}`
-      ).toBeLessThanOrEqual(tolerance);
-
-      log.info(
-        `✓ Комбинация успешно проверена: период=${combo.duration}, bandwidth=${combo.bandwidth}, курс=${combo.sunRate}`
-      );
-    }
-
-    log.info(`✓ Все ${combinations.length} комбинаций BANDWIDTH успешно проверены`);
-
-    try {
-      await coreRepo.coreConstantsKeyPut("PRICE_BANDWIDTH", { value: initialPriceBandwidth });
-      log.info(
-        `PRICE_BANDWIDTH восстановлено в начальное состояние: ${JSON.stringify({ value: initialPriceBandwidth })}`
-      );
-
-      const verifyRestoreResponse = await coreRepo.coreConstantsKeyGet("PRICE_BANDWIDTH");
-      const verifyRestoreData = verifyRestoreResponse.data;
-      log.info(
-        `Восстановленное значение PRICE_BANDWIDTH проверено: ${JSON.stringify(verifyRestoreData)}`
-      );
-    } catch (error) {
-      log.error(`Ошибка при восстановлении начального значения PRICE_BANDWIDTH: ${error}`);
-      throw error;
+        log.info(
+          `✓ Комбинация успешно проверена: период=${combo.duration}, bandwidth=${combo.bandwidth}, курс=${combo.sunRate}`
+        );
+      });
     }
   });
 
@@ -608,37 +592,9 @@ test.describe("Create new order", () => {
   });
 
   // Тест-кейс № 10: Создание заказов с различными комбинациями энергии, периодов и цен для PRICE_ENERGY для пользователя со скидкой
-  test("POST /api/v2/orders/ should create orders with different energy purchase combinations for user with discount", async ({
-    request,
-  }) => {
-    test.setTimeout(300000);
-    log.info(
-      "=== Тест: Создание заказов с различными комбинациями ENERGY для пользователя со скидкой ==="
-    );
-
+  test.describe("POST /api/v2/orders/ - Energy purchase combinations for user with discount", () => {
     const combinations = ENERGY_PURCHASE_COMBINATIONS_FOR_USER;
     log.info(`Найдено ${combinations.length} комбинаций для тестирования`);
-
-    const orderApi = new OrderApi(request);
-    const coreRepo = new CoreRepository();
-
-    const { wallet, activationOrder } = await createActivatedWallet(request);
-    const targetAddress = wallet.address?.base58 || "";
-    await waitForActivationCompleted(activationOrder.id, targetAddress, 30000, 1000);
-
-    let initialPriceEnergy: Record<string, number> | null = null;
-    try {
-      const initialPriceResponse = await coreRepo.coreUsersUserIdSettingsKeyGet(
-        userIdPrimary,
-        "PRICE_ENERGY"
-      );
-      initialPriceEnergy = { ...initialPriceResponse.data };
-      log.info(
-        `Начальное значение PRICE_ENERGY для пользователя сохранено: ${JSON.stringify(initialPriceEnergy)}`
-      );
-    } catch (error) {
-      log.warn(`Не удалось получить начальное значение PRICE_ENERGY для пользователя: ${error}`);
-    }
 
     function parsePeriod(duration: EnergyPurchaseCombination["duration"]): EnergyOrderPeriodMs {
       if (duration === "1h") return OrderPeriod.ONE_HOUR as EnergyOrderPeriodMs;
@@ -648,9 +604,20 @@ test.describe("Create new order", () => {
     }
 
     for (const combo of combinations) {
+      test(`should create order with energy=${combo.energy}, period=${combo.duration}, sunRate=${combo.sunRate}`, async ({
+        request,
+      }) => {
+        test.setTimeout(300000);
       log.info(
-        `Тестируем комбинацию: период=${combo.duration}, энергия=${combo.energy}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${combo.expectedCost} TRX`
+        `=== Тест: Создание заказа ENERGY для пользователя со скидкой (период=${combo.duration}, энергия=${combo.energy}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${combo.expectedCost} TRX) ===`
       );
+
+      const orderApi = new OrderApi(request);
+      const coreRepo = new CoreRepository();
+
+      const { wallet, activationOrder } = await createActivatedWallet(request);
+      const targetAddress = wallet.address?.base58 || "";
+      await waitForActivationCompleted(activationOrder.id, targetAddress, 30000, 1000);
 
       try {
         const priceValues: Partial<EnergyPriceValues> = {
@@ -736,36 +703,7 @@ test.describe("Create new order", () => {
       log.info(
         `✓ Комбинация успешно проверена: период=${combo.duration}, энергия=${combo.energy}, курс=${combo.sunRate}`
       );
-    }
-
-    log.info(`✓ Все ${combinations.length} комбинаций успешно проверены`);
-
-    if (initialPriceEnergy) {
-      try {
-        for (const [duration, initialValue] of Object.entries(initialPriceEnergy)) {
-          const restoreValue = { [duration]: initialValue };
-          await coreRepo.coreUsersUserIdSettingsKeyPut(userIdPrimary, "PRICE_ENERGY", {
-            value: restoreValue,
-          });
-          log.info(
-            `PRICE_ENERGY[${duration}] для пользователя восстановлено в начальное значение: ${initialValue}`
-          );
-        }
-
-        const verifyRestoreResponse = await coreRepo.coreUsersUserIdSettingsKeyGet(
-          userIdPrimary,
-          "PRICE_ENERGY"
-        );
-        const verifyRestoreData = verifyRestoreResponse.data;
-        log.info(
-          `Восстановленное значение PRICE_ENERGY для пользователя проверено: ${JSON.stringify(verifyRestoreData)}`
-        );
-      } catch (error) {
-        log.error(
-          `Ошибка при восстановлении начального значения PRICE_ENERGY для пользователя: ${error}`
-        );
-        throw error;
-      }
+      });
     }
   });
 });

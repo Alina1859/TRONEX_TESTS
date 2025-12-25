@@ -2,6 +2,7 @@ import {
   DefaultApiCoreConstantsKeyPutRequest,
   DefaultApiCoreUsersPostRequest,
   DefaultApiCoreUsersUserIdSettingsKeyPutRequest,
+  DefaultApiCoreUsersUserIdDeleteRequest,
   DefaultApi,
   Configuration,
 } from "@tronex-shared/core-api/src";
@@ -85,6 +86,17 @@ export class CoreRepository {
 
   async coreUserUserIdAccessTokenGet(userId: string) {
     return await coreApi.coreUserUserIdAccessTokenGet(
+      {
+        userId,
+      },
+      {
+        headers: getCoreApiHeaders(),
+      }
+    );
+  }
+
+  async coreUsersUserIdDelete(userId: string) {
+    return await coreApi.coreUsersUserIdDelete(
       {
         userId,
       },

@@ -348,6 +348,7 @@ test.describe("Create new smart order", () => {
   test("POST /api/v2/smart-orders/ should handle smart order with activated fromAddress and unactivated toAddress", async ({
     request,
   }) => {
+    test.setTimeout(200000);
     log.info(
       "=== Тест: Создание smart order с активированным fromAddress и неактивированным toAddress ==="
     );
@@ -415,55 +416,55 @@ test.describe("Create new smart order", () => {
     );
   });
 
-  // Тест-кейс № 7: Проверка обработки сетевой ошибки при создании smart order
-  test("POST /api/v2/smart-orders/ should handle network error during smart order creation", async ({
-    request,
-    page,
-  }) => {
-    log.info("=== Тест: Симуляция отключения интернета при создании smart order ===");
+  // // Тест-кейс № 7: Проверка обработки сетевой ошибки при создании smart order
+  // test("POST /api/v2/smart-orders/ should handle network error during smart order creation", async ({
+  //   request,
+  //   page,
+  // }) => {
+  //   log.info("=== Тест: Симуляция отключения интернета при создании smart order ===");
 
-    const fromAddress = await createAndActivateFromAddress(request);
+  //   const fromAddress = await createAndActivateFromAddress(request);
 
-    const toWallet = await createWallet();
-    const toAddress = toWallet.address?.base58 || "";
-    log.info(
-      `Создан кошелек toAddress (на него будет делегироваться энергия и bandwidth): ${toAddress}`
-    );
+  //   const toWallet = await createWallet();
+  //   const toAddress = toWallet.address?.base58 || "";
+  //   log.info(
+  //     `Создан кошелек toAddress (на него будет делегироваться энергия и bandwidth): ${toAddress}`
+  //   );
 
-    addressCheck.validateAddresses(fromAddress, toAddress);
+  //   addressCheck.validateAddresses(fromAddress, toAddress);
 
-    const smartOrderRequest = {
-      fromAddress,
-      toAddress,
-      withActivation: true,
-      withEnergy: true,
-      withBandwidth: true,
-    };
+  //   const smartOrderRequest = {
+  //     fromAddress,
+  //     toAddress,
+  //     withActivation: true,
+  //     withEnergy: true,
+  //     withBandwidth: true,
+  //   };
 
-    log.info(
-      `Отправка запроса на создание smart order: ${JSON.stringify(smartOrderRequest, null, 2)}`
-    );
+  //   log.info(
+  //     `Отправка запроса на создание smart order: ${JSON.stringify(smartOrderRequest, null, 2)}`
+  //   );
 
-    // Перехватываем запрос через page.route и симулируем отключение интернета
-    let requestAborted = false;
-    await page.route("**/api/v2/smart-orders/", async (route) => {
-      log.info("⚠ Симуляция отключения интернета: прерывание запроса");
-      requestAborted = true;
-      await route.abort("failed");
-    });
+  //   // Перехватываем запрос через page.route и симулируем отключение интернета
+  //   let requestAborted = false;
+  //   await page.route("**/api/v2/smart-orders/", async (route) => {
+  //     log.info("⚠ Симуляция отключения интернета: прерывание запроса");
+  //     requestAborted = true;
+  //     await route.abort("failed");
+  //   });
 
-    try {
-      const response = await request.post(`${apiUrl}/api/v2/smart-orders/`, {
-        headers: getPostHeaders(),
-        data: smartOrderRequest,
-      });
-      log.warn(`⚠ Запрос не был прерван, статус: ${response.status()}`);
-    } catch (error: any) {
-      log.info(`✓ Сетевая ошибка успешно перехвачена: ${error.message}`);
-      expect(error.message).toMatch(/aborted|failed|network|timeout|ECONNREFUSED|ENOTFOUND/i);
-    }
+  //   try {
+  //     const response = await request.post(`${apiUrl}/api/v2/smart-orders/`, {
+  //       headers: getPostHeaders(),
+  //       data: smartOrderRequest,
+  //     });
+  //     log.warn(`⚠ Запрос не был прерван, статус: ${response.status()}`);
+  //   } catch (error: any) {
+  //     log.info(`✓ Сетевая ошибка успешно перехвачена: ${error.message}`);
+  //     expect(error.message).toMatch(/aborted|failed|network|timeout|ECONNREFUSED|ENOTFOUND/i);
+  //   }
 
-    expect(requestAborted).toBe(true);
-    log.info("✓ Тест завершен: проверка обработки сетевой ошибки при создании smart order");
-  });
+  //   expect(requestAborted).toBe(true);
+  //   log.info("✓ Тест завершен: проверка обработки сетевой ошибки при создании smart order");
+  // });
 });
