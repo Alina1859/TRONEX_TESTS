@@ -15,6 +15,7 @@ import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_OK } from "@shared/utils/constants
 import { invalidCreateSmartOrderRequestVariations } from "@shared/utils/variations_constants/invalid-create-smart-order-request-variations";
 import { invalidSmartOrderExtraFieldsVariations } from "@shared/utils/variations_constants/invalid-smart-order-extra-fields-variations";
 import { getPostHeaders } from "@shared/utils/headers";
+import { waitForActivationCompleted } from "@shared/utils/activate-wallets";
 
 test.describe("Create new smart order", () => {
   const smartOrderFieldCheck = new SmartOrderFieldCheck();
@@ -53,33 +54,6 @@ test.describe("Create new smart order", () => {
     return fromAddress;
   }
 
-  async function waitForActivationCompleted(
-    orderId: number,
-    targetAddress: string,
-    timeoutMs = 30000,
-    stepMs = 1000
-  ) {
-    const deadline = Date.now() + timeoutMs;
-    while (Date.now() < deadline) {
-      const dbRows = await orderRepo.getOrderById(orderId);
-      const dbOrder = dbRows[0] as any;
-      if (dbOrder?.status === "COMPLETED") {
-        log.info(`Активация в БД завершена (orderId=${orderId})`);
-        expect(dbOrder.type).toBe("ACTIVATION");
-        expect(dbOrder.targetAddress).toBe(targetAddress);
-        return dbOrder;
-      }
-
-      log.info(
-        `Активация orderId=${orderId} ещё не завершена, статус=${dbOrder?.status ?? "none"}`
-      );
-      await new Promise((r) => setTimeout(r, stepMs));
-    }
-
-    throw new Error(
-      `Активация orderId=${orderId} для адреса ${targetAddress} не перешла в COMPLETED за ${timeoutMs} мс`
-    );
-  }
 
   async function waitForSmartOrderCompleted(
     smartOrderId: number,

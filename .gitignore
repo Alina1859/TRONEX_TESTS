@@ -6,3 +6,4 @@ test-results/
 inspect.ts
 schema.prisma
 shared/core-api
+test-cases-providers-priority.txt

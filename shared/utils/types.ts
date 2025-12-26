@@ -133,3 +133,16 @@ export interface CreateUserResponse {
 export interface GetAccessTokenResponse {
   token: string;
 }
+
+export interface ProviderAvailabilityConfig {
+  ENERGY?: boolean | string[];
+  BANDWIDTH?: boolean | string[];
+  ACTIVATION?: boolean;
+}
+
+export interface Provider {
+  name: string;
+  link?: string;
+  availabilityConfig: ProviderAvailabilityConfig;
+  last1hEnergyPrice?: number | null;
+}
