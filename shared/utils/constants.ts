@@ -58,3 +58,26 @@ export const HTTP_STATUS_OK = 200;
 export const HTTP_STATUS_BAD_REQUEST = 400;
 export const HTTP_STATUS_NOT_FOUND = 404;
 export const HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE = 415;
+
+export const ENERGY_PRICE_FORMULA = (sunRate: number, hour: number, day: number, energy: number) => {
+  const durationMultiplier = day > 0 ? day * 24 : hour;
+  return (energy * sunRate * durationMultiplier) / 1000000;
+}
+
+export const ENERGY_PRICE_FORMULA_DYNAMIC = (MinSunRate: number, hour: number, day: number, energy: number, dynamicPriceOffset: number) => {
+  const durationMultiplier = day > 0 ? day * 24 : hour;
+  return (energy * (MinSunRate + dynamicPriceOffset) * durationMultiplier) / 1000000;
+}
+
+
+export const BANDWIDTH_PRICE_FORMULA = (sunRate: number, hour: number, day: number, energy: number) => {
+  const durationMultiplier = day > 0 ? day * 24 : hour;
+  return (energy * sunRate * durationMultiplier + 295) / 1000000;
+}
+
+export const PROVIDER_NAMES = {
+  TRON_LOCAL_1: "TronLocal-1",
+  TRON_LOCAL_2: "TronLocal-2",
+  TRON_LOCAL_3: "TronLocal-3",
+  TRON_LOCAL: "TronLocal",
+} as const;

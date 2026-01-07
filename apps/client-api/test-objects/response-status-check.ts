@@ -3,8 +3,16 @@ import { log } from "@shared/utils/logger";
 import { HTTP_STATUS_OK } from "@shared/utils/constants";
 
 export class ResponseStatusCheck {
-  checkResponseStatus(response: APIResponse, expectedStatus: number = HTTP_STATUS_OK) {
-    const actualStatus = response.status();
+  checkResponseStatus(response: APIResponse, expectedStatus?: number): void;
+  checkResponseStatus(response: { status: number }, expectedStatus?: number): void;
+  checkResponseStatus(
+    response: APIResponse | { status: number },
+    expectedStatus: number = HTTP_STATUS_OK
+  ) {
+    const actualStatus =
+      typeof (response as APIResponse).status === "function"
+        ? (response as APIResponse).status()
+        : (response as { status: number }).status;
     log.info(`Проверка статуса ответа: ожидаемый ${expectedStatus}, фактический ${actualStatus}`);
 
     const isMatch = actualStatus === expectedStatus;

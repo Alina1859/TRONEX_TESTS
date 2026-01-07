@@ -48,9 +48,6 @@ export class CoreRepository {
       key,
       coreUsersUserIdSettingsKeyPutRequest,
     };
-    log.info(
-      `Отправка запроса coreUsersUserIdSettingsKeyPut: ${JSON.stringify(requestParams, null, 2)}`
-    );
     return await coreApi.coreUsersUserIdSettingsKeyPut(requestParams, {
       headers: getCoreApiHeaders(),
     });
@@ -104,5 +101,20 @@ export class CoreRepository {
         headers: getCoreApiHeaders(),
       }
     );
+  }
+
+  async setProviderSettings(
+    userId: string,
+    providerSettings: Record<string, { priority: number; dynamicPriority?: boolean }>
+  ) {
+    return await this.coreUsersUserIdSettingsKeyPut(userId, "PROVIDER_SETTINGS", {
+      value: providerSettings,
+    });
+  }
+
+  async setDynamicPriceOffset(userId: string, offset: number) {
+    return await this.coreUsersUserIdSettingsKeyPut(userId, "DYNAMIC_PRICE_OFFSET", {
+      value: offset,
+    });
   }
 }

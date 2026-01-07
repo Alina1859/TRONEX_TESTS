@@ -146,3 +146,5 @@ export interface Provider {
   availabilityConfig: ProviderAvailabilityConfig;
   last1hEnergyPrice?: number | null;
 }
+
+export type ProviderSettings = Record<string, { priority: number }>;

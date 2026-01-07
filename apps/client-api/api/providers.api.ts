@@ -22,5 +22,11 @@ export class ProvidersApi {
       headers: getCoreApiHeaders(),
     });
   }
+
+  async getDynamicPriceOffset(userId: string) {
+    return await this.request.get(`${apiUrl}/core/users/${userId}/settings/DYNAMIC_PRICE_OFFSET`, {
+      headers: getCoreApiHeaders(),
+    });
+  }
 }
 

@@ -23,3 +23,5 @@ export const ENERGY_PURCHASE_COMBINATIONS_FOR_USER: EnergyPurchaseCombination[] 
   { duration: "3d", energy: 110000, sunRate: 50, expectedCost: 16.5 },
   { duration: "3d", energy: 110000, sunRate: 122, expectedCost: 40.26 },
 ];
+
+

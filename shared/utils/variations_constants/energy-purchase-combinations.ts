@@ -1,4 +1,5 @@
 import { EnergyPurchaseCombination } from "../types";
+import { ENERGY_PRICE_FORMULA } from "../constants";
 
 export const ENERGY_PURCHASE_COMBINATIONS: EnergyPurchaseCombination[] = [
   { duration: "1h", energy: 65000, sunRate: 70, expectedCost: 4.55 },

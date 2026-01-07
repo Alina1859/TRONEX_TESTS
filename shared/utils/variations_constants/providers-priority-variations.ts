@@ -1,3 +1,13 @@
+import { PROVIDER_NAMES } from "@shared/utils/constants";
+import { OrderPeriod } from "@shared/utils/constants";
+
+export const providerTestCases = [
+  { providerName: PROVIDER_NAMES.TRON_LOCAL_1, priorityValue: 100 },
+  { providerName: PROVIDER_NAMES.TRON_LOCAL_2, priorityValue: 100 },
+  { providerName: PROVIDER_NAMES.TRON_LOCAL_3, priorityValue: 100 },
+  { providerName: PROVIDER_NAMES.TRON_LOCAL, priorityValue: 100 },
+];
+
 export const PROVIDERS_INFO = [
     {
         "name": "TronLocal-1",
@@ -50,6 +60,23 @@ export const TEST_ORDER_COMBINATIONS = [
     { duration: "3d", energy: 500000, sunRate: 127, expectedCost: 190.5 },
 ] as const;
 
+
+export const PROVIDERS_PRIORITY_ENERGY_ORDER_COMBINATIONS = [
+  { duration: OrderPeriod.ONE_DAY, amount: 65000, providerName: PROVIDER_NAMES.TRON_LOCAL_1 },
+  { duration: OrderPeriod.THREE_DAYS, amount: 100000, providerName: PROVIDER_NAMES.TRON_LOCAL_1 },
+  
+  { duration: OrderPeriod.ONE_HOUR, amount: 65000, providerName: PROVIDER_NAMES.TRON_LOCAL_2 },
+  { duration: OrderPeriod.ONE_DAY, amount: 100000, providerName: PROVIDER_NAMES.TRON_LOCAL_2 },
+  { duration: OrderPeriod.THREE_DAYS, amount: 500000, providerName: PROVIDER_NAMES.TRON_LOCAL_2 },
+  
+  { duration: OrderPeriod.ONE_HOUR, amount: 100000, providerName: PROVIDER_NAMES.TRON_LOCAL_3 },
+  { duration: OrderPeriod.ONE_DAY, amount: 500000, providerName: PROVIDER_NAMES.TRON_LOCAL_3 },
+  { duration: OrderPeriod.THREE_DAYS, amount: 65000, providerName: PROVIDER_NAMES.TRON_LOCAL_3 },
+  
+  { duration: OrderPeriod.ONE_HOUR, amount: 500000, providerName: PROVIDER_NAMES.TRON_LOCAL },
+  { duration: OrderPeriod.ONE_DAY, amount: 65000, providerName: PROVIDER_NAMES.TRON_LOCAL },
+  { duration: OrderPeriod.THREE_DAYS, amount: 100000, providerName: PROVIDER_NAMES.TRON_LOCAL },
+] as const;
 
 export interface ProviderPriorityWithOrderCombination {
   priorityDescription: string;
