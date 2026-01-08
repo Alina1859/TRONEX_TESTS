@@ -13,7 +13,6 @@ import {
   waitForOrderCompleted,
 } from "@shared/utils/activate-wallets";
 import { CreateOrderRequest, Order, EnergyPriceValues } from "@shared/utils/types";
-import { PROVIDER_NAMES } from "@shared/utils/constants";
 import { PROVIDERS_PRIORITY_ENERGY_ORDER_COMBINATIONS } from "@shared/utils/variations_constants/providers-priority-variations";
 
 test.describe("Create order with provider priority", () => {
@@ -29,16 +28,13 @@ test.describe("Create order with provider priority", () => {
     throw new Error(`Unsupported period: ${period}`);
   };
 
-  // Вспомогательная функция для получения параметров формулы из периода
-  // ВАЖНО: sunRate из PRICE_ENERGY уже учитывает период, поэтому используем hour равный количеству часов
   const getFormulaParams = (period: OrderPeriod): { hour: number; day: number } => {
     if (period === OrderPeriod.ONE_HOUR) return { hour: 1, day: 0 };
-    if (period === OrderPeriod.ONE_DAY) return { hour: 1, day: 0 }; // 1 день = используем hour=1, т.к. sunRate уже за день
-    if (period === OrderPeriod.THREE_DAYS) return { hour: 3, day: 0 }; // 3 дня = используем hour=3, т.к. sunRate уже за 3 дня
+    if (period === OrderPeriod.ONE_DAY) return { hour: 1, day: 0 }; 
+    if (period === OrderPeriod.THREE_DAYS) return { hour: 3, day: 0 };
     throw new Error(`Unsupported period: ${period}`);
   };
 
-  // Создаем отдельный тест для каждой комбинации
   for (const combination of PROVIDERS_PRIORITY_ENERGY_ORDER_COMBINATIONS) {
     const { duration, amount, providerName } = combination;
     const periodKey = getPeriodKey(duration);
@@ -55,7 +51,6 @@ test.describe("Create order with provider priority", () => {
       const coreRepo = new CoreRepository();
       const orderApi = new OrderApi(request);
 
-      // Сохраняем начальные настройки провайдера
       let initialProviderSettings: Record<string, { priority: number }> | null = null;
       try {
         const initialSettingsResponse = await coreRepo.coreUsersUserIdSettingsKeyGet(

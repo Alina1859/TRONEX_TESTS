@@ -2,14 +2,22 @@ import { expect } from "@playwright/test";
 import { ProviderSettings } from "@shared/utils/types";
 
 export class ProviderPriorityCheck {
+  checkProviderPriority(
+    data: ProviderSettings,
+    providerName: string,
+    priorityValue: number
+  ) {
+    expect(data, `Настройки не содержат провайдера ${providerName}`).toHaveProperty(providerName);
+    expect(data[providerName], `Провайдер ${providerName} не имеет свойства priority`).toHaveProperty("priority");
+    expect(data[providerName].priority, `Приоритет провайдера ${providerName} не равен ${priorityValue}`).toBe(priorityValue);
+  }
+
   checkProviderPriorityResponse(
     responseData: ProviderSettings,
     providerName: string,
     priorityValue: number
   ) {
-    expect(responseData).toHaveProperty(providerName);
-    expect(responseData[providerName]).toHaveProperty("priority");
-    expect(responseData[providerName].priority).toBe(priorityValue);
+    this.checkProviderPriority(responseData, providerName, priorityValue);
   }
 
   checkProviderPrioritySaved(
@@ -17,8 +25,7 @@ export class ProviderPriorityCheck {
     providerName: string,
     priorityValue: number
   ) {
-    expect(verifyData).toHaveProperty(providerName);
-    expect(verifyData[providerName].priority).toBe(priorityValue);
+    this.checkProviderPriority(verifyData, providerName, priorityValue);
   }
 }
 
