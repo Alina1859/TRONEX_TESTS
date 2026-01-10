@@ -8,11 +8,10 @@ import * as dotenv from "dotenv";
 import {
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE,
+  validOrderId,
 } from "@shared/utils/constants";
 
 dotenv.config();
-
-const validOrderId = 1;
 
 test.describe("API key validation", () => {
   const responseStatusCheck = new ResponseStatusCheck();

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { ProvidersApi } from "@apps/client-api/api/providers.api";
 import { OrderApi } from "@apps/client-api/api/order.api";
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
-import { CoreRepository } from "@apps/client-api/repositories/core.repository";
+import { CoreRepository } from "@apps/client-api/api/core.api";
 import { log } from "@shared/utils/logger";
 import { HTTP_STATUS_OK, OrderPeriod, ENERGY_PRICE_FORMULA_DYNAMIC } from "@shared/utils/constants";
 import { userIdPrimary } from "@apps/client-api/api/constants";

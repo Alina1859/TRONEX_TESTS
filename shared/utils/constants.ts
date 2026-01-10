@@ -64,9 +64,9 @@ export const ENERGY_PRICE_FORMULA = (sunRate: number, hour: number, day: number,
   return (energy * sunRate * durationMultiplier) / 1000000;
 }
 
-export const ENERGY_PRICE_FORMULA_DYNAMIC = (MinSunRate: number, hour: number, day: number, energy: number, dynamicPriceOffset: number) => {
+export const ENERGY_PRICE_FORMULA_DYNAMIC = (minSunRate: number, hour: number, day: number, energy: number, dynamicPriceOffset: number) => {
   const durationMultiplier = day > 0 ? day * 24 : hour;
-  return (energy * (MinSunRate + dynamicPriceOffset) * durationMultiplier) / 1000000;
+  return (energy * (minSunRate + dynamicPriceOffset) * durationMultiplier) / 1000000;
 }
 
 
@@ -81,3 +81,35 @@ export const PROVIDER_NAMES = {
   TRON_LOCAL_3: "TronLocal-3",
   TRON_LOCAL: "TronLocal",
 } as const;
+
+export const PROVIDER_ENERGY_PRICES = {
+  TRON_LOCAL_1: 48,
+  TRON_LOCAL_2: 53.07692307692308,
+  TRON_LOCAL_3: 58,
+  TRON_LOCAL: 43.07692307692308,
+} as const;
+
+export const PROVIDER_AVAILABILITY_CONFIG = {
+  TRON_LOCAL_1: {
+    ENERGY: ["1d", "3d"],
+    BANDWIDTH: false,
+    ACTIVATION: false,
+  },
+  TRON_LOCAL_2: {
+    ENERGY: true,
+    BANDWIDTH: true,
+    ACTIVATION: true,
+  },
+  TRON_LOCAL_3: {
+    ENERGY: true,
+    BANDWIDTH: true,
+    ACTIVATION: true,
+  },
+  TRON_LOCAL: {
+    ENERGY: true,
+    BANDWIDTH: true,
+    ACTIVATION: true,
+  },
+} as const;
+
+export const validOrderId = 1;

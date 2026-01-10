@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { CoreRepository } from "@apps/client-api/repositories/core.repository";
+import { CoreRepository } from "@apps/client-api/api/core.api";
 import { OrderApi } from "@apps/client-api/api/order.api";
 import { log } from "@shared/utils/logger";
 import { HTTP_STATUS_OK, OrderPeriod, ENERGY_PRICE_FORMULA } from "@shared/utils/constants";

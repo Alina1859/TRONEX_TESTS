@@ -2,15 +2,14 @@ import {
   DefaultApiCoreConstantsKeyPutRequest,
   DefaultApiCoreUsersPostRequest,
   DefaultApiCoreUsersUserIdSettingsKeyPutRequest,
-  DefaultApiCoreUsersUserIdDeleteRequest,
   DefaultApi,
   Configuration,
 } from "@tronex-shared/core-api/src";
 import { getCoreApiHeaders } from "@shared/utils/headers";
-import { log } from "@shared/utils/logger";
+import { apiUrl } from "./constants";
 
 export const coreApi = new DefaultApi(
-  new Configuration({ basePath: "https://api.tronex-test.com" })
+  new Configuration({ basePath: apiUrl })
 );
 
 export class CoreRepository {
@@ -118,3 +117,4 @@ export class CoreRepository {
     });
   }
 }
+

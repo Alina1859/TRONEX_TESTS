@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 import { SmartOrderRepository } from "@apps/client-api/repositories/smart-order.repository";
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
 import { boundaryAndInvalidSmartOrderIdVariations } from "@shared/utils/variations_constants/invalid-smart-orderId-variations";
@@ -9,15 +9,13 @@ import { SmartOrderResponseCheck } from "@apps/client-api/test-objects/smart-ord
 import { userIdPrimary, userIdSecondary } from "@apps/client-api/api/constants";
 import { HTTP_STATUS_NOT_FOUND } from "@shared/utils/constants";
 
-// Тестирует корректность работы эндпоинта GET /api/v2/smart-orders/{smartOrderId}
-test.describe("Get smart order by ID", () => {
+test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
   const smartOrderRepo = new SmartOrderRepository();
   const responseStatusCheck = new ResponseStatusCheck();
   const smartOrderResponseCheck = new SmartOrderResponseCheck();
   const smartOrderFieldTest = new SmartOrderFieldCheck();
 
-  // Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с смарт заказами и Orders
-  test("GET /api/v2/smart-orders/{id} should return correct smart order data", async ({
+  test("Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с смарт заказами и Orders", async ({
     request,
   }) => {
     log.info("=== Тест: Проверка валидности полей ответа API ===");
@@ -42,8 +40,7 @@ test.describe("Get smart order by ID", () => {
     log.info("✓ Все проверки пройдены успешно");
   });
 
-  // Тест-кейс № 2: Проверка получения смарт заказа по несуществующему ID
-  test("GET /api/v2/smart-orders/{id} should return 404 for non-existent smart order", async ({
+  test("Тест-кейс № 2: Проверка обработки несуществующего smart order", async ({
     request,
   }) => {
     log.info("=== Тест: Проверка обработки несуществующего смарт заказа ===");
@@ -67,8 +64,7 @@ test.describe("Get smart order by ID", () => {
     );
   });
 
-  // Тест-кейс № 3: Проверка получения чужого смарт заказа по ID
-  test("GET /api/v2/smart-orders/{id} should not return smart order from another user", async ({
+  test("Тест-кейс № 3: Проверка безопасности доступа к smart order другого пользователя", async ({
     request,
   }) => {
     log.info("=== Тест: Проверка безопасности доступа к смарт заказам ===");
@@ -95,8 +91,7 @@ test.describe("Get smart order by ID", () => {
     log.info("✓ Все проверки пройдены успешно. Доступ к чужому смарт заказу заблокирован.");
   });
 
-  // Тест-кейс № 4: Получение смарт заказа по smartOrderId = 1 (существующий или несуществующий)
-  test("GET /api/v2/smart-orders/{id} should return smart order or 404 for smart order with id = 1", async ({
+  test("Тест-кейс № 4: Проверка обработки smart order с ID = 1", async ({
     request,
   }) => {
     log.info("=== Тест: Проверка обработки смарт заказа с ID = 1 ===");
@@ -181,8 +176,7 @@ test.describe("Get smart order by ID", () => {
   //     log.info("✓ Все проверки пройдены успешно. Смарт заказ без Orders корректно получен.");
   //   });
 
-  // Тест-кейс № 5: Проверка граничных значений и базовых некорректных значений smartOrderId
-  test("GET /api/v2/smart-orders/{id} should validate boundary and invalid smartOrderId values", async ({
+  test("Тест-кейс № 5: Проверка граничных значений и базовых некорректных значений smartOrderId", async ({
     request,
   }) => {
     log.info(
@@ -222,8 +216,7 @@ test.describe("Get smart order by ID", () => {
     );
   });
 
-  // Тест-кейс № 7: Получение smart order со статусом "COMPLETED"
-  test('GET /api/v2/smart-orders/{id} should return smart order with status "COMPLETED"', async ({
+  test('Тест-кейс № 6: Проверка получения smart order со статусом "COMPLETED"', async ({
     request,
   }) => {
     log.info('=== Тест: Проверка получения smart order со статусом "COMPLETED" ===');
@@ -260,8 +253,7 @@ test.describe("Get smart order by ID", () => {
     );
   });
 
-  // Тест-кейс № 8: Получение smart order со статусом "FAILED"
-  test('GET /api/v2/smart-orders/{id} should return smart order with status "FAILED"', async ({
+  test('Тест-кейс № 7: Проверка получения smart order со статусом "FAILED"', async ({
     request,
   }) => {
     log.info('=== Тест: Проверка получения smart order со статусом "FAILED" ===');

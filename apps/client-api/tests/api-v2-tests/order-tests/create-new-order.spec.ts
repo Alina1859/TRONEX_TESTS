@@ -1,4 +1,4 @@
-import { test, expect, APIRequestContext } from "@playwright/test";
+import { test } from "@playwright/test";
 import { createWallet } from "@apps/client-api/repositories/tronweb";
 import { log } from "@shared/utils/logger";
 import { OrderFieldCheck } from "@apps/client-api/test-objects/order-field-check";
@@ -22,6 +22,11 @@ import {
   waitForOrderCompleted,
 } from "@shared/utils/activate-wallets";
 import {
+  validateEnergyOrderPriceByFormula,
+  validateBandwidthOrderPriceByFormula,
+  checkOrderCost,
+} from "@apps/client-api/test-objects/price-check";
+import {
   BANDWIDTH_AMOUNT_DEFAULT,
   ENERGY_AMOUNT_DEFAULT,
   HTTP_STATUS_BAD_REQUEST,
@@ -31,17 +36,16 @@ import { invalidCreateOrderRequestVariations } from "@shared/utils/variations_co
 import { ENERGY_PURCHASE_COMBINATIONS } from "@shared/utils/variations_constants/energy-purchase-combinations";
 import { ENERGY_PURCHASE_COMBINATIONS_FOR_USER } from "@shared/utils/variations_constants/energy-purchase-combinations-for-user";
 import { BANDWIDTH_PURCHASE_COMBINATIONS } from "@shared/utils/variations_constants/bandwidth-purchase-combinations";
-import { CoreRepository } from "@apps/client-api/repositories/core.repository";
+import { CoreRepository } from "@apps/client-api/api/core.api";
 import { userIdPrimary, apiKeyZero, apiUrl, apiKeyPrimary } from "@apps/client-api/api/constants";
 import { getPostHeaders } from "@shared/utils/headers";
 
-test.describe("Create new order", () => {
+test.describe("Create new order POST /api/v2/orders/", () => {
   const orderFieldCheck = new OrderFieldCheck();
   const orderResponseCheck = new OrderResponseCheck();
   const statusCheck = new ResponseStatusCheck();
 
-  // Тест-кейс № 1: Проверка создания нового заказа и валидации полей ответа
-  test("POST /api/v2/orders/ should return valid order fields", async ({ request }) => {
+  test("Тест-кейс № 1: Проверка создания нового заказа и валидации полей ответа", async ({ request }) => {
     log.info("=== Тест: Создание нового заказа ===");
     const orderApi = new OrderApi(request);
     const { wallet, activationOrder } = await createActivatedWallet(request, statusCheck);
@@ -78,8 +82,7 @@ test.describe("Create new order", () => {
     log.info("✓ Все проверки полей ответа после создания заказа пройдены");
   });
 
-  // Тест-кейс № 2: Проверка невалидных значений в запросе
-  test.describe("POST /api/v2/orders/ - Invalid request validation", () => {
+  test.describe("Тест-кейс № 2: Проверка невалидных значений в запросе", () => {
     for (const variation of invalidCreateOrderRequestVariations) {
       test(`should reject invalid request: ${variation.description}`, async ({
         request,
@@ -102,9 +105,10 @@ test.describe("Create new order", () => {
       });
     }
   });
-  // Тест-кейс № 3: Создание одного заказа с type = ENERGY
-  test("POST /api/v2/orders/ should create single ENERGY order", async ({ request }) => {
+  
+  test("Тест-кейс № 3: Создание одного заказа с type = ENERGY", async ({ request }) => {
     const orderApi = new OrderApi(request);
+    const coreRepo = new CoreRepository();
 
     const { wallet, activationOrder } = await createActivatedWallet(request, statusCheck);
     const targetAddress = wallet.address?.base58 || "";
@@ -132,11 +136,18 @@ test.describe("Create new order", () => {
 
     orderFieldCheck.checkAllFields(apiFinalOrder);
     orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
+
+    await validateEnergyOrderPriceByFormula(
+      apiFinalOrder,
+      coreRepo,
+      OrderPeriod.ONE_HOUR,
+      ENERGY_AMOUNT_DEFAULT
+    );
   });
 
-  // Тест-кейс № 4: Создание заказа с type = BANDWIDTH
-  test("POST /api/v2/orders/ should create single BANDWIDTH order", async ({ request }) => {
+  test("Тест-кейс № 4: Создание заказа с type = BANDWIDTH", async ({ request }) => {
     const orderApi = new OrderApi(request);
+    const coreRepo = new CoreRepository();
 
     const { wallet, activationOrder } = await createActivatedWallet(request, statusCheck);
     const targetAddress = wallet.address?.base58 || "";
@@ -164,10 +175,16 @@ test.describe("Create new order", () => {
 
     orderFieldCheck.checkAllFields(apiFinalOrder);
     orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
+
+    await validateBandwidthOrderPriceByFormula(
+      apiFinalOrder,
+      coreRepo,
+      OrderPeriod.ONE_HOUR,
+      BANDWIDTH_AMOUNT_DEFAULT
+    );
   });
 
-  // Тест-кейс № 5: Создание заказа с type = ACTIVATION, активированный кошелек
-  test("POST /api/v2/orders/ should reject ACTIVATION for already activated wallet", async ({
+  test("Тест-кейс № 5: Создание заказа с type = ACTIVATION, активированный кошелек", async ({
     request,
   }) => {
     const orderApi = new OrderApi(request);
@@ -196,15 +213,13 @@ test.describe("Create new order", () => {
     }
   });
 
-  // Тест-кейс № 6: Создание заказа с type = ACTIVATION, неактивированный кошелек
-  test("POST /api/v2/orders/ should create ACTIVATION order for not activated wallet", async ({
+  test("Тест-кейс № 6: Создание заказа с type = ACTIVATION, неактивированный кошелек", async ({
     request,
   }) => {
     const orderApi = new OrderApi(request);
 
     const wallet = await createWallet();
     const targetAddress = wallet.address?.base58 || "";
-    expect(targetAddress).not.toBe("");
 
     const activationRequest: CreateActivationOrderRequest = {
       type: "ACTIVATION",
@@ -228,8 +243,7 @@ test.describe("Create new order", () => {
     orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
   });
 
-  // Тест-кейс № 7: Создание заказов с различными комбинациями энергии, периодов и цен для PRICE_ENERGY
-  test.describe("POST /api/v2/orders/ - Energy purchase combinations", () => {
+  test.describe("Тест-кейс № 7: Создание заказов с различными комбинациями энергии, периодов и цен для PRICE_ENERGY", () => {
     const combinations = ENERGY_PURCHASE_COMBINATIONS;
     log.info(`Найдено ${combinations.length} комбинаций для тестирования`);
 
@@ -308,16 +322,7 @@ test.describe("Create new order", () => {
           `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${combo.expectedCost}`
         );
 
-        const actualCost =
-          typeof apiOrder.sellPrice === "string"
-            ? parseFloat(apiOrder.sellPrice)
-            : apiOrder.sellPrice;
-        const costDifference = Math.abs(actualCost - combo.expectedCost);
-        const tolerance = 0.01;
-        expect(
-          costDifference,
-          `Стоимость заказа ${actualCost} не совпадает с ожидаемой ${combo.expectedCost} (разница: ${costDifference})`
-        ).toBeLessThanOrEqual(tolerance);
+        checkOrderCost(apiOrder, combo.expectedCost);
 
         const dbFinalOrder = await waitForOrderCompleted(apiOrder.id);
         const getOrderResponse = await orderApi.getOrderById(apiOrder.id);
@@ -327,15 +332,21 @@ test.describe("Create new order", () => {
         orderFieldCheck.checkAllFields(apiFinalOrder);
         orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
 
-        const finalCost =
-          typeof apiFinalOrder.sellPrice === "string"
-            ? parseFloat(apiFinalOrder.sellPrice)
-            : apiFinalOrder.sellPrice;
-        const finalCostDifference = Math.abs(finalCost - combo.expectedCost);
-        expect(
-          finalCostDifference,
-          `Финальная стоимость заказа ${finalCost} не совпадает с ожидаемой ${combo.expectedCost}`
-        ).toBeLessThanOrEqual(tolerance);
+        checkOrderCost(
+          apiFinalOrder,
+          combo.expectedCost,
+          0.01,
+          `Финальная стоимость заказа не совпадает с ожидаемой ${combo.expectedCost}`
+        );
+
+        await validateEnergyOrderPriceByFormula(
+          apiFinalOrder,
+          coreRepo,
+          period,
+          combo.energy,
+          0.01,
+          combo.sunRate
+        );
 
         try {
           await coreRepo.coreConstantsKeyPut("PRICE_ENERGY", { value: initialPriceEnergy });
@@ -353,8 +364,7 @@ test.describe("Create new order", () => {
     }
   });
 
-  // Тест-кейс № 8: Создание заказов с различными комбинациями полосы пропускания, периодов и цен для PRICE_BANDWIDTH
-  test.describe("POST /api/v2/orders/ - Bandwidth purchase combinations", () => {
+  test.describe("Тест-кейс № 8: Создание заказов с различными комбинациями полосы пропускания, периодов и цен для PRICE_BANDWIDTH", () => {
     const combinations = BANDWIDTH_PURCHASE_COMBINATIONS;
     log.info(`Найдено ${combinations.length} комбинаций для тестирования`);
 
@@ -433,16 +443,7 @@ test.describe("Create new order", () => {
           `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${combo.expectedCost}`
         );
 
-        const actualCost =
-          typeof apiOrder.sellPrice === "string"
-            ? parseFloat(apiOrder.sellPrice)
-            : apiOrder.sellPrice;
-        const costDifference = Math.abs(actualCost - combo.expectedCost);
-        const tolerance = 0.01;
-        expect(
-          costDifference,
-          `Стоимость заказа ${actualCost} не совпадает с ожидаемой ${combo.expectedCost} (разница: ${costDifference})`
-        ).toBeLessThanOrEqual(tolerance);
+        checkOrderCost(apiOrder, combo.expectedCost);
 
         const dbFinalOrder = await waitForOrderCompleted(apiOrder.id);
         const getOrderResponse = await orderApi.getOrderById(apiOrder.id);
@@ -452,15 +453,19 @@ test.describe("Create new order", () => {
         orderFieldCheck.checkAllFields(apiFinalOrder);
         orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
 
-        const finalCost =
-          typeof apiFinalOrder.sellPrice === "string"
-            ? parseFloat(apiFinalOrder.sellPrice)
-            : apiFinalOrder.sellPrice;
-        const finalCostDifference = Math.abs(finalCost - combo.expectedCost);
-        expect(
-          finalCostDifference,
-          `Финальная стоимость заказа ${finalCost} не совпадает с ожидаемой ${combo.expectedCost}`
-        ).toBeLessThanOrEqual(tolerance);
+        checkOrderCost(
+          apiFinalOrder,
+          combo.expectedCost,
+          0.01,
+          `Финальная стоимость заказа не совпадает с ожидаемой ${combo.expectedCost}`
+        );
+
+        await validateBandwidthOrderPriceByFormula(
+          apiFinalOrder,
+          coreRepo,
+          period,
+          combo.bandwidth
+        );
 
         try {
           await coreRepo.coreConstantsKeyPut("PRICE_BANDWIDTH", { value: initialPriceBandwidth });
@@ -478,8 +483,7 @@ test.describe("Create new order", () => {
     }
   });
 
-  // Тест-кейс № 9: Создание заказа для пользователя без заказов с 0 балансом
-  test("POST /api/v2/orders/ should handle order creation for user with zero balance", async ({
+  test("Тест-кейс № 9: Создание заказа для пользователя без заказов с 0 балансом", async ({
     request,
   }) => {
     log.info("=== Тест: Создание заказа для пользователя без заказов с 0 балансом ===");
@@ -519,8 +523,7 @@ test.describe("Create new order", () => {
     log.info("✓ Тест завершен: проверка создания заказа для пользователя с нулевым балансом");
   });
 
-  // Тест-кейс № 10: Создание заказов с различными комбинациями энергии, периодов и цен для PRICE_ENERGY для пользователя со скидкой
-  test.describe("POST /api/v2/orders/ - Energy purchase combinations for user with discount", () => {
+  test.describe("Тест-кейс № 10: Создание заказов с различными комбинациями энергии, периодов и цен для PRICE_ENERGY для пользователя со скидкой", () => {
     const combinations = ENERGY_PURCHASE_COMBINATIONS_FOR_USER;
     log.info(`Найдено ${combinations.length} комбинаций для тестирования`);
 
@@ -599,16 +602,7 @@ test.describe("Create new order", () => {
         `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${combo.expectedCost}`
       );
 
-      const actualCost =
-        typeof apiOrder.sellPrice === "string"
-          ? parseFloat(apiOrder.sellPrice)
-          : apiOrder.sellPrice;
-      const costDifference = Math.abs(actualCost - combo.expectedCost);
-      const tolerance = 0.01;
-      expect(
-        costDifference,
-        `Стоимость заказа ${actualCost} не совпадает с ожидаемой ${combo.expectedCost} (разница: ${costDifference})`
-      ).toBeLessThanOrEqual(tolerance);
+      checkOrderCost(apiOrder, combo.expectedCost);
 
       const dbFinalOrder = await waitForOrderCompleted(apiOrder.id);
       const getOrderResponse = await orderApi.getOrderById(apiOrder.id);
@@ -618,15 +612,21 @@ test.describe("Create new order", () => {
       orderFieldCheck.checkAllFields(apiFinalOrder);
       orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
 
-      const finalCost =
-        typeof apiFinalOrder.sellPrice === "string"
-          ? parseFloat(apiFinalOrder.sellPrice)
-          : apiFinalOrder.sellPrice;
-      const finalCostDifference = Math.abs(finalCost - combo.expectedCost);
-      expect(
-        finalCostDifference,
-        `Финальная стоимость заказа ${finalCost} не совпадает с ожидаемой ${combo.expectedCost}`
-      ).toBeLessThanOrEqual(tolerance);
+      checkOrderCost(
+        apiFinalOrder,
+        combo.expectedCost,
+        0.01,
+        `Финальная стоимость заказа не совпадает с ожидаемой ${combo.expectedCost}`
+      );
+
+      await validateEnergyOrderPriceByFormula(
+        apiFinalOrder,
+        coreRepo,
+        period,
+        combo.energy,
+        0.01,
+        combo.sunRate
+      );
 
       log.info(
         `✓ Комбинация успешно проверена: период=${combo.duration}, энергия=${combo.energy}, курс=${combo.sunRate}`

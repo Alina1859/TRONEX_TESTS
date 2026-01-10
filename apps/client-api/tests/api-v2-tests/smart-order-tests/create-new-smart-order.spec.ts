@@ -1,4 +1,4 @@
-import { test, expect, APIRequestContext } from "@playwright/test";
+import { test, APIRequestContext, expect } from "@playwright/test";
 import { createWallet } from "@apps/client-api/repositories/tronweb";
 import { log } from "@shared/utils/logger";
 import { SmartOrderFieldCheck } from "@apps/client-api/test-objects/smart-order-field-check";
@@ -8,22 +8,26 @@ import { AddressCheck } from "@apps/client-api/test-objects/address-check";
 import { SmartOrderApi } from "@apps/client-api/api/smart-order.api";
 import { SmartOrderRepository } from "@apps/client-api/repositories/smart-order.repository";
 import { OrderApi } from "@apps/client-api/api/order.api";
-import { OrderRepository } from "@apps/client-api/repositories/order.repository";
-import { apiKeyZero, apiUrl } from "@apps/client-api/api/constants";
+import { apiKeyZero } from "@apps/client-api/api/constants";
 import { SmartOrderWithOrders, CreateActivationOrderRequest, Order } from "@shared/utils/types";
 import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_OK } from "@shared/utils/constants";
 import { invalidCreateSmartOrderRequestVariations } from "@shared/utils/variations_constants/invalid-create-smart-order-request-variations";
 import { invalidSmartOrderExtraFieldsVariations } from "@shared/utils/variations_constants/invalid-smart-order-extra-fields-variations";
-import { getPostHeaders } from "@shared/utils/headers";
 import { waitForActivationCompleted } from "@shared/utils/activate-wallets";
+import {
+  validateEnergyOrderPriceByFormula,
+  validateBandwidthOrderPriceByFormula,
+} from "@apps/client-api/test-objects/price-check";
+import { CoreRepository } from "@apps/client-api/api/core.api";
+import { OrderPeriod } from "@shared/utils/constants";
+import { EnergyOrderPeriodMs, BandwidthOrderPeriodMs } from "@shared/utils/types";
 
-test.describe("Create new smart order", () => {
+test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
   const smartOrderFieldCheck = new SmartOrderFieldCheck();
   const smartOrderResponseCheck = new SmartOrderResponseCheck();
   const statusCheck = new ResponseStatusCheck();
   const smartOrderRepo = new SmartOrderRepository();
   const addressCheck = new AddressCheck();
-  const orderRepo = new OrderRepository();
 
   async function createAndActivateFromAddress(
     request: APIRequestContext,
@@ -89,8 +93,7 @@ test.describe("Create new smart order", () => {
     );
   }
 
-  // Тест-кейс № 1: Проверка создания нового smart order и валидации полей ответа
-  test("POST /api/v2/smart-orders/ should return valid smart order fields", async ({ request }) => {
+  test("Тест-кейс № 1: Проверка создания нового smart order и валидации полей ответа", async ({ request }) => {
     log.info("=== Тест: Создание нового smart order ===");
 
     const smartOrderApi = new SmartOrderApi(request);
@@ -151,71 +154,97 @@ test.describe("Create new smart order", () => {
     smartOrderFieldCheck.checkAllFields(apiFinalSmartOrder);
     smartOrderResponseCheck.checkSmartOrderFieldEquality(apiFinalSmartOrder, dbFinalSmartOrder);
 
+    log.info("Проверка цен заказов в финальном smart order по формулам...");
+    const coreRepo = new CoreRepository();
+    for (const order of apiFinalSmartOrder.orders) {
+      if (order.type === "ENERGY" && order.amount && order.period) {
+        await validateEnergyOrderPriceByFormula(
+          order,
+          coreRepo,
+          order.period as EnergyOrderPeriodMs,
+          order.amount,
+          0.01
+        );
+      } else if (order.type === "BANDWIDTH" && order.amount && order.period) {
+        await validateBandwidthOrderPriceByFormula(
+          order,
+          coreRepo,
+          order.period as BandwidthOrderPeriodMs,
+          order.amount,
+          0.03
+        );
+      } else if (order.type === "ACTIVATION") {
+        const activationPrice =
+          typeof order.sellPrice === "string" ? parseFloat(order.sellPrice) : order.sellPrice;
+        log.info(`Проверка цены активации: ${activationPrice} TRX`);
+        expect(activationPrice, "Стоимость заказа ACTIVATION должна быть больше нуля").toBeGreaterThan(0);
+      }
+    }
+
     log.info("✓ Все проверки полей ответа после создания smart order пройдены");
   });
 
   // Тест-кейс № 2: Проверка невалидных значений в запросе
-  for (const variation of invalidCreateSmartOrderRequestVariations) {
-    test(`POST /api/v2/smart-orders/ should reject invalid request: ${variation.description}`, async ({
-      request,
-    }) => {
-      const smartOrderApi = new SmartOrderApi(request);
+  test.describe("Тест-кейс № 2: Проверка отклонения невалидных значений в запросе", () => {
+    for (const variation of invalidCreateSmartOrderRequestVariations) {
+      test(`${variation.description}`, async ({ request }) => {
+        const smartOrderApi = new SmartOrderApi(request);
 
-      const response = await smartOrderApi.createNewSmartOrder(variation.data);
-      statusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
+        const response = await smartOrderApi.createNewSmartOrder(variation.data);
+        statusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
 
-      const headers = response.headers();
-      const contentType = headers["content-type"] ?? headers["Content-Type"] ?? "";
+        const headers = response.headers();
+        const contentType = headers["content-type"] ?? headers["Content-Type"] ?? "";
 
-      if (contentType.includes("application/json")) {
-        const jsonBody = await response.json().catch(() => undefined);
-        log.info(`Error response JSON: ${JSON.stringify(jsonBody, null, 2)}`);
-      } else {
-        const textBody = await response.text().catch(() => "");
-        log.info(`Error response text: ${textBody}`);
-      }
-    });
-  }
+        if (contentType.includes("application/json")) {
+          const jsonBody = await response.json().catch(() => undefined);
+          log.info(`Error response JSON: ${JSON.stringify(jsonBody, null, 2)}`);
+        } else {
+          const textBody = await response.text().catch(() => "");
+          log.info(`Error response text: ${textBody}`);
+        }
+      });
+    }
+  });
 
   // Тест-кейс № 3: Проверка игнорирования лишних полей в запросе
-  for (const variation of invalidSmartOrderExtraFieldsVariations) {
-    test(`POST /api/v2/smart-orders/ should ignore extra fields: ${variation.description}`, async ({
-      request,
-    }) => {
-      const smartOrderApi = new SmartOrderApi(request);
+  test.describe("Тест-кейс № 3: Проверка игнорирования лишних полей в запросе", () => {
+    for (const variation of invalidSmartOrderExtraFieldsVariations) {
+      test(`${variation.description}`, async ({ request }) => {
+        const smartOrderApi = new SmartOrderApi(request);
 
-      const fromAddress = await createAndActivateFromAddress(request);
-      const toWallet = await createWallet();
-      const toAddress = toWallet.address?.base58 || "";
+        const fromAddress = await createAndActivateFromAddress(request);
+        const toWallet = await createWallet();
+        const toAddress = toWallet.address?.base58 || "";
 
-      const requestData = {
-        ...variation.data,
-        fromAddress,
-        toAddress,
-      };
+        const requestData = {
+          ...variation.data,
+          fromAddress,
+          toAddress,
+        };
 
-      const response = await smartOrderApi.createNewSmartOrder(requestData);
-      statusCheck.checkResponseStatus(response, HTTP_STATUS_OK);
+        const response = await smartOrderApi.createNewSmartOrder(requestData);
+        statusCheck.checkResponseStatus(response, HTTP_STATUS_OK);
 
-      const apiSmartOrder = (await response.json()) as SmartOrderWithOrders;
-      log.info(`API Response (with extra fields): ${JSON.stringify(apiSmartOrder, null, 2)}`);
+        const apiSmartOrder = (await response.json()) as SmartOrderWithOrders;
+        log.info(`API Response (with extra fields): ${JSON.stringify(apiSmartOrder, null, 2)}`);
 
-      smartOrderFieldCheck.checkAllFields(apiSmartOrder);
-      smartOrderFieldCheck.checkRequestResponseMatch(
-        apiSmartOrder,
-        fromAddress,
-        toAddress,
-        requestData.withActivation ?? true,
-        requestData.withEnergy ?? true,
-        requestData.withBandwidth ?? true
-      );
+        smartOrderFieldCheck.checkAllFields(apiSmartOrder);
+        smartOrderFieldCheck.checkRequestResponseMatch(
+          apiSmartOrder,
+          fromAddress,
+          toAddress,
+          requestData.withActivation ?? true,
+          requestData.withEnergy ?? true,
+          requestData.withBandwidth ?? true
+        );
 
-      log.info(`✓ Smart order успешно создан с лишними полями: ${variation.description}`);
-    });
-  }
+        log.info(`✓ Smart order успешно создан с лишними полями: ${variation.description}`);
+      });
+    }
+  });
 
-  // Тест-кейс № 4: Проверка создания smart order с 0 балансом
-  test("POST /api/v2/smart-orders/ should handle smart order creation for user with zero balance", async ({
+  test("Тест-кейс № 4: Проверка создания smart order для пользователя с нулевым балансом", async ({
     request,
   }) => {
     log.info("=== Тест: Создание smart order для пользователя с 0 балансом ===");
@@ -267,8 +296,7 @@ test.describe("Create new smart order", () => {
     log.info("✓ Тест завершен: проверка создания smart order для пользователя с нулевым балансом");
   });
 
-  // Тест-кейс № 5: Проверка создания smart order с неактивированным fromAddress при withActivation=false
-  test("POST /api/v2/smart-orders/ should handle smart order with unactivated fromAddress and activated toAddress when withActivation=false", async ({
+  test("Тест-кейс № 5: Проверка создания smart order с неактивированным fromAddress при withActivation=false", async ({
     request,
   }) => {
     log.info(
@@ -318,8 +346,7 @@ test.describe("Create new smart order", () => {
     );
   });
 
-  // Тест-кейс № 6: Проверка создания smart order с активированным fromAddress и неактивированным toAddress
-  test("POST /api/v2/smart-orders/ should handle smart order with activated fromAddress and unactivated toAddress", async ({
+  test("Тест-кейс № 6: Проверка создания smart order с активированным fromAddress и неактивированным toAddress", async ({
     request,
   }) => {
     test.setTimeout(200000);

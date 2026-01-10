@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { CoreRepository } from "@apps/client-api/repositories/core.repository";
+import { CoreRepository } from "@apps/client-api/api/core.api";
 import { log } from "@shared/utils/logger";
 import { userIdPrimary } from "@apps/client-api/api/constants";
 import { providerTestCases } from "@shared/utils/variations_constants/providers-priority-variations";

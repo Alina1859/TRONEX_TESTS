@@ -49,7 +49,19 @@ export class OrderResponseCheck {
     expect(expectedOrders.length).toBe(0);
   }
 
+  checkOrderListEmpty(orders: Order[]) {
+    expect(orders.length).toBe(0);
+  }
+
   checkRateLimitEnforcement(statusCounts: Record<number, number>): void {
     expect(statusCounts[429]).toBeGreaterThan(0);
+  }
+
+  checkOrderStatus(apiOrder: Order, expectedStatus: string) {
+    expect(apiOrder.status).toBe(expectedStatus);
+  }
+
+  checkOrderType(apiOrder: Order, expectedType: string) {
+    expect(apiOrder.type).toBe(expectedType);
   }
 }
