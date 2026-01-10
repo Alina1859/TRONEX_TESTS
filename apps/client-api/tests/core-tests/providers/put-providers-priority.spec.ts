@@ -7,7 +7,7 @@ import { ProviderPriorityCheck } from "@apps/client-api/test-objects/provider-pr
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
 import { ProviderSettings } from "@shared/utils/types";
 
-test.describe("Тест-кейс № 1: Установка приоритета провайдера", () => {
+test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER_SETTINGS", () => {
   test.describe.configure({ mode: 'serial', timeout: 60000 });
 
   const providerPriorityCheck = new ProviderPriorityCheck();
@@ -48,59 +48,54 @@ test.describe("Тест-кейс № 1: Установка приоритета 
     }
   });
 
-  providerTestCases.forEach(({ providerName, priorityValue }, index) => {
-    test(`Установка приоритета провайдера ${providerName}`, async () => {
-      await test.step("Установить приоритет провайдера", async () => {
-        const requestBody = {
-          value: {
-            [providerName]: {
-              priority: priorityValue,
+  test.describe("Тест-кейс № 1: Установка приоритета провайдера", () => {
+    providerTestCases.forEach(({ providerName, priorityValue }, index) => {
+      test(`Установка приоритета провайдера ${providerName}`, async () => {
+        await test.step("Установить приоритет провайдера", async () => {
+          const requestBody = {
+            value: {
+              [providerName]: {
+                priority: priorityValue,
+              },
             },
-          },
-        };
+          };
 
-        log.info(`Установка приоритета ${providerName} = ${priorityValue}`);
+          log.info(`Установка приоритета ${providerName} = ${priorityValue}`);
 
-        const response = await coreRepo.coreUsersUserIdSettingsKeyPut(
-          userIdPrimary,
-          "PROVIDER_SETTINGS",
-          requestBody
-        );
+          const response = await coreRepo.coreUsersUserIdSettingsKeyPut(
+            userIdPrimary,
+            "PROVIDER_SETTINGS",
+            requestBody
+          );
 
-        log.info(`📄 Тело ответа API (PUT /settings):`);
-        log.info(`${JSON.stringify(response.data, null, 2)}`);
+          log.info(`📄 Тело ответа API (PUT /settings):`);
+          log.info(`${JSON.stringify(response.data, null, 2)}`);
 
-        responseStatusCheck.checkResponseStatus(response);
+          responseStatusCheck.checkResponseStatus(response);
 
-        const responseData = response.data;
-        providerPriorityCheck.checkProviderPriority(responseData, providerName, priorityValue);
-      });
+          const responseData = response.data;
+          providerPriorityCheck.checkProviderPriority(responseData, providerName, priorityValue);
+        });
 
-      await test.step("Проверить сохранение приоритета", async () => {
-        const verifyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet(
-          userIdPrimary,
-          "PROVIDER_SETTINGS"
-        );
+        await test.step("Проверить сохранение приоритета", async () => {
+          const verifyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet(
+            userIdPrimary,
+            "PROVIDER_SETTINGS"
+          );
 
-        log.info(`📄 Тело ответа API (GET /settings):`);
-        log.info(`${JSON.stringify(verifyResponse.data, null, 2)}`);
+          log.info(`📄 Тело ответа API (GET /settings):`);
+          log.info(`${JSON.stringify(verifyResponse.data, null, 2)}`);
 
-        const verifyData = verifyResponse.data;
+          const verifyData = verifyResponse.data;
 
-        providerPriorityCheck.checkProviderPriority(verifyData, providerName, priorityValue);
-        log.info(`✓ Приоритет ${providerName} успешно установлен и верифицирован`);
+          providerPriorityCheck.checkProviderPriority(verifyData, providerName, priorityValue);
+          log.info(`✓ Приоритет ${providerName} успешно установлен и верифицирован`);
+        });
       });
     });
   });
-});
 
-test.describe("Тест-кейс № 2: Удаление приоритета провайдера", () => {
-  test.describe.configure({ mode: 'serial', timeout: 60000 });
-
-  const responseStatusCheck = new ResponseStatusCheck();
-  const coreRepo = new CoreRepository();
-
-  test("Удаление приоритета провайдера", async () => {
+  test("Тест-кейс № 2: Удаление приоритета провайдера", async () => {
     await test.step("Удалить приоритет провайдера", async () => {
       const requestBody = {
         value: null

@@ -7,3 +7,4 @@ inspect.ts
 schema.prisma
 shared/core-api
 test-cases-providers-priority.txt
+apps/client-api/tests/core-tests/providers/tests not ready/
