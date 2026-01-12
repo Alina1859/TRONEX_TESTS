@@ -4,13 +4,11 @@ import { log } from "@shared/utils/logger";
 import { createWallet } from "@apps/client-api/repositories/tronweb";
 import { OrderApi } from "@apps/client-api/api/order.api";
 import { SmartOrderApi } from "@apps/client-api/api/smart-order.api";
-import * as dotenv from "dotenv";
 import {
   HttpStatus,
   validOrderId,
 } from "@shared/utils/constants";
 
-dotenv.config();
 
 test.describe("API key validation", () => {
   const responseStatusCheck = new ResponseStatusCheck();

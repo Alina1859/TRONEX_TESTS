@@ -87,7 +87,7 @@ export interface EnergyPurchaseCombination {
   duration: "1h" | "1d" | "3d";
   energy: number;
   sunRate: number;
-  expectedCost: number;
+  expectedCost?: number;
 }
 
 export interface BandwidthPurchaseCombination {

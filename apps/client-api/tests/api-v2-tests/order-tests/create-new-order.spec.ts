@@ -24,6 +24,8 @@ import {
   HttpStatus,
   OrderPeriod,
   OrderType,
+  ENERGY_PRICE_FORMULA,
+  BANDWIDTH_PRICE_FORMULA,
 } from "@shared/utils/constants";
 import { invalidCreateOrderRequestVariations } from "@shared/utils/variations_constants/invalid-create-order-request-variations";
 import { ENERGY_PURCHASE_COMBINATIONS } from "@shared/utils/variations_constants/energy-purchase-combinations";
@@ -32,6 +34,7 @@ import { BANDWIDTH_PURCHASE_COMBINATIONS } from "@shared/utils/variations_consta
 import { CoreRepository } from "@apps/client-api/api/core.api";
 import { userIdPrimary, apiKeyZero, apiUrl, apiKeyPrimary } from "@apps/client-api/api/constants";
 import { getPostHeaders } from "@shared/utils/headers";
+import { getFormulaParams } from "@shared/helpers/order-period-helpers";
 
 test.describe("Create new order POST /api/v2/orders/", () => {
   const orderFieldCheck = new OrderFieldCheck();
@@ -172,7 +175,7 @@ test.describe("Create new order POST /api/v2/orders/", () => {
       period: OrderPeriod.ONE_HOUR,
     };
 
-    const response = await orderApi.createNewOrder(bandwidthRequest);
+    const response = await orderApi.createNewOrder({ data: bandwidthRequest });
     statusCheck.checkResponseStatus(response);
 
     const apiOrder = (await response.json()) as Order;
@@ -282,8 +285,11 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         request,
       }) => {
         test.setTimeout(300000);
+        const period = parsePeriod(combo.duration);
+        const { hour, day } = getFormulaParams(period);
+        const expectedCost = ENERGY_PRICE_FORMULA(combo.sunRate, hour, day, combo.energy);
         log.info(
-          `=== Тест: Создание заказа ENERGY (период=${combo.duration}, энергия=${combo.energy}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${combo.expectedCost} TRX) ===`
+          `=== Тест: Создание заказа ENERGY (период=${combo.duration}, энергия=${combo.energy}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${expectedCost} TRX) ===`
         );
 
         const orderApi = new OrderApi(request);
@@ -335,7 +341,6 @@ test.describe("Create new order POST /api/v2/orders/", () => {
           throw error;
         }
 
-        const period = parsePeriod(combo.duration);
         const energyRequest: CreateOrderRequest = {
           type: OrderType.ENERGY,
           targetAddress,
@@ -343,16 +348,18 @@ test.describe("Create new order POST /api/v2/orders/", () => {
           period: period,
         };
 
+        log.info(`Отправка запроса на создание заказа ENERGY: ${JSON.stringify(energyRequest, null, 2)}`);
         const response = await orderApi.createNewOrder({ data: energyRequest });
         statusCheck.checkResponseStatus(response);
 
         const apiOrder = (await response.json()) as Order;
+        log.info(`Получен ответ от API (ENERGY): ${JSON.stringify(apiOrder, null, 2)}`);
         log.info(
-          `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${combo.expectedCost}`
+          `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${expectedCost}`
         );
 
         const priceCheck = new PriceCheck(coreRepo, apiOrder);
-        priceCheck.checkOrderCost({ expectedCost: combo.expectedCost });
+        priceCheck.checkOrderCost({ expectedCost });
 
         const dbFinalOrder = await walletActivationHelper.waitForOrderCompleted({
       orderId: apiOrder.id,
@@ -360,15 +367,16 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         const getOrderResponse = await orderApi.getOrderById({ orderId: apiOrder.id });
         statusCheck.checkResponseStatus(getOrderResponse);
         const apiFinalOrder = (await getOrderResponse.json()) as Order;
+        log.info(`Получен финальный заказ от API (ENERGY, by id): ${JSON.stringify(apiFinalOrder, null, 2)}`);
 
         orderFieldCheck.checkAllFields(apiFinalOrder);
         orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
 
         const priceCheckFinal = new PriceCheck(coreRepo, apiFinalOrder);
         priceCheckFinal.checkOrderCost({
-          expectedCost: combo.expectedCost,
+          expectedCost,
           tolerance: 0.01,
-          message: `Финальная стоимость заказа не совпадает с ожидаемой ${combo.expectedCost}`,
+          message: `Финальная стоимость заказа не совпадает с ожидаемой ${expectedCost}`,
         });
 
         await priceCheckFinal.checkEnergyOrderPriceByFormula({
@@ -414,8 +422,11 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         request,
       }) => {
         test.setTimeout(300000);
+        const period = parsePeriod(combo.duration);
+        const { hour, day } = getFormulaParams(period);
+        const expectedCost = BANDWIDTH_PRICE_FORMULA(combo.sunRate, hour, day, combo.bandwidth);
         log.info(
-          `=== Тест: Создание заказа BANDWIDTH (период=${combo.duration}, bandwidth=${combo.bandwidth}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${combo.expectedCost} TRX) ===`
+          `=== Тест: Создание заказа BANDWIDTH (период=${combo.duration}, bandwidth=${combo.bandwidth}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${expectedCost} TRX) ===`
         );
 
         const orderApi = new OrderApi(request);
@@ -466,7 +477,6 @@ test.describe("Create new order POST /api/v2/orders/", () => {
           throw error;
         }
 
-        const period = parsePeriod(combo.duration);
         const bandwidthRequest: CreateOrderRequest = {
           type: OrderType.BANDWIDTH,
           targetAddress,
@@ -474,16 +484,18 @@ test.describe("Create new order POST /api/v2/orders/", () => {
           period: period,
         };
 
+        log.info(`Отправка запроса на создание заказа BANDWIDTH: ${JSON.stringify(bandwidthRequest, null, 2)}`);
         const response = await orderApi.createNewOrder({ data: bandwidthRequest });
         statusCheck.checkResponseStatus(response);
 
         const apiOrder = (await response.json()) as Order;
+        log.info(`Получен ответ от API (BANDWIDTH): ${JSON.stringify(apiOrder, null, 2)}`);
         log.info(
-          `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${combo.expectedCost}`
+          `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${expectedCost}`
         );
 
         const priceCheck = new PriceCheck(coreRepo, apiOrder);
-        priceCheck.checkOrderCost({ expectedCost: combo.expectedCost });
+        priceCheck.checkOrderCost({ expectedCost });
 
         const dbFinalOrder = await walletActivationHelper.waitForOrderCompleted({
       orderId: apiOrder.id,
@@ -491,15 +503,16 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         const getOrderResponse = await orderApi.getOrderById({ orderId: apiOrder.id });
         statusCheck.checkResponseStatus(getOrderResponse);
         const apiFinalOrder = (await getOrderResponse.json()) as Order;
+        log.info(`Получен финальный заказ от API (BANDWIDTH, by id): ${JSON.stringify(apiFinalOrder, null, 2)}`);
 
         orderFieldCheck.checkAllFields(apiFinalOrder);
         orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
 
         const priceCheckFinal = new PriceCheck(coreRepo, apiFinalOrder);
         priceCheckFinal.checkOrderCost({
-          expectedCost: combo.expectedCost,
+          expectedCost,
           tolerance: 0.01,
-          message: `Финальная стоимость заказа не совпадает с ожидаемой ${combo.expectedCost}`,
+          message: `Финальная стоимость заказа не совпадает с ожидаемой ${expectedCost}`,
         });
 
         await priceCheckFinal.checkBandwidthOrderPriceByFormula({
@@ -587,8 +600,11 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         request,
       }) => {
         test.setTimeout(300000);
+        const period = parsePeriod(combo.duration);
+        const { hour, day } = getFormulaParams(period);
+        const expectedCost = ENERGY_PRICE_FORMULA(combo.sunRate, hour, day, combo.energy);
       log.info(
-        `=== Тест: Создание заказа ENERGY для пользователя со скидкой (период=${combo.duration}, энергия=${combo.energy}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${combo.expectedCost} TRX) ===`
+        `=== Тест: Создание заказа ENERGY для пользователя со скидкой (период=${combo.duration}, энергия=${combo.energy}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${expectedCost} TRX) ===`
       );
 
       const orderApi = new OrderApi(request);
@@ -636,7 +652,6 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         throw error;
       }
 
-      const period = parsePeriod(combo.duration);
       const energyRequest: CreateOrderRequest = {
         type: OrderType.ENERGY,
         targetAddress,
@@ -655,11 +670,11 @@ test.describe("Create new order POST /api/v2/orders/", () => {
 
       const apiOrder = (await response.json()) as Order;
       log.info(
-        `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${combo.expectedCost}`
+        `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${expectedCost}`
       );
 
       const priceCheck = new PriceCheck(coreRepo, apiOrder);
-      priceCheck.checkOrderCost({ expectedCost: combo.expectedCost });
+      priceCheck.checkOrderCost({ expectedCost });
 
       const dbFinalOrder = await walletActivationHelper.waitForOrderCompleted({
       orderId: apiOrder.id,
@@ -673,9 +688,9 @@ test.describe("Create new order POST /api/v2/orders/", () => {
 
       const priceCheckFinal = new PriceCheck(coreRepo, apiFinalOrder);
       priceCheckFinal.checkOrderCost({
-        expectedCost: combo.expectedCost,
+        expectedCost,
         tolerance: 0.01,
-        message: `Финальная стоимость заказа не совпадает с ожидаемой ${combo.expectedCost}`,
+        message: `Финальная стоимость заказа не совпадает с ожидаемой ${expectedCost}`,
       });
 
       await priceCheckFinal.checkEnergyOrderPriceByFormula({

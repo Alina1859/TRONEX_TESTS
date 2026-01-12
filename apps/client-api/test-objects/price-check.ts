@@ -116,7 +116,7 @@ export class PriceCheck {
     bandwidthAmount: number;
     tolerance?: number;
   }): Promise<void> {
-    const { period, bandwidthAmount, tolerance = 0.03 } = params;
+    const { period, bandwidthAmount, tolerance = 0.01 } = params;
     const expectedPrice = await this.calculateExpectedBandwidthPrice({ period, bandwidthAmount });
     const actualPrice = this.getOrderPrice();
 

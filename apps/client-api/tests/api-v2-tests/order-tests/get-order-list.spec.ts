@@ -187,11 +187,11 @@ test.describe("Get order list GET /api/v2/orders/", () => {
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      ORDER_LIST_DEFAULT_OFFSET,
-      5
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: ORDER_LIST_DEFAULT_OFFSET,
+      limit: 5,
+    });
 
     const response = await orderApi.getOrderList({ limit: 5 });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -316,11 +316,11 @@ test.describe("Get order list GET /api/v2/orders/", () => {
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      ORDER_LIST_DEFAULT_OFFSET,
-      ORDER_LIST_MAX_LIMIT
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: ORDER_LIST_DEFAULT_OFFSET,
+      limit: ORDER_LIST_MAX_LIMIT,
+    });
 
     const response = await orderApi.getOrderList({ limit: ORDER_LIST_MAX_LIMIT });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);

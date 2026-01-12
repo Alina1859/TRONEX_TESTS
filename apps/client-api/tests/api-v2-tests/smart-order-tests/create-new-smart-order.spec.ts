@@ -10,13 +10,12 @@ import { SmartOrderRepository } from "@apps/client-api/repositories/smart-order.
 import { OrderApi } from "@apps/client-api/api/order.api";
 import { apiKeyZero } from "@apps/client-api/api/constants";
 import { SmartOrderWithOrders, CreateActivationOrderRequest, Order } from "@shared/utils/types";
-import { HttpStatus } from "@shared/utils/constants";
+import { HttpStatus, OrderType } from "@shared/utils/constants";
 import { invalidCreateSmartOrderRequestVariations } from "@shared/utils/variations_constants/invalid-create-smart-order-request-variations";
 import { invalidSmartOrderExtraFieldsVariations } from "@shared/utils/variations_constants/invalid-smart-order-extra-fields-variations";
 import { WalletActivationHelper } from "@shared/helpers/wallet-activation-helper";
 import { PriceCheck } from "@apps/client-api/test-objects/price-check";
 import { CoreRepository } from "@apps/client-api/api/core.api";
-import { OrderPeriod } from "@shared/utils/constants";
 import { EnergyOrderPeriodMs, BandwidthOrderPeriodMs } from "@shared/utils/types";
 
 test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
@@ -25,7 +24,6 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
   const statusCheck = new ResponseStatusCheck();
   const smartOrderRepo = new SmartOrderRepository();
   const addressCheck = new AddressCheck();
-  const priceCheck = new PriceCheck();
   const walletActivationHelper = new WalletActivationHelper();
 
   async function createAndActivateFromAddress(
@@ -39,7 +37,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
 
     const orderApi = new OrderApi(request);
     const activationRequest: CreateActivationOrderRequest = {
-      type: "ACTIVATION",
+      type: OrderType.ACTIVATION,
       targetAddress: fromAddress,
     };
 
@@ -162,21 +160,19 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
     const coreRepo = new CoreRepository();
     for (const order of apiFinalSmartOrder.orders) {
       if (order.type === "ENERGY" && order.amount && order.period) {
-        await priceCheck.checkEnergyOrderPriceByFormula(
-          order,
-          coreRepo,
-          order.period as EnergyOrderPeriodMs,
-          order.amount,
-          0.01
-        );
+        const priceCheck = new PriceCheck(coreRepo, order);
+        await priceCheck.checkEnergyOrderPriceByFormula({
+          period: order.period as EnergyOrderPeriodMs,
+          energyAmount: order.amount,
+          tolerance: 0.01,
+        });
       } else if (order.type === "BANDWIDTH" && order.amount && order.period) {
-        await priceCheck.checkBandwidthOrderPriceByFormula(
-          order,
-          coreRepo,
-          order.period as BandwidthOrderPeriodMs,
-          order.amount,
-          0.03
-        );
+        const priceCheck = new PriceCheck(coreRepo, order);
+        await priceCheck.checkBandwidthOrderPriceByFormula({
+          period: order.period as BandwidthOrderPeriodMs,
+          bandwidthAmount: order.amount,
+          tolerance: 0.03,
+        });
       } else if (order.type === "ACTIVATION") {
         const activationPrice =
           typeof order.sellPrice === "string" ? parseFloat(order.sellPrice) : order.sellPrice;

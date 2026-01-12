@@ -5,6 +5,7 @@ import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-stat
 import { log } from "@shared/utils/logger";
 import { createWallet } from "@apps/client-api/repositories/tronweb";
 import { Order, CreateActivationOrderRequest } from "@shared/utils/types";
+import { OrderType } from "@shared/utils/constants";
 
 export class WalletActivationHelper {
   private async waitForOrderStatus(params: {
@@ -86,11 +87,11 @@ export class WalletActivationHelper {
 
     const orderApi = new OrderApi(request);
     const activationRequest: CreateActivationOrderRequest = {
-      type: "ACTIVATION",
+      type: OrderType.ACTIVATION,
       targetAddress: wallet.address?.base58 || "",
     };
 
-    const activationResponse = await orderApi.createNewOrder(activationRequest);
+    const activationResponse = await orderApi.createNewOrder({ data: activationRequest });
     const activationStatus = activationResponse.status();
     log.info(`API запрос (ACTIVATION) выполнен. Статус: ${activationStatus}`);
 

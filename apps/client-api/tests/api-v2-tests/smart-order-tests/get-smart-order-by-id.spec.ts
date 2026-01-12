@@ -115,7 +115,7 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
     }
 
     const smartOrderApi = new SmartOrderApi(request);
-    const response = await smartOrderApi.getSmartOrderById(smartOrderId);
+    const response = await smartOrderApi.getSmartOrderById({ smartOrderId });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     if (smartOrderExists) {

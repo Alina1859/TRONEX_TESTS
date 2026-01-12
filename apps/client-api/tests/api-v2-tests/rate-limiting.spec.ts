@@ -9,6 +9,7 @@ import { SmartOrderResponseCheck } from "@apps/client-api/test-objects/smart-ord
 import { log } from "@shared/utils/logger";
 import { userIdPrimary } from "@apps/client-api/api/constants";
 import { calculateExecutionTime } from "@shared/helpers/execution-time-helper";
+import { RATE_LIMIT_TEST_REQUEST_COUNT } from "@shared/utils/constants";
 
 test.describe("rate limiting tests", () => {
   const orderRepo = new OrderRepository();
@@ -24,18 +25,16 @@ test.describe("rate limiting tests", () => {
     const lastOrderId = getLastOrderByUserId[0].id;
 
     const orderApi = new OrderApi(request);
-    const requestCount = 120;
 
-    log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
+    log.info(`Отправка ${RATE_LIMIT_TEST_REQUEST_COUNT} запросов параллельно (100 запросов в секунду)...`);
     log.info(`Используется Order ID: ${lastOrderId}`);
 
-    const requests = Array.from({ length: requestCount }, () => orderApi.getOrderById({ orderId: lastOrderId }));
-    const { result: responses, duration } = await calculateExecutionTime(() => Promise.all(requests));
-    log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
+    const requests = Array.from({ length: RATE_LIMIT_TEST_REQUEST_COUNT }, () => orderApi.getOrderById({ orderId: lastOrderId }));
+    const responses = await calculateExecutionTime(() => Promise.all(requests), RATE_LIMIT_TEST_REQUEST_COUNT);
 
     const statusCounts = await responseStatusCheck.processRateLimitResponses(
       responses,
-      requestCount
+      RATE_LIMIT_TEST_REQUEST_COUNT
     );
     orderResponseCheck.checkRateLimitEnforcement(statusCounts);
   });
@@ -44,17 +43,15 @@ test.describe("rate limiting tests", () => {
     log.info("=== Тест: Проверка rate limiting для GET /api/v2/orders/ ===");
 
     const orderApi = new OrderApi(request);
-    const requestCount = 120;
 
-    log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
+    log.info(`Отправка ${RATE_LIMIT_TEST_REQUEST_COUNT} запросов параллельно (100 запросов в секунду)...`);
 
-    const requests = Array.from({ length: requestCount }, () => orderApi.getOrderList({}));
-    const { result: responses, duration } = await calculateExecutionTime(() => Promise.all(requests));
-    log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
+    const requests = Array.from({ length: RATE_LIMIT_TEST_REQUEST_COUNT }, () => orderApi.getOrderList({}));
+    const responses = await calculateExecutionTime(() => Promise.all(requests), RATE_LIMIT_TEST_REQUEST_COUNT);
 
     const statusCounts = await responseStatusCheck.processRateLimitResponses(
       responses,
-      requestCount
+      RATE_LIMIT_TEST_REQUEST_COUNT
     );
     orderResponseCheck.checkRateLimitEnforcement(statusCounts);
   });
@@ -66,20 +63,18 @@ test.describe("rate limiting tests", () => {
     const lastSmartOrderId = getLastSmartOrderByUserId[0].id;
 
     const smartOrderApi = new SmartOrderApi(request);
-    const requestCount = 120;
 
-    log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
+    log.info(`Отправка ${RATE_LIMIT_TEST_REQUEST_COUNT} запросов параллельно (100 запросов в секунду)...`);
     log.info(`Используется Smart Order ID: ${lastSmartOrderId}`);
 
-    const requests = Array.from({ length: requestCount }, () =>
+    const requests = Array.from({ length: RATE_LIMIT_TEST_REQUEST_COUNT }, () =>
       smartOrderApi.getSmartOrderById({ smartOrderId: lastSmartOrderId })
     );
-    const { result: responses, duration } = await calculateExecutionTime(() => Promise.all(requests));
-    log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
+    const responses = await calculateExecutionTime(() => Promise.all(requests), RATE_LIMIT_TEST_REQUEST_COUNT);
 
     const statusCounts = await responseStatusCheck.processRateLimitResponses(
       responses,
-      requestCount
+      RATE_LIMIT_TEST_REQUEST_COUNT
     );
     smartOrderResponseCheck.checkRateLimitEnforcement(statusCounts);
   });

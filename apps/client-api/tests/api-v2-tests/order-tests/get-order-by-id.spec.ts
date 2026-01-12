@@ -100,7 +100,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     }
 
     const orderApi = new OrderApi(request);
-    const response = await orderApi.getOrderById(orderId);
+    const response = await orderApi.getOrderById({ orderId });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     if (orderExists) {
