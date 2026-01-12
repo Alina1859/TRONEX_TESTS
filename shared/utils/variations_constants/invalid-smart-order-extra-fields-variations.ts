@@ -1,4 +1,5 @@
 import { CreateOrderRequestVariation } from "@shared/utils/types";
+import { TEST_USER_ID_UUID } from "@shared/utils/constants";
 import { validFromAddress, validToAddress } from "./invalid-create-smart-order-request-variations";
 
 const validSmartOrderBaseRequest = {
@@ -84,7 +85,7 @@ export const invalidSmartOrderExtraFieldsVariations: CreateOrderRequestVariation
   {
     data: {
       ...validSmartOrderBaseRequest,
-      userId: "123e4567-e89b-12d3-a456-426614174000",
+      userId: TEST_USER_ID_UUID,
     },
     description: "лишнее поле userId",
   },
@@ -123,7 +124,7 @@ export const invalidSmartOrderExtraFieldsVariations: CreateOrderRequestVariation
       ...validSmartOrderBaseRequest,
       id: 1,
       status: "INIT",
-      userId: "123e4567-e89b-12d3-a456-426614174000",
+      userId: TEST_USER_ID_UUID,
     },
     description: "лишние поля id, status и userId",
   },
@@ -145,7 +146,7 @@ export const invalidSmartOrderExtraFieldsVariations: CreateOrderRequestVariation
       targetAddress: validToAddress,
       id: 1,
       status: "INIT",
-      userId: "123e4567-e89b-12d3-a456-426614174000",
+      userId: TEST_USER_ID_UUID,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },

@@ -1,6 +1,6 @@
-import { BANDWIDTH_ORDER_PERIODS, ENERGY_ORDER_PERIODS } from "./constants";
+import { BANDWIDTH_ORDER_PERIODS, ENERGY_ORDER_PERIODS, OrderStatus, OrderType, SmartOrderStatus, OrderSource } from "./constants";
 
-export type OrderResourceType = "ENERGY" | "BANDWIDTH" | "ACTIVATION";
+export type OrderResourceType = OrderType;
 
 export type EnergyOrderPeriodMs = (typeof ENERGY_ORDER_PERIODS)[number];
 export type BandwidthOrderPeriodMs = (typeof BANDWIDTH_ORDER_PERIODS)[number];
@@ -12,7 +12,7 @@ export interface Order {
   id: number;
   createdAt: Date | string;
   updatedAt: Date | string;
-  status: "INIT" | "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED";
+  status: OrderStatus;
   type: OrderResourceType;
   amount: number;
   period: OrderPeriodMs;
@@ -26,19 +26,9 @@ export interface Order {
   description?: string | null;
   details?: any;
   silent: boolean;
-  source: "BOT" | "API" | "WEB" | "AUTO_REFILL" | "SMART_REFILL";
+  source: OrderSource;
   userId: string;
 }
-
-export const SMART_ORDER_STATUSES = [
-  "INIT",
-  "PENDING_ACTIVATION",
-  "PENDING_RESOURCES",
-  "COMPLETED",
-  "FAILED",
-] as const;
-
-export type SmartOrderStatus = (typeof SMART_ORDER_STATUSES)[number];
 
 export interface SmartOrder {
   id: number;
@@ -148,3 +138,19 @@ export interface Provider {
 }
 
 export type ProviderSettings = Record<string, { priority: number }>;
+
+export interface ProviderPriorityWithOrderCombination {
+  priorityDescription: string;
+  priorities: {
+    "TronLocal-1": number;
+    "TronLocal-2": number;
+    "TronLocal-3": number;
+    "TronLocal": number;
+  };
+  orderCombination: {
+    duration: "1h" | "1d" | "3d";
+    energy: number;
+    sunRate: number;
+    expectedCost: number;
+  };
+}

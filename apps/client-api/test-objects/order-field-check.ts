@@ -1,6 +1,6 @@
 import { expect } from "@playwright/test";
 import { Order } from "@shared/utils/types";
-import { VALID_ORDER_PERIODS, ORDER_STATUSES, ORDER_TYPES } from "@shared/utils/constants";
+import { VALID_ORDER_PERIODS, OrderStatus, OrderType } from "@shared/utils/constants";
 import { AddressCheck } from "./address-check";
 
 export class OrderFieldCheck {
@@ -20,13 +20,13 @@ export class OrderFieldCheck {
   checkStatus(apiOrder: Order) {
     expect(apiOrder).toHaveProperty("status");
     expect(typeof apiOrder.status).toBe("string");
-    expect(ORDER_STATUSES).toContain(apiOrder.status);
+    expect(Object.values(OrderStatus)).toContain(apiOrder.status);
   }
 
   checkType(apiOrder: Order) {
     expect(apiOrder).toHaveProperty("type");
     expect(typeof apiOrder.type).toBe("string");
-    expect(ORDER_TYPES).toContain(apiOrder.type);
+    expect(Object.values(OrderType)).toContain(apiOrder.type);
   }
 
   checkAmount(apiOrder: Order) {

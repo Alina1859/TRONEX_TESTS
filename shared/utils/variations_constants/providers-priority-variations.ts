@@ -1,5 +1,6 @@
 import { PROVIDER_NAMES } from "@shared/utils/constants";
 import { OrderPeriod } from "@shared/utils/constants";
+import { ProviderPriorityWithOrderCombination } from "@shared/utils/types";
 
 export const providerTestCases = [
   { providerName: PROVIDER_NAMES.TRON_LOCAL_1, priorityValue: 100 },
@@ -7,52 +8,6 @@ export const providerTestCases = [
   { providerName: PROVIDER_NAMES.TRON_LOCAL_3, priorityValue: 100 },
   { providerName: PROVIDER_NAMES.TRON_LOCAL, priorityValue: 100 },
 ];
-
-export const PROVIDERS_INFO = [
-    {
-        "name": "TronLocal-1",
-        "link": "http://tron-testnet-resource-server-ms-chart.tronex-dev:8000",
-        "availabilityConfig": {
-            "ENERGY": [
-                "1d",
-                "3d"
-            ],
-            "BANDWIDTH": false,
-            "ACTIVATION": false
-        },
-        "last1hEnergyPrice": 48
-    },
-    {
-        "name": "TronLocal-2",
-        "link": "http://tron-testnet-resource-server-ms-chart.tronex-dev:8000",
-        "availabilityConfig": {
-            "ENERGY": true,
-            "BANDWIDTH": true,
-            "ACTIVATION": true
-        },
-        "last1hEnergyPrice": 53.07692307692308
-    },
-    {
-        "name": "TronLocal-3",
-        "link": "http://tron-testnet-resource-server-ms-chart.tronex-dev:8000",
-        "availabilityConfig": {
-            "ENERGY": true,
-            "BANDWIDTH": true,
-            "ACTIVATION": true
-        },
-        "last1hEnergyPrice": 58
-    },
-    {
-        "name": "TronLocal",
-        "link": "http://tron-testnet-resource-server-ms-chart.tronex-dev:8000",
-        "availabilityConfig": {
-            "ENERGY": true,
-            "BANDWIDTH": true,
-            "ACTIVATION": true
-        },
-        "last1hEnergyPrice": 43.07692307692308
-    }
-] as const;
 
 export const TEST_ORDER_COMBINATIONS = [
     { duration: "1h", energy: 65000, sunRate: 70, expectedCost: 4.55 },
@@ -77,23 +32,6 @@ export const PROVIDERS_PRIORITY_ENERGY_ORDER_COMBINATIONS = [
   { duration: OrderPeriod.ONE_DAY, amount: 65000, providerName: PROVIDER_NAMES.TRON_LOCAL },
   { duration: OrderPeriod.THREE_DAYS, amount: 100000, providerName: PROVIDER_NAMES.TRON_LOCAL },
 ] as const;
-
-export interface ProviderPriorityWithOrderCombination {
-  priorityDescription: string;
-  priorities: {
-    "TronLocal-1": number;
-    "TronLocal-2": number;
-    "TronLocal-3": number;
-    "TronLocal": number;
-  };
-  orderCombination: {
-    duration: "1h" | "1d" | "3d";
-    energy: number;
-    sunRate: number;
-    expectedCost: number;
-  };
-}
-
 
 export const PROVIDER_PRIORITY_WITH_ORDER_COMBINATIONS: ProviderPriorityWithOrderCombination[] = [
 

@@ -11,21 +11,5 @@ export class ProviderPriorityCheck {
     expect(data[providerName], `Провайдер ${providerName} не имеет свойства priority`).toHaveProperty("priority");
     expect(data[providerName].priority, `Приоритет провайдера ${providerName} не равен ${priorityValue}`).toBe(priorityValue);
   }
-
-  checkProviderPriorityResponse(
-    responseData: ProviderSettings,
-    providerName: string,
-    priorityValue: number
-  ) {
-    this.checkProviderPriority(responseData, providerName, priorityValue);
-  }
-
-  checkProviderPrioritySaved(
-    verifyData: ProviderSettings,
-    providerName: string,
-    priorityValue: number
-  ) {
-    this.checkProviderPriority(verifyData, providerName, priorityValue);
-  }
 }
 

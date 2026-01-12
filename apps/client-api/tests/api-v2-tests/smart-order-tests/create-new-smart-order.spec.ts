@@ -10,14 +10,11 @@ import { SmartOrderRepository } from "@apps/client-api/repositories/smart-order.
 import { OrderApi } from "@apps/client-api/api/order.api";
 import { apiKeyZero } from "@apps/client-api/api/constants";
 import { SmartOrderWithOrders, CreateActivationOrderRequest, Order } from "@shared/utils/types";
-import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_OK } from "@shared/utils/constants";
+import { HttpStatus } from "@shared/utils/constants";
 import { invalidCreateSmartOrderRequestVariations } from "@shared/utils/variations_constants/invalid-create-smart-order-request-variations";
 import { invalidSmartOrderExtraFieldsVariations } from "@shared/utils/variations_constants/invalid-smart-order-extra-fields-variations";
-import { waitForActivationCompleted } from "@shared/utils/activate-wallets";
-import {
-  validateEnergyOrderPriceByFormula,
-  validateBandwidthOrderPriceByFormula,
-} from "@apps/client-api/test-objects/price-check";
+import { WalletActivationHelper } from "@shared/helpers/wallet-activation-helper";
+import { PriceCheck } from "@apps/client-api/test-objects/price-check";
 import { CoreRepository } from "@apps/client-api/api/core.api";
 import { OrderPeriod } from "@shared/utils/constants";
 import { EnergyOrderPeriodMs, BandwidthOrderPeriodMs } from "@shared/utils/types";
@@ -28,6 +25,8 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
   const statusCheck = new ResponseStatusCheck();
   const smartOrderRepo = new SmartOrderRepository();
   const addressCheck = new AddressCheck();
+  const priceCheck = new PriceCheck();
+  const walletActivationHelper = new WalletActivationHelper();
 
   async function createAndActivateFromAddress(
     request: APIRequestContext,
@@ -44,7 +43,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
       targetAddress: fromAddress,
     };
 
-    const activationResponse = await orderApi.createNewOrder(activationRequest);
+    const activationResponse = await orderApi.createNewOrder({ data: activationRequest });
     const activationStatus = activationResponse.status();
     log.info(`API запрос (ACTIVATION) выполнен. Статус: ${activationStatus}`);
     statusCheck.checkResponseStatus(activationResponse);
@@ -52,7 +51,12 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
     const activationOrder = (await activationResponse.json()) as Order;
     log.info(`API Response (ACTIVATION): ${JSON.stringify(activationOrder, null, 2)}`);
 
-    await waitForActivationCompleted(activationOrder.id, fromAddress, timeoutMs, stepMs);
+    await walletActivationHelper.waitForActivationCompleted({
+      orderId: activationOrder.id,
+      targetAddress: fromAddress,
+      timeoutMs,
+      stepMs,
+    });
     log.info(`Кошелек fromAddress активирован: ${fromAddress}`);
 
     return fromAddress;
@@ -120,7 +124,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
       `Отправка запроса на создание smart order: ${JSON.stringify(smartOrderRequest, null, 2)}`
     );
 
-    const response = await smartOrderApi.createNewSmartOrder(smartOrderRequest);
+    const response = await smartOrderApi.createNewSmartOrder({ data: smartOrderRequest });
     const responseStatus = response.status();
     log.info(`API запрос выполнен. Статус: ${responseStatus}`);
 
@@ -143,7 +147,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
 
     const dbFinalSmartOrder = await waitForSmartOrderCompleted(apiSmartOrder.id);
 
-    const getSmartOrderResponse = await smartOrderApi.getSmartOrderById(apiSmartOrder.id);
+    const getSmartOrderResponse = await smartOrderApi.getSmartOrderById({ smartOrderId: apiSmartOrder.id });
     statusCheck.checkResponseStatus(getSmartOrderResponse);
     const apiFinalSmartOrder = (await getSmartOrderResponse.json()) as SmartOrderWithOrders;
     log.info(`API Response (Smart Order, by id): ${JSON.stringify(apiFinalSmartOrder, null, 2)}`);
@@ -158,7 +162,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
     const coreRepo = new CoreRepository();
     for (const order of apiFinalSmartOrder.orders) {
       if (order.type === "ENERGY" && order.amount && order.period) {
-        await validateEnergyOrderPriceByFormula(
+        await priceCheck.checkEnergyOrderPriceByFormula(
           order,
           coreRepo,
           order.period as EnergyOrderPeriodMs,
@@ -166,7 +170,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
           0.01
         );
       } else if (order.type === "BANDWIDTH" && order.amount && order.period) {
-        await validateBandwidthOrderPriceByFormula(
+        await priceCheck.checkBandwidthOrderPriceByFormula(
           order,
           coreRepo,
           order.period as BandwidthOrderPeriodMs,
@@ -190,8 +194,8 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
       test(`${variation.description}`, async ({ request }) => {
         const smartOrderApi = new SmartOrderApi(request);
 
-        const response = await smartOrderApi.createNewSmartOrder(variation.data);
-        statusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
+        const response = await smartOrderApi.createNewSmartOrder({ data: variation.data });
+        statusCheck.checkResponseStatus(response, HttpStatus.BAD_REQUEST);
 
         const headers = response.headers();
         const contentType = headers["content-type"] ?? headers["Content-Type"] ?? "";
@@ -223,8 +227,8 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
           toAddress,
         };
 
-        const response = await smartOrderApi.createNewSmartOrder(requestData);
-        statusCheck.checkResponseStatus(response, HTTP_STATUS_OK);
+        const response = await smartOrderApi.createNewSmartOrder({ data: requestData });
+        statusCheck.checkResponseStatus(response, HttpStatus.OK);
 
         const apiSmartOrder = (await response.json()) as SmartOrderWithOrders;
         log.info(`API Response (with extra fields): ${JSON.stringify(apiSmartOrder, null, 2)}`);
@@ -272,10 +276,10 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
     );
 
     const smartOrderApi = new SmartOrderApi(request);
-    const response = await smartOrderApi.createNewSmartOrderWithApiKey(
-      smartOrderRequest,
-      apiKeyZero
-    );
+    const response = await smartOrderApi.createNewSmartOrder({
+      data: smartOrderRequest,
+      apiKey: apiKeyZero,
+    });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
@@ -326,7 +330,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
       `Отправка запроса на создание smart order: ${JSON.stringify(smartOrderRequest, null, 2)}`
     );
 
-    const response = await smartOrderApi.createNewSmartOrder(smartOrderRequest);
+    const response = await smartOrderApi.createNewSmartOrder({ data: smartOrderRequest });
     const responseStatus = response.status();
     log.info(`API запрос выполнен. Статус: ${responseStatus}`);
 
@@ -377,7 +381,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
       `Отправка запроса на создание smart order: ${JSON.stringify(smartOrderRequest, null, 2)}`
     );
 
-    const response = await smartOrderApi.createNewSmartOrder(smartOrderRequest);
+    const response = await smartOrderApi.createNewSmartOrder({ data: smartOrderRequest });
     const responseStatus = response.status();
     log.info(`API запрос выполнен. Статус: ${responseStatus}`);
 
@@ -400,7 +404,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
 
     const dbFinalSmartOrder = await waitForSmartOrderCompleted(apiSmartOrder.id);
 
-    const getSmartOrderResponse = await smartOrderApi.getSmartOrderById(apiSmartOrder.id);
+    const getSmartOrderResponse = await smartOrderApi.getSmartOrderById({ smartOrderId: apiSmartOrder.id });
     statusCheck.checkResponseStatus(getSmartOrderResponse);
     const apiFinalSmartOrder = (await getSmartOrderResponse.json()) as SmartOrderWithOrders;
     log.info(`API Response (Smart Order, by id): ${JSON.stringify(apiFinalSmartOrder, null, 2)}`);

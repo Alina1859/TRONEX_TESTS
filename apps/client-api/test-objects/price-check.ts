@@ -6,162 +6,156 @@ import {
   EnergyOrderPeriodMs,
   BandwidthPriceValues,
   BandwidthOrderPeriodMs,
-} from "../../../shared/utils/types";
-import { ENERGY_PRICE_FORMULA, BANDWIDTH_PRICE_FORMULA, OrderPeriod } from "../../../shared/utils/constants";
-import { log } from "../../../shared/utils/logger";
+} from "@shared/utils/types";
+import { ENERGY_PRICE_FORMULA, BANDWIDTH_PRICE_FORMULA, OrderPeriod } from "@shared/utils/constants";
+import { getPeriodKey } from "@shared/helpers/order-period-helpers";
+import { log } from "@shared/utils/logger";
 
+type PeriodHoursAndDays = { hour: number; day: number };
 
-export async function getEnergyPriceForPeriod(
-  coreRepo: CoreRepository,
-  period: EnergyOrderPeriodMs
-): Promise<number> {
-  const priceEnergyResponse = await coreRepo.coreConstantsKeyGet("PRICE_ENERGY");
-  const priceEnergy: EnergyPriceValues = priceEnergyResponse.data;
+const ENERGY_PERIOD_MAP: Record<EnergyOrderPeriodMs, PeriodHoursAndDays> = {
+  [OrderPeriod.ONE_HOUR]: { hour: 1, day: 0 },
+  [OrderPeriod.ONE_DAY]: { hour: 0, day: 1 },
+  [OrderPeriod.THREE_DAYS]: { hour: 0, day: 3 },
+};
 
-  if (period === OrderPeriod.ONE_HOUR) {
-    return priceEnergy["1h"];
-  } else if (period === OrderPeriod.ONE_DAY) {
-    return priceEnergy["1d"];
-  } else if (period === OrderPeriod.THREE_DAYS) {
-    return priceEnergy["3d"];
-  } else {
-    throw new Error(`Неподдерживаемый период для энергии: ${period}`);
+const BANDWIDTH_PERIOD_MAP: Record<BandwidthOrderPeriodMs, PeriodHoursAndDays> = {
+  [OrderPeriod.ONE_HOUR]: { hour: 1, day: 0 },
+  [OrderPeriod.ONE_DAY]: { hour: 0, day: 1 },
+};
+
+export class PriceCheck {
+  constructor(
+    private coreRepo: CoreRepository,
+    private order: Order
+  ) {}
+
+  private getOrderPrice(): number {
+    return typeof this.order.sellPrice === "string"
+      ? parseFloat(this.order.sellPrice)
+      : this.order.sellPrice;
+  }
+
+  private async getEnergyPriceForPeriod(period: EnergyOrderPeriodMs): Promise<number> {
+    const priceEnergyResponse = await this.coreRepo.coreConstantsKeyGet({ key: "PRICE_ENERGY" });
+    const priceEnergy: EnergyPriceValues = priceEnergyResponse.data;
+    const periodKey = getPeriodKey(period);
+    return priceEnergy[periodKey];
+  }
+
+  private async getBandwidthPriceForPeriod(period: BandwidthOrderPeriodMs): Promise<number> {
+    const priceBandwidthResponse = await this.coreRepo.coreConstantsKeyGet({ key: "PRICE_BANDWIDTH" });
+    const priceBandwidth: BandwidthPriceValues = priceBandwidthResponse.data;
+    const periodKey = getPeriodKey(period) as "1h" | "1d";
+    return priceBandwidth[periodKey];
+  }
+
+  private periodToHoursAndDays(period: EnergyOrderPeriodMs): PeriodHoursAndDays {
+    const result = ENERGY_PERIOD_MAP[period];
+    if (!result) {
+      throw new Error(`Неподдерживаемый период для энергии: ${period}`);
+    }
+    return result;
+  }
+
+  private bandwidthPeriodToHoursAndDays(period: BandwidthOrderPeriodMs): PeriodHoursAndDays {
+    const result = BANDWIDTH_PERIOD_MAP[period];
+    if (!result) {
+      throw new Error(`Неподдерживаемый период для полосы пропускания: ${period}`);
+    }
+    return result;
+  }
+
+  async calculateExpectedEnergyPrice(params: {
+    period: EnergyOrderPeriodMs;
+    energyAmount: number;
+    sunRate?: number;
+  }): Promise<number> {
+    const { period, energyAmount, sunRate } = params;
+    const actualSunRate = sunRate !== undefined
+      ? sunRate
+      : await this.getEnergyPriceForPeriod(period);
+    const { hour, day } = this.periodToHoursAndDays(period);
+    return ENERGY_PRICE_FORMULA(actualSunRate, hour, day, energyAmount);
+  }
+
+  async checkEnergyOrderPriceByFormula(params: {
+    period: EnergyOrderPeriodMs;
+    energyAmount: number;
+    tolerance?: number;
+    sunRate?: number;
+  }): Promise<void> {
+    const { period, energyAmount, tolerance = 0.01, sunRate } = params;
+    const expectedPrice = await this.calculateExpectedEnergyPrice({ period, energyAmount, sunRate });
+    const actualPrice = this.getOrderPrice();
+
+    log.info(
+      `Проверка цены энергии: ожидаемая (по формуле) = ${expectedPrice}, фактическая (API) = ${actualPrice}${sunRate !== undefined ? `, sunRate = ${sunRate}` : ""}`
+    );
+
+    this.checkPriceDifference(
+      actualPrice,
+      expectedPrice,
+      tolerance,
+      `Стоимость заказа энергии ${actualPrice} не совпадает с расчетной по формуле ${expectedPrice}`
+    );
+  }
+
+  async calculateExpectedBandwidthPrice(params: {
+    period: BandwidthOrderPeriodMs;
+    bandwidthAmount: number;
+  }): Promise<number> {
+    const { period, bandwidthAmount } = params;
+    const sunRate = await this.getBandwidthPriceForPeriod(period);
+    const { hour, day } = this.bandwidthPeriodToHoursAndDays(period);
+    return BANDWIDTH_PRICE_FORMULA(sunRate, hour, day, bandwidthAmount);
+  }
+
+  async checkBandwidthOrderPriceByFormula(params: {
+    period: BandwidthOrderPeriodMs;
+    bandwidthAmount: number;
+    tolerance?: number;
+  }): Promise<void> {
+    const { period, bandwidthAmount, tolerance = 0.03 } = params;
+    const expectedPrice = await this.calculateExpectedBandwidthPrice({ period, bandwidthAmount });
+    const actualPrice = this.getOrderPrice();
+
+    log.info(
+      `Проверка цены полосы пропускания: ожидаемая (по формуле) = ${expectedPrice}, фактическая (API) = ${actualPrice}`
+    );
+
+    this.checkPriceDifference(
+      actualPrice,
+      expectedPrice,
+      tolerance,
+      `Стоимость заказа полосы пропускания ${actualPrice} не совпадает с расчетной по формуле ${expectedPrice}`
+    );
+  }
+
+  private checkPriceDifference(
+    actualPrice: number,
+    expectedPrice: number,
+    tolerance: number,
+    baseMessage: string
+  ): void {
+    const priceDifference = Math.abs(actualPrice - expectedPrice);
+    expect(
+      priceDifference,
+      `${baseMessage} (разница: ${priceDifference})`
+    ).toBeLessThanOrEqual(tolerance);
+  }
+
+  checkOrderCost(params: {
+    expectedCost: number;
+    tolerance?: number;
+    message?: string;
+  }): void {
+    const { expectedCost, tolerance = 0.01, message } = params;
+    const actualCost = this.getOrderPrice();
+    const costDifference = Math.abs(actualCost - expectedCost);
+    const errorMessage =
+      message ||
+      `Стоимость заказа ${actualCost} не совпадает с ожидаемой ${expectedCost} (разница: ${costDifference})`;
+    expect(costDifference, errorMessage).toBeLessThanOrEqual(tolerance);
   }
 }
-
-function periodToHoursAndDays(period: EnergyOrderPeriodMs): { hour: number; day: number } {
-  if (period === OrderPeriod.ONE_HOUR) {
-    return { hour: 1, day: 0 };
-  } else if (period === OrderPeriod.ONE_DAY) {
-    return { hour: 0, day: 1 };
-  } else if (period === OrderPeriod.THREE_DAYS) {
-    return { hour: 0, day: 3 };
-  } else {
-    throw new Error(`Неподдерживаемый период: ${period}`);
-  }
-}
-
-export async function calculateExpectedEnergyPrice(
-  coreRepo: CoreRepository,
-  period: EnergyOrderPeriodMs,
-  energyAmount: number,
-  sunRate?: number
-): Promise<number> {
-  const actualSunRate = sunRate !== undefined ? sunRate : await getEnergyPriceForPeriod(coreRepo, period);
-  const { hour, day } = periodToHoursAndDays(period);
-  return ENERGY_PRICE_FORMULA(actualSunRate, hour, day, energyAmount);
-}
-
-export async function validateEnergyOrderPriceByFormula(
-  order: Order,
-  coreRepo: CoreRepository,
-  period: EnergyOrderPeriodMs,
-  energyAmount: number,
-  tolerance = 0.01,
-  sunRate?: number
-): Promise<void> {
-  const expectedPrice = await calculateExpectedEnergyPrice(coreRepo, period, energyAmount, sunRate);
-  const actualPrice = typeof order.sellPrice === "string" ? parseFloat(order.sellPrice) : order.sellPrice;
-
-  log.info(
-    `Проверка цены энергии: ожидаемая (по формуле) = ${expectedPrice}, фактическая (API) = ${actualPrice}${sunRate !== undefined ? `, sunRate = ${sunRate}` : ""}`
-  );
-
-  const priceDifference = Math.abs(actualPrice - expectedPrice);
-  expect(
-    priceDifference,
-    `Стоимость заказа энергии ${actualPrice} не совпадает с расчетной по формуле ${expectedPrice} (разница: ${priceDifference})`
-  ).toBeLessThanOrEqual(tolerance);
-}
-
-
-export async function getBandwidthPriceForPeriod(
-  coreRepo: CoreRepository,
-  period: BandwidthOrderPeriodMs
-): Promise<number> {
-  const priceBandwidthResponse = await coreRepo.coreConstantsKeyGet("PRICE_BANDWIDTH");
-  const priceBandwidth: BandwidthPriceValues = priceBandwidthResponse.data;
-
-  if (period === OrderPeriod.ONE_HOUR) {
-    return priceBandwidth["1h"];
-  } else if (period === OrderPeriod.ONE_DAY) {
-    return priceBandwidth["1d"];
-  } else {
-    throw new Error(`Неподдерживаемый период для полосы пропускания: ${period}`);
-  }
-}
-
-
-function bandwidthPeriodToHoursAndDays(
-  period: BandwidthOrderPeriodMs
-): { hour: number; day: number } {
-  if (period === OrderPeriod.ONE_HOUR) {
-    return { hour: 1, day: 0 };
-  } else if (period === OrderPeriod.ONE_DAY) {
-    return { hour: 0, day: 1 };
-  } else {
-    throw new Error(`Неподдерживаемый период полосы пропускания: ${period}`);
-  }
-}
-
-export async function calculateExpectedBandwidthPrice(
-  coreRepo: CoreRepository,
-  period: BandwidthOrderPeriodMs,
-  bandwidthAmount: number
-): Promise<number> {
-  const sunRate = await getBandwidthPriceForPeriod(coreRepo, period);
-  const { hour, day } = bandwidthPeriodToHoursAndDays(period);
-  return BANDWIDTH_PRICE_FORMULA(sunRate, hour, day, bandwidthAmount);
-}
-
-
-export async function validateBandwidthOrderPriceByFormula(
-  order: Order,
-  coreRepo: CoreRepository,
-  period: BandwidthOrderPeriodMs,
-  bandwidthAmount: number,
-  tolerance = 0.03
-): Promise<void> {
-  const expectedPrice = await calculateExpectedBandwidthPrice(coreRepo, period, bandwidthAmount);
-  const actualPrice = typeof order.sellPrice === "string" ? parseFloat(order.sellPrice) : order.sellPrice;
-
-  log.info(
-    `Проверка цены полосы пропускания: ожидаемая (по формуле) = ${expectedPrice}, фактическая (API) = ${actualPrice}`
-  );
-
-  const priceDifference = Math.abs(actualPrice - expectedPrice);
-  expect(
-    priceDifference,
-    `Стоимость заказа полосы пропускания ${actualPrice} не совпадает с расчетной по формуле ${expectedPrice} (разница: ${priceDifference})`
-  ).toBeLessThanOrEqual(tolerance);
-}
-
-export function checkOrderCost(
-  order: Order,
-  expectedCost: number,
-  tolerance = 0.01,
-  message?: string
-): void {
-  const actualCost =
-    typeof order.sellPrice === "string" ? parseFloat(order.sellPrice) : order.sellPrice;
-  const costDifference = Math.abs(actualCost - expectedCost);
-  const errorMessage =
-    message ||
-    `Стоимость заказа ${actualCost} не совпадает с ожидаемой ${expectedCost} (разница: ${costDifference})`;
-  expect(costDifference, errorMessage).toBeLessThanOrEqual(tolerance);
-}
-
-export function checkSmartOrderOrdersPrices(orders: Order[]): void {
-  expect(orders.length).toBeGreaterThan(0);
-  let totalCost = 0;
-  for (const order of orders) {
-    const orderCost =
-      typeof order.sellPrice === "string" ? parseFloat(order.sellPrice) : order.sellPrice;
-    expect(orderCost, `Стоимость заказа ${order.type} должна быть больше нуля`).toBeGreaterThan(0);
-    totalCost += orderCost;
-    log.info(`Заказ ${order.type} (id=${order.id}): стоимость=${orderCost} TRX`);
-  }
-  expect(totalCost, `Общая стоимость всех заказов должна быть больше нуля`).toBeGreaterThan(0);
-  log.info(`Общая стоимость всех заказов в smart order: ${totalCost} TRX`);
-}
-

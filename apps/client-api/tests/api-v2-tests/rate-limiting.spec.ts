@@ -8,6 +8,7 @@ import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response
 import { SmartOrderResponseCheck } from "@apps/client-api/test-objects/smart-order-response-check";
 import { log } from "@shared/utils/logger";
 import { userIdPrimary } from "@apps/client-api/api/constants";
+import { calculateExecutionTime } from "@shared/helpers/execution-time-helper";
 
 test.describe("rate limiting tests", () => {
   const orderRepo = new OrderRepository();
@@ -28,12 +29,8 @@ test.describe("rate limiting tests", () => {
     log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
     log.info(`Используется Order ID: ${lastOrderId}`);
 
-    const startTime = Date.now();
-    const requests = Array.from({ length: requestCount }, () => orderApi.getOrderById(lastOrderId));
-    const responses = await Promise.all(requests);
-    const endTime = Date.now();
-    const duration = (endTime - startTime) / 1000;
-
+    const requests = Array.from({ length: requestCount }, () => orderApi.getOrderById({ orderId: lastOrderId }));
+    const { result: responses, duration } = await calculateExecutionTime(() => Promise.all(requests));
     log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
 
     const statusCounts = await responseStatusCheck.processRateLimitResponses(
@@ -51,12 +48,8 @@ test.describe("rate limiting tests", () => {
 
     log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
 
-    const startTime = Date.now();
-    const requests = Array.from({ length: requestCount }, () => orderApi.getOrderList());
-    const responses = await Promise.all(requests);
-    const endTime = Date.now();
-    const duration = (endTime - startTime) / 1000;
-
+    const requests = Array.from({ length: requestCount }, () => orderApi.getOrderList({}));
+    const { result: responses, duration } = await calculateExecutionTime(() => Promise.all(requests));
     log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
 
     const statusCounts = await responseStatusCheck.processRateLimitResponses(
@@ -78,14 +71,10 @@ test.describe("rate limiting tests", () => {
     log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
     log.info(`Используется Smart Order ID: ${lastSmartOrderId}`);
 
-    const startTime = Date.now();
     const requests = Array.from({ length: requestCount }, () =>
-      smartOrderApi.getSmartOrderById(lastSmartOrderId)
+      smartOrderApi.getSmartOrderById({ smartOrderId: lastSmartOrderId })
     );
-    const responses = await Promise.all(requests);
-    const endTime = Date.now();
-    const duration = (endTime - startTime) / 1000;
-
+    const { result: responses, duration } = await calculateExecutionTime(() => Promise.all(requests));
     log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
 
     const statusCounts = await responseStatusCheck.processRateLimitResponses(

@@ -19,10 +19,10 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
   test.beforeEach(async () => {
     await test.step("Сохранить начальные настройки провайдеров", async () => {
       try {
-        const initialSettingsResponse = await coreRepo.coreUsersUserIdSettingsKeyGet(
-          userIdPrimary,
-          "PROVIDER_SETTINGS"
-        );
+        const initialSettingsResponse = await coreRepo.coreUsersUserIdSettingsKeyGet({
+          userId: userIdPrimary,
+          key: "PROVIDER_SETTINGS",
+        });
         initialProviderSettings = initialSettingsResponse.data || {};
         log.info(`Сохранены начальные настройки PROVIDER_SETTINGS: ${JSON.stringify(initialProviderSettings, null, 2)}`);
       } catch (error) {
@@ -33,19 +33,22 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
   });
 
   test.afterEach(async () => {
-    if (initialProviderSettings !== null) {
-      await test.step("Восстановить начальные настройки провайдеров", async () => {
-        try {
-          await coreRepo.coreUsersUserIdSettingsKeyPut(userIdPrimary, "PROVIDER_SETTINGS", {
+    if (initialProviderSettings === null) return;
+    await test.step("Восстановить начальные настройки провайдеров", async () => {
+      try {
+        await coreRepo.coreUsersUserIdSettingsKeyPut({
+          userId: userIdPrimary,
+          key: "PROVIDER_SETTINGS",
+          coreUsersUserIdSettingsKeyPutRequest: {
             value: initialProviderSettings,
-          });
-          log.info(`✓ Начальные настройки PROVIDER_SETTINGS восстановлены`);
-        } catch (error) {
-          log.error(`Ошибка при восстановлении начальных настроек: ${error}`);
-          throw error;
-        }
-      });
-    }
+          },
+        });
+        log.info(`✓ Начальные настройки PROVIDER_SETTINGS восстановлены`);
+      } catch (error) {
+        log.error(`Ошибка при восстановлении начальных настроек: ${error}`);
+        throw error;
+      }
+    });
   });
 
   test.describe("Тест-кейс № 1: Установка приоритета провайдера", () => {
@@ -62,33 +65,30 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
 
           log.info(`Установка приоритета ${providerName} = ${priorityValue}`);
 
-          const response = await coreRepo.coreUsersUserIdSettingsKeyPut(
-            userIdPrimary,
-            "PROVIDER_SETTINGS",
-            requestBody
-          );
+          const response = await coreRepo.coreUsersUserIdSettingsKeyPut({
+            userId: userIdPrimary,
+            key: "PROVIDER_SETTINGS",
+            coreUsersUserIdSettingsKeyPutRequest: requestBody,
+          });
 
           log.info(`📄 Тело ответа API (PUT /settings):`);
           log.info(`${JSON.stringify(response.data, null, 2)}`);
 
           responseStatusCheck.checkResponseStatus(response);
 
-          const responseData = response.data;
-          providerPriorityCheck.checkProviderPriority(responseData, providerName, priorityValue);
+          providerPriorityCheck.checkProviderPriority(response.data, providerName, priorityValue);
         });
 
         await test.step("Проверить сохранение приоритета", async () => {
-          const verifyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet(
-            userIdPrimary,
-            "PROVIDER_SETTINGS"
-          );
+          const verifyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet({
+            userId: userIdPrimary,
+            key: "PROVIDER_SETTINGS",
+          });
 
           log.info(`📄 Тело ответа API (GET /settings):`);
           log.info(`${JSON.stringify(verifyResponse.data, null, 2)}`);
 
-          const verifyData = verifyResponse.data;
-
-          providerPriorityCheck.checkProviderPriority(verifyData, providerName, priorityValue);
+          providerPriorityCheck.checkProviderPriority(verifyResponse.data, providerName, priorityValue);
           log.info(`✓ Приоритет ${providerName} успешно установлен и верифицирован`);
         });
       });
@@ -103,33 +103,31 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
 
       log.info(`Удаление приоритета провайдера`);
 
-      const response = await coreRepo.coreUsersUserIdSettingsKeyPut(
-        userIdPrimary,
-        "PROVIDER_SETTINGS",
-        requestBody
-      );
+      const response = await coreRepo.coreUsersUserIdSettingsKeyPut({
+        userId: userIdPrimary,
+        key: "PROVIDER_SETTINGS",
+        coreUsersUserIdSettingsKeyPutRequest: requestBody,
+      });
 
       log.info(`📄 Тело ответа API (PUT /settings):`);
       log.info(`${JSON.stringify(response.data, null, 2)}`);
 
       responseStatusCheck.checkResponseStatus(response);
 
-      const responseData = response.data;
-      expect(responseData).toBeNull();
+      expect(response.data).toBeNull();
       log.info(`✓ Приоритет провайдера успешно удален`);
     });
 
     await test.step("Проверить удаление приоритета", async () => {
-      const verifyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet(
-        userIdPrimary,
-        "PROVIDER_SETTINGS"
-      );
+      const verifyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet({
+        userId: userIdPrimary,
+        key: "PROVIDER_SETTINGS",
+      });
 
       log.info(`📄 Тело ответа API (GET /settings):`);
       log.info(`${JSON.stringify(verifyResponse.data, null, 2)}`);
 
-      const verifyData = verifyResponse.data;
-      expect(verifyData).toBeNull();
+      expect(verifyResponse.data).toBeNull();
       log.info(`✓ Удаление приоритета провайдера успешно верифицировано`);
     });
   });

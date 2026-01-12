@@ -1,5 +1,6 @@
 import { expect } from "@playwright/test";
 import { Order } from "@shared/utils/types";
+import { HttpStatus } from "@shared/utils/constants";
 
 export class OrderResponseCheck {
   checkOrderId(apiOrder: Order, expectedOrderId: string | number) {
@@ -54,7 +55,7 @@ export class OrderResponseCheck {
   }
 
   checkRateLimitEnforcement(statusCounts: Record<number, number>): void {
-    expect(statusCounts[429]).toBeGreaterThan(0);
+    expect(statusCounts[HttpStatus.TOO_MANY_REQUESTS]).toBeGreaterThan(0);
   }
 
   checkOrderStatus(apiOrder: Order, expectedStatus: string) {

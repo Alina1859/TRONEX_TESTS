@@ -50,14 +50,43 @@ export const ORDER_ID_MAX = 2147483647;
 export const SMART_ORDER_ID_MIN = 1;
 export const SMART_ORDER_ID_MAX = 2147483647;
 
-export const ORDER_STATUSES = ["INIT", "PENDING", "COMPLETED", "FAILED", "CANCELLED"] as const;
+export enum OrderStatus {
+  INIT = "INIT",
+  PENDING = "PENDING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+  CANCELLED = "CANCELLED",
+}
 
-export const ORDER_TYPES = ["ENERGY", "BANDWIDTH", "ACTIVATION"] as const;
+export enum OrderType {
+  ENERGY = "ENERGY",
+  BANDWIDTH = "BANDWIDTH",
+  ACTIVATION = "ACTIVATION",
+}
 
-export const HTTP_STATUS_OK = 200;
-export const HTTP_STATUS_BAD_REQUEST = 400;
-export const HTTP_STATUS_NOT_FOUND = 404;
-export const HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE = 415;
+export enum HttpStatus {
+  OK = 200,
+  BAD_REQUEST = 400,
+  NOT_FOUND = 404,
+  UNSUPPORTED_MEDIA_TYPE = 415,
+  TOO_MANY_REQUESTS = 429,
+}
+
+export enum SmartOrderStatus {
+  INIT = "INIT",
+  PENDING_ACTIVATION = "PENDING_ACTIVATION",
+  PENDING_RESOURCES = "PENDING_RESOURCES",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
+}
+
+export enum OrderSource {
+  BOT = "BOT",
+  API = "API",
+  WEB = "WEB",
+  AUTO_REFILL = "AUTO_REFILL",
+  SMART_REFILL = "SMART_REFILL",
+}
 
 export const ENERGY_PRICE_FORMULA = (sunRate: number, hour: number, day: number, energy: number) => {
   const durationMultiplier = day > 0 ? day * 24 : hour;
@@ -86,9 +115,9 @@ export const PROVIDER_NAMES = {
 
 export const PROVIDER_ENERGY_PRICES = {
   TRON_LOCAL_1: 48,
-  TRON_LOCAL_2: 53.07692307692308,
+  TRON_LOCAL_2: 53.08,
   TRON_LOCAL_3: 58,
-  TRON_LOCAL: 43.07692307692308,
+  TRON_LOCAL: 43.08,
 } as const;
 
 export const PROVIDER_AVAILABILITY_CONFIG = {
@@ -150,3 +179,5 @@ export const PROVIDERS = [
 ];
 
 export const validOrderId = 1;
+
+export const TEST_USER_ID_UUID = "123e4567-e89b-12d3-a456-426614174000";

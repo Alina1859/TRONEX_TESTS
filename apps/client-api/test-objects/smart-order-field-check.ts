@@ -1,6 +1,7 @@
 import { expect } from "@playwright/test";
 import { AddressCheck } from "@apps/client-api/test-objects/address-check";
-import { SMART_ORDER_STATUSES, SmartOrderWithOrders } from "@shared/utils/types";
+import { SmartOrderWithOrders } from "@shared/utils/types";
+import { SmartOrderStatus } from "@shared/utils/constants";
 import { OrderFieldCheck } from "./order-field-check";
 
 export class SmartOrderFieldCheck {
@@ -13,7 +14,7 @@ export class SmartOrderFieldCheck {
   checkStatus(apiSmartOrder: SmartOrderWithOrders) {
     expect(apiSmartOrder).toHaveProperty("status");
     expect(typeof apiSmartOrder.status).toBe("string");
-    expect(SMART_ORDER_STATUSES).toContain(apiSmartOrder.status);
+    expect(Object.values(SmartOrderStatus)).toContain(apiSmartOrder.status);
   }
 
   checkFromAddress(apiSmartOrder: SmartOrderWithOrders) {

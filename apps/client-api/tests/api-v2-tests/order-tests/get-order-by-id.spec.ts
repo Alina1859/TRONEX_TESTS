@@ -7,7 +7,7 @@ import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-stat
 import { boundaryAndInvalidOrderIdVariations } from "@shared/utils/variations_constants/invalid-orderId-variations";
 import { log } from "@shared/utils/logger";
 import { userIdPrimary, userIdSecondary } from "@apps/client-api/api/constants";
-import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND } from "@shared/utils/constants";
+import { HttpStatus } from "@shared/utils/constants";
 
 test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
   const orderRepo = new OrderRepository();
@@ -23,7 +23,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     const lastOrderId = lastOrder.id;
 
     const orderApi = new OrderApi(request);
-    const response = await orderApi.getOrderById(lastOrderId);
+    const response = await orderApi.getOrderById({ orderId: lastOrderId });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     responseStatusCheck.checkResponseStatus(response);
@@ -50,10 +50,10 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     log.info(`Попытка доступа к Order ID: ${lastOrderId} (принадлежит другому пользователю)`);
 
     const orderApi = new OrderApi(request);
-    const response = await orderApi.getOrderById(lastOrderId);
+    const response = await orderApi.getOrderById({ orderId: lastOrderId });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_NOT_FOUND);
+    responseStatusCheck.checkResponseStatus(response, HttpStatus.NOT_FOUND);
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
@@ -70,10 +70,10 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     log.info(`Сгенерированный несуществующий Order ID: ${nonExistentOrderId}`);
 
     const orderApi = new OrderApi(request);
-    const response = await orderApi.getOrderById(nonExistentOrderId);
+    const response = await orderApi.getOrderById({ orderId: nonExistentOrderId });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-    responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_NOT_FOUND);
+    responseStatusCheck.checkResponseStatus(response, HttpStatus.NOT_FOUND);
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
@@ -115,7 +115,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
       log.info("✓ Все проверки пройдены успешно. Заказ с ID = 1 корректно получен.");
     } else {
       log.info("Проверка обработки ошибки 404 для несуществующего заказа...");
-      responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_NOT_FOUND);
+      responseStatusCheck.checkResponseStatus(response, HttpStatus.NOT_FOUND);
       const errorResponse = await response.json();
       log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
@@ -141,14 +141,14 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
         log.info(
           `Проверка: ${variation.description} (значение: ${JSON.stringify(variation.value)})`
         );
-        const response = await orderApi.getOrderById(variation.value as any);
+        const response = await orderApi.getOrderById({ orderId: variation.value as any });
         const status = response.status();
 
-        if (status === HTTP_STATUS_BAD_REQUEST || status === HTTP_STATUS_NOT_FOUND) {
+        if (status === HttpStatus.BAD_REQUEST || status === HttpStatus.NOT_FOUND) {
           log.info(`  ✓ Корректно обработано: статус ${status}`);
         } else {
           log.warn(
-            `  ✗ Неожиданный статус: ${status} (ожидался ${HTTP_STATUS_BAD_REQUEST} или ${HTTP_STATUS_NOT_FOUND})`
+            `  ✗ Неожиданный статус: ${status} (ожидался ${HttpStatus.BAD_REQUEST} или ${HttpStatus.NOT_FOUND})`
           );
         }
         responseStatusCheck.checkResponseStatus(response, status);
@@ -175,7 +175,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     log.info(`Статус заказа в БД: ${completedOrder[0].status}`);
 
     const orderApi = new OrderApi(request);
-    const response = await orderApi.getOrderById(completedOrderId);
+    const response = await orderApi.getOrderById({ orderId: completedOrderId });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     responseStatusCheck.checkResponseStatus(response);
@@ -203,7 +203,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     log.info(`Статус заказа в БД: ${failedOrder[0].status}`);
 
     const orderApi = new OrderApi(request);
-    const response = await orderApi.getOrderById(failedOrderId);
+    const response = await orderApi.getOrderById({ orderId: failedOrderId });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     responseStatusCheck.checkResponseStatus(response);
@@ -231,7 +231,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     log.info(`Тип заказа в БД: ${energyOrder[0].type}`);
 
     const orderApi = new OrderApi(request);
-    const response = await orderApi.getOrderById(energyOrderId);
+    const response = await orderApi.getOrderById({ orderId: energyOrderId });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     responseStatusCheck.checkResponseStatus(response);
@@ -259,7 +259,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     log.info(`Тип заказа в БД: ${bandwidthOrder[0].type}`);
 
     const orderApi = new OrderApi(request);
-    const response = await orderApi.getOrderById(bandwidthOrderId);
+    const response = await orderApi.getOrderById({ orderId: bandwidthOrderId });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     responseStatusCheck.checkResponseStatus(response);
@@ -289,7 +289,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     log.info(`Тип заказа в БД: ${activationOrder[0].type}`);
 
     const orderApi = new OrderApi(request);
-    const response = await orderApi.getOrderById(activationOrderId);
+    const response = await orderApi.getOrderById({ orderId: activationOrderId });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     responseStatusCheck.checkResponseStatus(response);

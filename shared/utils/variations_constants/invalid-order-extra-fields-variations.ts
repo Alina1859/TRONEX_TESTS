@@ -2,12 +2,12 @@ import {
   BANDWIDTH_AMOUNT_DEFAULT,
   ENERGY_AMOUNT_DEFAULT,
   OrderPeriod,
+  TEST_USER_ID_UUID,
 } from "@shared/utils/constants";
 import { CreateOrderRequestVariation } from "@shared/utils/types";
 import { validTargetAddress } from "./invalid-create-order-request-variations";
 
 export const invalidOrderExtraFieldsVariations: CreateOrderRequestVariation[] = [
-  // ACTIVATION: лишние поля amount и period
   {
     data: {
       type: "ACTIVATION",
@@ -34,7 +34,6 @@ export const invalidOrderExtraFieldsVariations: CreateOrderRequestVariation[] = 
     description: "ACTIVATION: лишние поля amount+period",
   },
 
-  // Поля из ответа, которые не должны быть в запросе (для всех типов)
   {
     data: {
       type: "ENERGY",
@@ -81,7 +80,7 @@ export const invalidOrderExtraFieldsVariations: CreateOrderRequestVariation[] = 
       targetAddress: validTargetAddress,
       amount: ENERGY_AMOUNT_DEFAULT,
       period: OrderPeriod.ONE_HOUR,
-      userId: "123e4567-e89b-12d3-a456-426614174000",
+      userId: TEST_USER_ID_UUID,
     },
     description: "ENERGY: лишнее поле userId",
   },
@@ -186,7 +185,6 @@ export const invalidOrderExtraFieldsVariations: CreateOrderRequestVariation[] = 
     description: "ENERGY: лишнее поле source",
   },
 
-  // BANDWIDTH: лишние поля из ответа
   {
     data: {
       type: "BANDWIDTH",
@@ -213,7 +211,7 @@ export const invalidOrderExtraFieldsVariations: CreateOrderRequestVariation[] = 
       targetAddress: validTargetAddress,
       amount: BANDWIDTH_AMOUNT_DEFAULT,
       period: OrderPeriod.ONE_HOUR,
-      userId: "123e4567-e89b-12d3-a456-426614174000",
+      userId: TEST_USER_ID_UUID,
     },
     description: "BANDWIDTH: лишнее поле userId",
   },
@@ -228,7 +226,6 @@ export const invalidOrderExtraFieldsVariations: CreateOrderRequestVariation[] = 
     description: "BANDWIDTH: лишнее поле blockchainTransaction",
   },
 
-  // ACTIVATION: лишние поля из ответа
   {
     data: {
       type: "ACTIVATION",
@@ -249,7 +246,7 @@ export const invalidOrderExtraFieldsVariations: CreateOrderRequestVariation[] = 
     data: {
       type: "ACTIVATION",
       targetAddress: validTargetAddress,
-      userId: "123e4567-e89b-12d3-a456-426614174000",
+      userId: TEST_USER_ID_UUID,
     },
     description: "ACTIVATION: лишнее поле userId",
   },
@@ -262,7 +259,6 @@ export const invalidOrderExtraFieldsVariations: CreateOrderRequestVariation[] = 
     description: "ACTIVATION: лишнее поле blockchainTransaction",
   },
 
-  // Комбинации лишних полей
   {
     data: {
       type: "ENERGY",
@@ -271,7 +267,7 @@ export const invalidOrderExtraFieldsVariations: CreateOrderRequestVariation[] = 
       period: OrderPeriod.ONE_HOUR,
       id: 1,
       status: "INIT",
-      userId: "123e4567-e89b-12d3-a456-426614174000",
+      userId: TEST_USER_ID_UUID,
     },
     description: "ENERGY: лишние поля id, status и userId",
   },

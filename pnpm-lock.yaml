@@ -14,6 +14,9 @@ importers:
       '@prisma/client':
         specifier: ^6.3.0
         version: 6.19.1(prisma@6.19.1(typescript@5.9.3))(typescript@5.9.3)
+      axios:
+        specifier: ^1.13.2
+        version: 1.13.2
       pg:
         specifier: ^8.14.0
         version: 8.16.3
@@ -97,10 +100,10 @@ importers:
     devDependencies:
       '@openapitools/openapi-generator-cli':
         specifier: ^2.19.1
-        version: 2.25.2(@types/node@24.10.1)
+        version: 2.25.2(@types/node@12.20.42)
       '@types/node':
-        specifier: ^24.10.1
-        version: 24.10.1
+        specifier: ^12.20.42
+        version: 12.20.42
       typescript:
         specifier: ^4.0 || ^5.0
         version: 5.9.3
@@ -601,6 +604,9 @@ packages:
 
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
+
+  '@types/node@12.20.42':
+    resolution: {integrity: sha512-aI3/oo5DzyiI5R/xAhxxRzfZlWlsbbqdgxfTPkqu/Zt+23GXiJvMCyPJT4+xKSXOnLqoL8jJYMLTwvK2M3a5hw==}
 
   '@types/node@22.7.5':
     resolution: {integrity: sha512-jML7s2NAzMWc//QSJ1a3prpk78cOPchGvXJsC3C6R6PSMoooztvRVQEz89gmBTBY1SPMaqo5teB4uNHPdetShQ==}
@@ -1826,12 +1832,12 @@ snapshots:
     dependencies:
       hono: 4.10.6
 
-  '@inquirer/external-editor@1.0.3(@types/node@24.10.1)':
+  '@inquirer/external-editor@1.0.3(@types/node@12.20.42)':
     dependencies:
       chardet: 2.1.1
       iconv-lite: 0.7.0
     optionalDependencies:
-      '@types/node': 24.10.1
+      '@types/node': 12.20.42
 
   '@isaacs/balanced-match@4.0.1': {}
 
@@ -1909,7 +1915,7 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@openapitools/openapi-generator-cli@2.25.2(@types/node@24.10.1)':
+  '@openapitools/openapi-generator-cli@2.25.2(@types/node@12.20.42)':
     dependencies:
       '@nestjs/axios': 4.0.1(@nestjs/common@11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2))(axios@1.13.2)(rxjs@7.8.2)
       '@nestjs/common': 11.1.9(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -1923,7 +1929,7 @@ snapshots:
       console.table: 0.10.0
       fs-extra: 11.3.2
       glob: 13.0.0
-      inquirer: 8.2.7(@types/node@24.10.1)
+      inquirer: 8.2.7(@types/node@12.20.42)
       proxy-agent: 6.5.0
       reflect-metadata: 0.2.2
       rxjs: 7.8.2
@@ -2188,6 +2194,8 @@ snapshots:
   '@tsconfig/node14@1.0.3': {}
 
   '@tsconfig/node16@1.0.4': {}
+
+  '@types/node@12.20.42': {}
 
   '@types/node@22.7.5':
     dependencies:
@@ -2673,9 +2681,9 @@ snapshots:
 
   inherits@2.0.4: {}
 
-  inquirer@8.2.7(@types/node@24.10.1):
+  inquirer@8.2.7(@types/node@12.20.42):
     dependencies:
-      '@inquirer/external-editor': 1.0.3(@types/node@24.10.1)
+      '@inquirer/external-editor': 1.0.3(@types/node@12.20.42)
       ansi-escapes: 4.3.2
       chalk: 4.1.2
       cli-cursor: 3.1.0

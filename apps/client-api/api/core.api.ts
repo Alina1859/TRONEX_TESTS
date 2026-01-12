@@ -13,107 +13,110 @@ export const coreApi = new DefaultApi(
 );
 
 export class CoreRepository {
-  async coreConstantsKeyGet(key: string) {
+  async coreConstantsKeyGet(params: { key: string }) {
     return await coreApi.coreConstantsKeyGet(
-      {
-        key,
-      },
-      {
-        headers: getCoreApiHeaders(),
-      }
+      { key: params.key },
+      { headers: getCoreApiHeaders() }
     );
   }
 
-  async coreUsersUserIdSettingsKeyGet(userId: string, key: string, useCache?: boolean) {
-    return await coreApi.coreUsersUserIdSettingsKeyGet(
-      {
-        userId,
-        key,
-        useCache,
-      },
-      {
-        headers: getCoreApiHeaders(),
-      }
-    );
-  }
-
-  async coreUsersUserIdSettingsKeyPut(
-    userId: string,
-    key: string,
-    coreUsersUserIdSettingsKeyPutRequest: DefaultApiCoreUsersUserIdSettingsKeyPutRequest["coreUsersUserIdSettingsKeyPutRequest"]
-  ) {
-    const requestParams = {
-      userId,
-      key,
-      coreUsersUserIdSettingsKeyPutRequest,
-    };
-    return await coreApi.coreUsersUserIdSettingsKeyPut(requestParams, {
+  async coreUsersUserIdSettingsKeyGet(params: {
+    userId: string;
+    key: string;
+    useCache?: boolean;
+  }) {
+    return await coreApi.coreUsersUserIdSettingsKeyGet(params, {
       headers: getCoreApiHeaders(),
     });
   }
 
-  async coreConstantsKeyPut(
-    key: string,
-    coreUsersUserIdSettingsKeyPutRequest: DefaultApiCoreConstantsKeyPutRequest["coreUsersUserIdSettingsKeyPutRequest"]
-  ) {
-    return await coreApi.coreConstantsKeyPut(
-      {
-        key,
-        coreUsersUserIdSettingsKeyPutRequest,
-      },
-      {
-        headers: getCoreApiHeaders(),
-      }
-    );
+  async coreUsersUserIdSettingsKeyPut(params: {
+    userId: string;
+    key: string;
+    coreUsersUserIdSettingsKeyPutRequest: DefaultApiCoreUsersUserIdSettingsKeyPutRequest["coreUsersUserIdSettingsKeyPutRequest"];
+  }) {
+    return await coreApi.coreUsersUserIdSettingsKeyPut(params, {
+      headers: getCoreApiHeaders(),
+    });
   }
 
-  async coreUsersPost(
-    coreUsersPostRequest: DefaultApiCoreUsersPostRequest["coreUsersPostRequest"]
-  ) {
-    return await coreApi.coreUsersPost(
-      {
-        coreUsersPostRequest,
-      },
-      {
-        headers: getCoreApiHeaders(),
-      }
-    );
+  async coreConstantsKeyPut(params: {
+    key: string;
+    coreUsersUserIdSettingsKeyPutRequest: DefaultApiCoreConstantsKeyPutRequest["coreUsersUserIdSettingsKeyPutRequest"];
+  }) {
+    return await coreApi.coreConstantsKeyPut(params, {
+      headers: getCoreApiHeaders(),
+    });
   }
 
-  async coreUserUserIdAccessTokenGet(userId: string) {
-    return await coreApi.coreUserUserIdAccessTokenGet(
-      {
-        userId,
-      },
-      {
-        headers: getCoreApiHeaders(),
-      }
-    );
+  async coreUsersPost(params: {
+    coreUsersPostRequest: DefaultApiCoreUsersPostRequest["coreUsersPostRequest"];
+  }) {
+    return await coreApi.coreUsersPost(params, {
+      headers: getCoreApiHeaders(),
+    });
   }
 
-  async coreUsersUserIdDelete(userId: string) {
-    return await coreApi.coreUsersUserIdDelete(
-      {
-        userId,
-      },
-      {
-        headers: getCoreApiHeaders(),
-      }
-    );
+  async coreUserUserIdAccessTokenGet(params: { userId: string }) {
+    return await coreApi.coreUserUserIdAccessTokenGet(params, {
+      headers: getCoreApiHeaders(),
+    });
+  }
+
+  async coreUsersUserIdDelete(params: { userId: string }) {
+    return await coreApi.coreUsersUserIdDelete(params, {
+      headers: getCoreApiHeaders(),
+    });
   }
 
   async setProviderSettings(
     userId: string,
     providerSettings: Record<string, { priority: number; dynamicPriority?: boolean }>
   ) {
-    return await this.coreUsersUserIdSettingsKeyPut(userId, "PROVIDER_SETTINGS", {
-      value: providerSettings,
+    return await this.coreUsersUserIdSettingsKeyPut({
+      userId,
+      key: "PROVIDER_SETTINGS",
+      coreUsersUserIdSettingsKeyPutRequest: {
+        value: providerSettings,
+      },
     });
   }
 
   async setDynamicPriceOffset(userId: string, offset: number) {
-    return await this.coreUsersUserIdSettingsKeyPut(userId, "DYNAMIC_PRICE_OFFSET", {
-      value: offset,
+    return await this.coreUsersUserIdSettingsKeyPut({
+      userId,
+      key: "DYNAMIC_PRICE_OFFSET",
+      coreUsersUserIdSettingsKeyPutRequest: {
+        value: offset,
+      },
+    });
+  }
+
+  async coreProvidersGet() {
+    return await coreApi.coreProvidersGet({
+      headers: getCoreApiHeaders(),
+    });
+  }
+
+  async coreProvidersProviderBalanceGet(params: { provider: string }) {
+    return await coreApi.coreProvidersProviderBalanceGet(params, {
+      headers: getCoreApiHeaders(),
+    });
+  }
+
+  async getProviderPriority(userId: string, useCache?: boolean) {
+    return await this.coreUsersUserIdSettingsKeyGet({
+      userId,
+      key: "PROVIDER_SETTINGS",
+      useCache,
+    });
+  }
+
+  async getDynamicPriceOffset(userId: string, useCache?: boolean) {
+    return await this.coreUsersUserIdSettingsKeyGet({
+      userId,
+      key: "DYNAMIC_PRICE_OFFSET",
+      useCache,
     });
   }
 }

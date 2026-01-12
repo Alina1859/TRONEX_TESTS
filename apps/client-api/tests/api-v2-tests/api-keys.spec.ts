@@ -6,8 +6,7 @@ import { OrderApi } from "@apps/client-api/api/order.api";
 import { SmartOrderApi } from "@apps/client-api/api/smart-order.api";
 import * as dotenv from "dotenv";
 import {
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE,
+  HttpStatus,
   validOrderId,
 } from "@shared/utils/constants";
 
@@ -26,7 +25,7 @@ test.describe("API key validation", () => {
   test("GET /api/v2/orders/{id} should return 401 for empty API key", async () => {
     log.info("=== Тест: Проверка отправки пустого API ключа ===");
 
-    const response = await orderApi.getOrderByIdWithApiKey(validOrderId, "");
+    const response = await orderApi.getOrderById({ orderId: validOrderId, apiKey: "" });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
@@ -44,7 +43,7 @@ test.describe("API key validation", () => {
     const invalidApiKey = "invalid_api_key_12345";
     log.info(`Используется невалидный API ключ: ${invalidApiKey}`);
 
-    const response = await orderApi.getOrderByIdWithApiKey(validOrderId, invalidApiKey);
+    const response = await orderApi.getOrderById({ orderId: validOrderId, apiKey: invalidApiKey });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
@@ -59,7 +58,7 @@ test.describe("API key validation", () => {
   test("GET /api/v2/orders should return 401 for empty API key", async () => {
     log.info("=== Тест: Проверка отправки пустого API ключа для списка заказов ===");
 
-    const response = await orderApi.getOrderListWithApiKey("");
+    const response = await orderApi.getOrderList({ apiKey: "" });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
@@ -77,7 +76,7 @@ test.describe("API key validation", () => {
     const invalidApiKey = "invalid_api_key_12345";
     log.info(`Используется невалидный API ключ: ${invalidApiKey}`);
 
-    const response = await orderApi.getOrderListWithApiKey(invalidApiKey);
+    const response = await orderApi.getOrderList({ apiKey: invalidApiKey });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
@@ -98,7 +97,7 @@ test.describe("API key validation", () => {
       targetAddress: wallet.address?.base58 || "",
     };
 
-    const response = await orderApi.createNewOrderWithApiKey(createOrderRequest, "");
+    const response = await orderApi.createNewOrder({ data: createOrderRequest, apiKey: "" });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
     responseStatusCheck.checkResponseStatus(response, 401);
@@ -121,7 +120,7 @@ test.describe("API key validation", () => {
     const invalidApiKey = "invalid_api_key_12345";
     log.info(`Используется невалидный API ключ: ${invalidApiKey}`);
 
-    const response = await orderApi.createNewOrderWithApiKey(createOrderRequest, invalidApiKey);
+    const response = await orderApi.createNewOrder({ data: createOrderRequest, apiKey: invalidApiKey });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
     responseStatusCheck.checkResponseStatus(response, 401);
@@ -143,15 +142,16 @@ test.describe("API key validation", () => {
       targetAddress: wallet.address?.base58 || "",
     };
 
-    const response = await orderApi.createNewOrderWithoutContentType(
-      createOrderRequest,
-      validApiKey
-    );
+    const response = await orderApi.createNewOrder({
+      data: createOrderRequest,
+      apiKey: validApiKey,
+      withoutContentType: true,
+    });
 
     const status = response.status();
     log.info(`API запрос выполнен. Статус: ${status}`);
 
-    expect([HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE]).toContain(status);
+    expect([HttpStatus.BAD_REQUEST, HttpStatus.UNSUPPORTED_MEDIA_TYPE]).toContain(status);
 
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
@@ -162,7 +162,7 @@ test.describe("API key validation", () => {
   test("GET /api/v2/smart-orders/{smartOrderId} should return 401 for empty API key", async () => {
     log.info("=== Тест: Проверка отправки пустого API ключа для smart order ===");
 
-    const response = await smartOrderApi.getSmartOrderByIdWithApiKey(validOrderId, "");
+    const response = await smartOrderApi.getSmartOrderById({ smartOrderId: validOrderId, apiKey: "" });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
@@ -180,7 +180,7 @@ test.describe("API key validation", () => {
     const invalidApiKey = "invalid_api_key_12345";
     log.info(`Используется невалидный API ключ: ${invalidApiKey}`);
 
-    const response = await smartOrderApi.getSmartOrderByIdWithApiKey(validOrderId, invalidApiKey);
+    const response = await smartOrderApi.getSmartOrderById({ smartOrderId: validOrderId, apiKey: invalidApiKey });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
@@ -205,7 +205,7 @@ test.describe("API key validation", () => {
       withBandwidth: true,
     };
 
-    const response = await smartOrderApi.createNewSmartOrderWithApiKey(createSmartOrderRequest, "");
+    const response = await smartOrderApi.createNewSmartOrder({ data: createSmartOrderRequest, apiKey: "" });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
     responseStatusCheck.checkResponseStatus(response, 401);
@@ -232,10 +232,10 @@ test.describe("API key validation", () => {
     const invalidApiKey = "invalid_api_key_12345";
     log.info(`Используется невалидный API ключ: ${invalidApiKey}`);
 
-    const response = await smartOrderApi.createNewSmartOrderWithApiKey(
-      createSmartOrderRequest,
-      invalidApiKey
-    );
+    const response = await smartOrderApi.createNewSmartOrder({
+      data: createSmartOrderRequest,
+      apiKey: invalidApiKey,
+    });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
     responseStatusCheck.checkResponseStatus(response, 401);
@@ -261,15 +261,16 @@ test.describe("API key validation", () => {
       withBandwidth: true,
     };
 
-    const response = await smartOrderApi.createNewSmartOrderWithoutContentType(
-      createSmartOrderRequest,
-      validApiKey
-    );
+    const response = await smartOrderApi.createNewSmartOrder({
+      data: createSmartOrderRequest,
+      apiKey: validApiKey,
+      withoutContentType: true,
+    });
 
     const status = response.status();
     log.info(`API запрос выполнен. Статус: ${status}`);
 
-    expect([HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_UNSUPPORTED_MEDIA_TYPE]).toContain(status);
+    expect([HttpStatus.BAD_REQUEST, HttpStatus.UNSUPPORTED_MEDIA_TYPE]).toContain(status);
 
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));

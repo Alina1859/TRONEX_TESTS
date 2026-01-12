@@ -1,5 +1,6 @@
 import { expect } from "@playwright/test";
-import { SmartOrder, SmartOrderWithOrders, Order } from "@shared/utils/types";
+import { SmartOrder, SmartOrderWithOrders } from "@shared/utils/types";
+import { HttpStatus } from "@shared/utils/constants";
 import { OrderResponseCheck } from "./order-response-check";
 
 export class SmartOrderResponseCheck {
@@ -51,6 +52,6 @@ export class SmartOrderResponseCheck {
   }
 
   checkRateLimitEnforcement(statusCounts: Record<number, number>): void {
-    expect(statusCounts[429]).toBeGreaterThan(0);
+    expect(statusCounts[HttpStatus.TOO_MANY_REQUESTS]).toBeGreaterThan(0);
   }
 }

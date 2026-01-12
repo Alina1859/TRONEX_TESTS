@@ -11,7 +11,7 @@ import {
 import { log } from "@shared/utils/logger";
 import { Order } from "@shared/utils/types";
 import {
-  HTTP_STATUS_BAD_REQUEST,
+  HttpStatus,
   ORDER_LIST_DEFAULT_LIMIT,
   ORDER_LIST_DEFAULT_OFFSET,
   ORDER_LIST_MAX_LIMIT,
@@ -30,12 +30,12 @@ test.describe("Get order list GET /api/v2/orders/", () => {
 
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      ORDER_LIST_DEFAULT_OFFSET,
-      ORDER_LIST_DEFAULT_LIMIT
-    );
-    const response = await orderApi.getOrderList();
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: ORDER_LIST_DEFAULT_OFFSET,
+      limit: ORDER_LIST_DEFAULT_LIMIT,
+    });
+    const response = await orderApi.getOrderList({});
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     responseStatusCheck.checkResponseStatus(response);
@@ -64,7 +64,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-      responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
+      responseStatusCheck.checkResponseStatus(response, HttpStatus.BAD_REQUEST);
 
       const errorResponse = await response.json();
       log.info(`Ответ ошибки: ${JSON.stringify(errorResponse, null, 2)}`);
@@ -86,7 +86,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-      responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
+      responseStatusCheck.checkResponseStatus(response, HttpStatus.BAD_REQUEST);
 
       const errorResponse = await response.json();
       log.info(`Ответ ошибки: ${JSON.stringify(errorResponse, null, 2)}`);
@@ -112,7 +112,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-      responseStatusCheck.checkResponseStatus(response, HTTP_STATUS_BAD_REQUEST);
+      responseStatusCheck.checkResponseStatus(response, HttpStatus.BAD_REQUEST);
 
       const errorResponse = await response.json();
       log.info(`Ответ ошибки: ${JSON.stringify(errorResponse, null, 2)}`);
@@ -127,11 +127,11 @@ test.describe("Get order list GET /api/v2/orders/", () => {
 
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      0,
-      ORDER_LIST_DEFAULT_LIMIT
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: 0,
+      limit: ORDER_LIST_DEFAULT_LIMIT,
+    });
 
     const response = await orderApi.getOrderList({ offset: 0 });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -157,11 +157,11 @@ test.describe("Get order list GET /api/v2/orders/", () => {
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      10,
-      ORDER_LIST_DEFAULT_LIMIT
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: 10,
+      limit: ORDER_LIST_DEFAULT_LIMIT,
+    });
 
     const response = await orderApi.getOrderList({ offset: 10 });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -219,11 +219,11 @@ test.describe("Get order list GET /api/v2/orders/", () => {
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      1000,
-      ORDER_LIST_DEFAULT_LIMIT
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: 1000,
+      limit: ORDER_LIST_DEFAULT_LIMIT,
+    });
 
     const response = await orderApi.getOrderList({ offset: 1000 });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -253,7 +253,11 @@ test.describe("Get order list GET /api/v2/orders/", () => {
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(userIdPrimary, 10, 5);
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: 10,
+      limit: 5,
+    });
 
     const response = await orderApi.getOrderList({ offset: 10, limit: 5 });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -280,11 +284,11 @@ test.describe("Get order list GET /api/v2/orders/", () => {
 
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdZero,
-      ORDER_LIST_DEFAULT_OFFSET,
-      ORDER_LIST_DEFAULT_LIMIT
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdZero,
+      offset: ORDER_LIST_DEFAULT_OFFSET,
+      limit: ORDER_LIST_DEFAULT_LIMIT,
+    });
 
     const response = await request.get(`${apiUrl}/api/v2/orders/`, {
       headers: getHeaders(apiKeyZero),
