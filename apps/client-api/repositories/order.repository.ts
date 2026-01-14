@@ -9,7 +9,7 @@ export class OrderRepository {
     type?: OrderType;
   }): Promise<Order[]> {
     const { userId, status, type } = params;
-    
+
     if (status && type) {
       return await coreDb.$queryRaw<Order[]>`
         SELECT *
@@ -19,7 +19,7 @@ export class OrderRepository {
         LIMIT 1
       `;
     }
-    
+
     if (status) {
       return await coreDb.$queryRaw<Order[]>`
         SELECT *
@@ -29,7 +29,7 @@ export class OrderRepository {
         LIMIT 1
       `;
     }
-    
+
     if (type) {
       return await coreDb.$queryRaw<Order[]>`
         SELECT *
@@ -39,7 +39,7 @@ export class OrderRepository {
         LIMIT 1
       `;
     }
-    
+
     return await coreDb.$queryRaw<Order[]>`
       SELECT *
       FROM "Order"

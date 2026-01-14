@@ -2,7 +2,7 @@ import { BandwidthPurchaseCombination } from "../types";
 
 export const BANDWIDTH_PURCHASE_COMBINATIONS: BandwidthPurchaseCombination[] = [
   { duration: "1h", bandwidth: 1000, sunRate: 976, expectedCost: 1.27 },
-  { duration: "1h", bandwidth: 1000, sunRate: 3104, expectedCost: 3.40 },
+  { duration: "1h", bandwidth: 1000, sunRate: 3104, expectedCost: 3.4 },
   { duration: "1h", bandwidth: 1000, sunRate: 13512, expectedCost: 13.81 },
   { duration: "1h", bandwidth: 50000, sunRate: 976, expectedCost: 63.55 },
   { duration: "1h", bandwidth: 50000, sunRate: 3104, expectedCost: 169.95 },
@@ -14,9 +14,9 @@ export const BANDWIDTH_PURCHASE_COMBINATIONS: BandwidthPurchaseCombination[] = [
   { duration: "1d", bandwidth: 1000, sunRate: 976, expectedCost: 23.72 },
   { duration: "1d", bandwidth: 1000, sunRate: 3104, expectedCost: 74.79 },
   { duration: "1d", bandwidth: 1000, sunRate: 13512, expectedCost: 324.58 },
-  { duration: "1d", bandwidth: 50000, sunRate: 976, expectedCost: 1200.30 },
-  { duration: "1d", bandwidth: 50000, sunRate: 3104, expectedCost: 3725.10 },
-  { duration: "1d", bandwidth: 50000, sunRate: 13512, expectedCost: 16214.70 },
+  { duration: "1d", bandwidth: 50000, sunRate: 976, expectedCost: 1200.3 },
+  { duration: "1d", bandwidth: 50000, sunRate: 3104, expectedCost: 3725.1 },
+  { duration: "1d", bandwidth: 50000, sunRate: 13512, expectedCost: 16214.7 },
   // { duration: "1d", bandwidth: 100000, sunRate: 976, expectedCost: 2342.70 },
   // { duration: "1d", bandwidth: 100000, sunRate: 3104, expectedCost: 7449.90 },
   // { duration: "1d", bandwidth: 100000, sunRate: 13512, expectedCost: 32429.10 },

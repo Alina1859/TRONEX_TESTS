@@ -16,5 +16,8 @@ export const coreApiToken = process.env.CORE_API_TOKEN!;
 
 export const fullHost = process.env.FULL_HOST!;
 
+export const privateKeyShasta = process.env.PRIVATE_KEY_SHASTA!;
+export const addressWithTrx = process.env.ADDRESS_WITH_TRX!;
+
 export const ORDERS_BASE_URL = `${apiUrl}/api/v2/orders/`;
 export const SMART_ORDERS_BASE_URL = `${apiUrl}/api/v2/smart-orders/`;

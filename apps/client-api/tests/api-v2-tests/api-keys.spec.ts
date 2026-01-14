@@ -4,11 +4,7 @@ import { log } from "@shared/utils/logger";
 import { createWallet } from "@apps/client-api/repositories/tronweb";
 import { OrderApi } from "@apps/client-api/api/order.api";
 import { SmartOrderApi } from "@apps/client-api/api/smart-order.api";
-import {
-  HttpStatus,
-  validOrderId,
-} from "@shared/utils/constants";
-
+import { HttpStatus, validOrderId } from "@shared/utils/constants";
 
 test.describe("API key validation", () => {
   const responseStatusCheck = new ResponseStatusCheck();
@@ -118,7 +114,10 @@ test.describe("API key validation", () => {
     const invalidApiKey = "invalid_api_key_12345";
     log.info(`Используется невалидный API ключ: ${invalidApiKey}`);
 
-    const response = await orderApi.createNewOrder({ data: createOrderRequest, apiKey: invalidApiKey });
+    const response = await orderApi.createNewOrder({
+      data: createOrderRequest,
+      apiKey: invalidApiKey,
+    });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
     responseStatusCheck.checkResponseStatus(response, 401);
@@ -160,7 +159,10 @@ test.describe("API key validation", () => {
   test("GET /api/v2/smart-orders/{smartOrderId} should return 401 for empty API key", async () => {
     log.info("=== Тест: Проверка отправки пустого API ключа для smart order ===");
 
-    const response = await smartOrderApi.getSmartOrderById({ smartOrderId: validOrderId, apiKey: "" });
+    const response = await smartOrderApi.getSmartOrderById({
+      smartOrderId: validOrderId,
+      apiKey: "",
+    });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
@@ -178,7 +180,10 @@ test.describe("API key validation", () => {
     const invalidApiKey = "invalid_api_key_12345";
     log.info(`Используется невалидный API ключ: ${invalidApiKey}`);
 
-    const response = await smartOrderApi.getSmartOrderById({ smartOrderId: validOrderId, apiKey: invalidApiKey });
+    const response = await smartOrderApi.getSmartOrderById({
+      smartOrderId: validOrderId,
+      apiKey: invalidApiKey,
+    });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
@@ -203,7 +208,10 @@ test.describe("API key validation", () => {
       withBandwidth: true,
     };
 
-    const response = await smartOrderApi.createNewSmartOrder({ data: createSmartOrderRequest, apiKey: "" });
+    const response = await smartOrderApi.createNewSmartOrder({
+      data: createSmartOrderRequest,
+      apiKey: "",
+    });
 
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
     responseStatusCheck.checkResponseStatus(response, 401);

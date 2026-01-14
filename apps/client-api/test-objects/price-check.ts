@@ -7,7 +7,12 @@ import {
   BandwidthPriceValues,
   BandwidthOrderPeriodMs,
 } from "@shared/utils/types";
-import { ENERGY_PRICE_FORMULA, BANDWIDTH_PRICE_FORMULA, OrderPeriod } from "@shared/utils/constants";
+import {
+  ENERGY_PRICE_FORMULA,
+  BANDWIDTH_PRICE_FORMULA,
+  OrderPeriod,
+  PRICE_TOLERANCE,
+} from "@shared/utils/constants";
 import { getPeriodKey } from "@shared/helpers/order-period-helpers";
 import { log } from "@shared/utils/logger";
 
@@ -44,7 +49,9 @@ export class PriceCheck {
   }
 
   private async getBandwidthPriceForPeriod(period: BandwidthOrderPeriodMs): Promise<number> {
-    const priceBandwidthResponse = await this.coreRepo.coreConstantsKeyGet({ key: "PRICE_BANDWIDTH" });
+    const priceBandwidthResponse = await this.coreRepo.coreConstantsKeyGet({
+      key: "PRICE_BANDWIDTH",
+    });
     const priceBandwidth: BandwidthPriceValues = priceBandwidthResponse.data;
     const periodKey = getPeriodKey(period) as "1h" | "1d";
     return priceBandwidth[periodKey];
@@ -72,9 +79,8 @@ export class PriceCheck {
     sunRate?: number;
   }): Promise<number> {
     const { period, energyAmount, sunRate } = params;
-    const actualSunRate = sunRate !== undefined
-      ? sunRate
-      : await this.getEnergyPriceForPeriod(period);
+    const actualSunRate =
+      sunRate !== undefined ? sunRate : await this.getEnergyPriceForPeriod(period);
     const { hour, day } = this.periodToHoursAndDays(period);
     return ENERGY_PRICE_FORMULA(actualSunRate, hour, day, energyAmount);
   }
@@ -85,8 +91,12 @@ export class PriceCheck {
     tolerance?: number;
     sunRate?: number;
   }): Promise<void> {
-    const { period, energyAmount, tolerance = 0.01, sunRate } = params;
-    const expectedPrice = await this.calculateExpectedEnergyPrice({ period, energyAmount, sunRate });
+    const { period, energyAmount, tolerance = PRICE_TOLERANCE, sunRate } = params;
+    const expectedPrice = await this.calculateExpectedEnergyPrice({
+      period,
+      energyAmount,
+      sunRate,
+    });
     const actualPrice = this.getOrderPrice();
 
     log.info(
@@ -116,7 +126,7 @@ export class PriceCheck {
     bandwidthAmount: number;
     tolerance?: number;
   }): Promise<void> {
-    const { period, bandwidthAmount, tolerance = 0.01 } = params;
+    const { period, bandwidthAmount, tolerance = PRICE_TOLERANCE } = params;
     const expectedPrice = await this.calculateExpectedBandwidthPrice({ period, bandwidthAmount });
     const actualPrice = this.getOrderPrice();
 
@@ -139,18 +149,13 @@ export class PriceCheck {
     baseMessage: string
   ): void {
     const priceDifference = Math.abs(actualPrice - expectedPrice);
-    expect(
-      priceDifference,
-      `${baseMessage} (разница: ${priceDifference})`
-    ).toBeLessThanOrEqual(tolerance);
+    expect(priceDifference, `${baseMessage} (разница: ${priceDifference})`).toBeLessThanOrEqual(
+      tolerance
+    );
   }
 
-  checkOrderCost(params: {
-    expectedCost: number;
-    tolerance?: number;
-    message?: string;
-  }): void {
-    const { expectedCost, tolerance = 0.01, message } = params;
+  checkOrderCost(params: { expectedCost: number; tolerance?: number; message?: string }): void {
+    const { expectedCost, tolerance = PRICE_TOLERANCE, message } = params;
     const actualCost = this.getOrderPrice();
     const costDifference = Math.abs(actualCost - expectedCost);
     const errorMessage =

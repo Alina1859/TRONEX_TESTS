@@ -8,23 +8,14 @@ import {
 import { getCoreApiHeaders } from "@shared/utils/headers";
 import { apiUrl } from "./constants";
 
-export const coreApi = new DefaultApi(
-  new Configuration({ basePath: apiUrl })
-);
+export const coreApi = new DefaultApi(new Configuration({ basePath: apiUrl }));
 
 export class CoreRepository {
   async coreConstantsKeyGet(params: { key: string }) {
-    return await coreApi.coreConstantsKeyGet(
-      { key: params.key },
-      { headers: getCoreApiHeaders() }
-    );
+    return await coreApi.coreConstantsKeyGet({ key: params.key }, { headers: getCoreApiHeaders() });
   }
 
-  async coreUsersUserIdSettingsKeyGet(params: {
-    userId: string;
-    key: string;
-    useCache?: boolean;
-  }) {
+  async coreUsersUserIdSettingsKeyGet(params: { userId: string; key: string; useCache?: boolean }) {
     return await coreApi.coreUsersUserIdSettingsKeyGet(params, {
       headers: getCoreApiHeaders(),
     });
@@ -120,4 +111,3 @@ export class CoreRepository {
     });
   }
 }
-

@@ -2,7 +2,12 @@ import { test, expect } from "@playwright/test";
 import { CoreRepository } from "@apps/client-api/api/core.api";
 import { OrderApi } from "@apps/client-api/api/order.api";
 import { log } from "@shared/utils/logger";
-import { HttpStatus, OrderPeriod, ENERGY_PRICE_FORMULA, PROVIDER_TEST_PRIORITY } from "@shared/utils/constants";
+import {
+  HttpStatus,
+  OrderPeriod,
+  ENERGY_PRICE_FORMULA,
+  PROVIDER_TEST_PRIORITY,
+} from "@shared/utils/constants";
 import { userIdPrimary, apiKeyPrimary } from "@apps/client-api/api/constants";
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
 import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response-check";
@@ -13,7 +18,7 @@ import { PROVIDERS_PRIORITY_ENERGY_ORDER_COMBINATIONS } from "@shared/utils/vari
 import { getPeriodKey, getFormulaParams } from "@shared/helpers/order-period-helpers";
 
 test.describe("Create order with provider priority POST /api/v2/orders", () => {
-  test.describe.configure({ mode: 'serial', timeout: 300000 });
+  test.describe.configure({ mode: "serial", timeout: 300000 });
 
   const responseStatusCheck = new ResponseStatusCheck();
   const orderResponseCheck = new OrderResponseCheck();
@@ -79,9 +84,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
             },
           };
 
-          log.info(
-            `Установка приоритета провайдера: ${JSON.stringify(providerSettings, null, 2)}`
-          );
+          log.info(`Установка приоритета провайдера: ${JSON.stringify(providerSettings, null, 2)}`);
 
           const priorityResponse = await coreRepo.coreUsersUserIdSettingsKeyPut({
             userId: userIdPrimary,
@@ -91,20 +94,27 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
             },
           });
 
-          log.info(`✓ Приоритет провайдера ${providerName} установлен на ${PROVIDER_TEST_PRIORITY}`);
+          log.info(
+            `✓ Приоритет провайдера ${providerName} установлен на ${PROVIDER_TEST_PRIORITY}`
+          );
 
           const verifyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet({
             userId: userIdPrimary,
             key: "PROVIDER_SETTINGS",
           });
-          log.info(`Проверка установленного приоритета: ${JSON.stringify(verifyResponse.data, null, 2)}`);
+          log.info(
+            `Проверка установленного приоритета: ${JSON.stringify(verifyResponse.data, null, 2)}`
+          );
 
           expect(verifyResponse.data[providerName]?.priority).toBe(PROVIDER_TEST_PRIORITY);
           log.info(`✓ Приоритет провайдера ${providerName} успешно установлен и верифицирован`);
         });
 
         const { targetAddress } = await test.step("Создать и активировать кошелек", async () => {
-          const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(request, responseStatusCheck);
+          const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(
+            request,
+            responseStatusCheck
+          );
           const address = wallet.address?.base58 || "";
           await walletActivationHelper.waitForActivationCompleted({
             orderId: activationOrder.id,
@@ -124,9 +134,14 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
             period: duration,
           };
 
-          log.info(`Отправка запроса на создание заказа: ${JSON.stringify(energyRequest, null, 2)}`);
+          log.info(
+            `Отправка запроса на создание заказа: ${JSON.stringify(energyRequest, null, 2)}`
+          );
 
-          const response = await orderApi.createNewOrder({ data: energyRequest, apiKey: apiKeyPrimary });
+          const response = await orderApi.createNewOrder({
+            data: energyRequest,
+            apiKey: apiKeyPrimary,
+          });
           responseStatusCheck.checkResponseStatus(response, HttpStatus.OK);
 
           const order = (await response.json()) as Order;
@@ -150,16 +165,29 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
         });
 
         await test.step("Проверить цену заказа и провайдера", async () => {
-          const priceEnergyResponse = await coreRepo.coreConstantsKeyGet({ key: "PRICE_ENERGY" });
-          const sunRate = (priceEnergyResponse.data as EnergyPriceValues)[periodKey];
-
-          log.info(`Получен sunRate для периода ${periodKey} из PRICE_ENERGY: ${sunRate}`);
+          // Проверяем PRICE_ENERGY пользователя (если установлен), иначе используем глобальный
+          let sunRate: number;
+          try {
+            const userPriceEnergyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet({
+              userId: userIdPrimary,
+              key: "PRICE_ENERGY",
+            });
+            if (userPriceEnergyResponse.data) {
+              sunRate = (userPriceEnergyResponse.data as EnergyPriceValues)[periodKey];
+            } else {
+              const globalPriceEnergyResponse = await coreRepo.coreConstantsKeyGet({
+                key: "PRICE_ENERGY",
+              });
+              sunRate = (globalPriceEnergyResponse.data as EnergyPriceValues)[periodKey];
+            }
+          } catch (error) {
+            const globalPriceEnergyResponse = await coreRepo.coreConstantsKeyGet({
+              key: "PRICE_ENERGY",
+            });
+            sunRate = (globalPriceEnergyResponse.data as EnergyPriceValues)[periodKey];
+          }
 
           const expectedSellPrice = ENERGY_PRICE_FORMULA(sunRate, hour, day, amount);
-
-          log.info(
-            `Ожидаемая цена (sellPrice) по формуле: ${expectedSellPrice} TRX (sunRate=${sunRate}, energy=${amount}, period=${periodKey})`
-          );
 
           const dbFinalOrder = await walletActivationHelper.waitForOrderCompleted({
             orderId: apiOrder.id,
@@ -178,9 +206,6 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
               ? parseFloat(dbFinalOrder.sellPrice)
               : dbFinalOrder.sellPrice;
 
-          log.info(`Фактическая цена из БД: ${actualSellPrice} TRX`);
-          log.info(`Ожидаемая цена по формуле: ${expectedSellPrice} TRX`);
-
           const priceDifference = Math.abs(actualSellPrice - expectedSellPrice);
           const tolerance = 0.01;
 
@@ -190,7 +215,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
           ).toBeLessThanOrEqual(tolerance);
 
           log.info(
-            `✓ Цена заказа из БД (${actualSellPrice}) соответствует ожидаемой по формуле (${expectedSellPrice}), разница: ${priceDifference}`
+            `✓ Цена заказа из БД (${actualSellPrice}) соответствует ожидаемой по формуле (${expectedSellPrice})`
           );
 
           const getOrderResponse = await orderApi.getOrderById({ orderId: apiOrder.id });

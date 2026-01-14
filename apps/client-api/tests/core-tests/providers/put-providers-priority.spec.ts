@@ -8,7 +8,7 @@ import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-stat
 import { ProviderSettings } from "@shared/utils/types";
 
 test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER_SETTINGS", () => {
-  test.describe.configure({ mode: 'serial', timeout: 60000 });
+  test.describe.configure({ mode: "serial", timeout: 60000 });
 
   const providerPriorityCheck = new ProviderPriorityCheck();
   const responseStatusCheck = new ResponseStatusCheck();
@@ -24,7 +24,9 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
           key: "PROVIDER_SETTINGS",
         });
         initialProviderSettings = initialSettingsResponse.data || {};
-        log.info(`Сохранены начальные настройки PROVIDER_SETTINGS: ${JSON.stringify(initialProviderSettings, null, 2)}`);
+        log.info(
+          `Сохранены начальные настройки PROVIDER_SETTINGS: ${JSON.stringify(initialProviderSettings, null, 2)}`
+        );
       } catch (error) {
         log.warn(`Не удалось получить начальные настройки PROVIDER_SETTINGS: ${error}`);
         initialProviderSettings = null;
@@ -88,7 +90,11 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
           log.info(`📄 Тело ответа API (GET /settings):`);
           log.info(`${JSON.stringify(verifyResponse.data, null, 2)}`);
 
-          providerPriorityCheck.checkProviderPriority(verifyResponse.data, providerName, priorityValue);
+          providerPriorityCheck.checkProviderPriority(
+            verifyResponse.data,
+            providerName,
+            priorityValue
+          );
           log.info(`✓ Приоритет ${providerName} успешно установлен и верифицирован`);
         });
       });
@@ -98,7 +104,7 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
   test("Тест-кейс № 2: Удаление приоритета провайдера", async () => {
     await test.step("Удалить приоритет провайдера", async () => {
       const requestBody = {
-        value: null
+        value: null,
       };
 
       log.info(`Удаление приоритета провайдера`);

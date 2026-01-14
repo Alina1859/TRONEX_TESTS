@@ -5,10 +5,7 @@ import { HttpStatus } from "@shared/utils/constants";
 type ResponseWithStatus = APIResponse | { status: number };
 
 export class ResponseStatusCheck {
-  checkResponseStatus(
-    response: ResponseWithStatus,
-    expectedStatus: number = HttpStatus.OK
-  ): void {
+  checkResponseStatus(response: ResponseWithStatus, expectedStatus: number = HttpStatus.OK): void {
     const actualStatus = this.getStatus(response);
 
     this.logStatusCheck(actualStatus, expectedStatus);
@@ -30,9 +27,7 @@ export class ResponseStatusCheck {
 
   private getStatus(response: ResponseWithStatus): number {
     if (response instanceof Object && "status" in response) {
-      return typeof response.status === "function"
-        ? response.status()
-        : response.status;
+      return typeof response.status === "function" ? response.status() : response.status;
     }
     return (response as APIResponse).status();
   }
@@ -59,9 +54,7 @@ export class ResponseStatusCheck {
     return statusCounts;
   }
 
-  private async extractRateLimitInfo(
-    responses: APIResponse[]
-  ): Promise<{
+  private async extractRateLimitInfo(responses: APIResponse[]): Promise<{
     hit: boolean;
     requestIndex: number;
     response: any;
@@ -120,14 +113,12 @@ export class ResponseStatusCheck {
     requestCount: number
   ): void {
     if (rateLimitInfo.hit) {
-      log.info(`✓ Rate limiting работает корректно. API вернул ${HttpStatus.TOO_MANY_REQUESTS} после превышения лимита.`);
+      log.info(
+        `✓ Rate limiting работает корректно. API вернул ${HttpStatus.TOO_MANY_REQUESTS} после превышения лимита.`
+      );
     } else {
-      log.warn(
-        `⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`
-      );
-      log.warn(
-        "  Это может означать, что лимит выше ожидаемого или rate limiting не настроен."
-      );
+      log.warn(`⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`);
+      log.warn("  Это может означать, что лимит выше ожидаемого или rate limiting не настроен.");
     }
   }
 }

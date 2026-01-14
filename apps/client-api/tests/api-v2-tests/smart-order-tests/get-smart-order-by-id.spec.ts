@@ -40,9 +40,7 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
     log.info("✓ Все проверки пройдены успешно");
   });
 
-  test("Тест-кейс № 2: Проверка обработки несуществующего smart order", async ({
-    request,
-  }) => {
+  test("Тест-кейс № 2: Проверка обработки несуществующего smart order", async ({ request }) => {
     log.info("=== Тест: Проверка обработки несуществующего смарт заказа ===");
 
     const maxSmartOrderId = await smartOrderRepo.getMaxSmartOrderId();
@@ -52,7 +50,9 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
     log.info(`Сгенерированный несуществующий Smart Order ID: ${nonExistentSmartOrderId}`);
 
     const smartOrderApi = new SmartOrderApi(request);
-    const response = await smartOrderApi.getSmartOrderById({ smartOrderId: nonExistentSmartOrderId });
+    const response = await smartOrderApi.getSmartOrderById({
+      smartOrderId: nonExistentSmartOrderId,
+    });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     responseStatusCheck.checkResponseStatus(response, HttpStatus.NOT_FOUND);
@@ -91,9 +91,7 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
     log.info("✓ Все проверки пройдены успешно. Доступ к чужому смарт заказу заблокирован.");
   });
 
-  test("Тест-кейс № 4: Проверка обработки smart order с ID = 1", async ({
-    request,
-  }) => {
+  test("Тест-кейс № 4: Проверка обработки smart order с ID = 1", async ({ request }) => {
     log.info("=== Тест: Проверка обработки смарт заказа с ID = 1 ===");
 
     const smartOrderId = 1;
@@ -194,7 +192,9 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
         log.info(
           `Проверка: ${variation.description} (значение: ${JSON.stringify(variation.value)})`
         );
-        const response = await smartOrderApi.getSmartOrderById({ smartOrderId: variation.value as any });
+        const response = await smartOrderApi.getSmartOrderById({
+          smartOrderId: variation.value as any,
+        });
         const status = response.status();
 
         if (variation.expectedStatus.includes(status)) {

@@ -25,7 +25,9 @@ test.describe("Get order list GET /api/v2/orders/", () => {
   const orderFieldCheck = new OrderFieldCheck();
   const orderResponseCheck = new OrderResponseCheck();
 
-  test("Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с заказами с дефолтными параметрами", async ({ request }) => {
+  test("Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с заказами с дефолтными параметрами", async ({
+    request,
+  }) => {
     log.info("=== Тест: Получение списка заказов с параметрами по умолчанию ===");
 
     const orderApi = new OrderApi(request);
@@ -96,9 +98,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
     log.info("✓ Все невалидные значения limit корректно отклонены (400)");
   });
 
-  test("Тест-кейс № 4: Проверка невалидных комбинаций offset и limit", async ({
-    request,
-  }) => {
+  test("Тест-кейс № 4: Проверка невалидных комбинаций offset и limit", async ({ request }) => {
     log.info("=== Тест: Проверка невалидных комбинаций offset и limit ===");
 
     const orderApi = new OrderApi(request);
@@ -211,9 +211,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
     log.info("✓ limit = 5: получены ожидаемые заказы пользователя, не более 5");
   });
 
-  test("Тест-кейс № 8: Проверка значения offset = 1000", async ({
-    request,
-  }) => {
+  test("Тест-кейс № 8: Проверка значения offset = 1000", async ({ request }) => {
     log.info("=== Тест: Проверка offset = 1000 ===");
 
     const orderApi = new OrderApi(request);

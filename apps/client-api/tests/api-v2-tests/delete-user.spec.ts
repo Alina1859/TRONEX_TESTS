@@ -34,7 +34,6 @@
 //     expect(deleteResult).toBe(true);
 //     log.info(`✓ Пользователь успешно удален. Результат: ${deleteResult}`);
 
-    
 //     try {
 //       await coreRepo.coreUserUserIdAccessTokenGet(userId);
 //       throw new Error("Пользователь не был удален - токен все еще доступен");
@@ -59,4 +58,3 @@
 //     throw error;
 //   }
 // });
-

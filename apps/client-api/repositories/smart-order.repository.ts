@@ -8,7 +8,7 @@ export class SmartOrderRepository {
     status?: SmartOrderStatus;
   }): Promise<SmartOrder[]> {
     const { userId, status } = params;
-    
+
     if (status) {
       return await coreDb.$queryRaw<SmartOrder[]>`
         SELECT *
@@ -18,7 +18,7 @@ export class SmartOrderRepository {
         LIMIT 1
       `;
     }
-    
+
     return await coreDb.$queryRaw<SmartOrder[]>`
       SELECT *
       FROM "SmartOrder"

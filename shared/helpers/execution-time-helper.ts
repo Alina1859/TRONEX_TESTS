@@ -12,4 +12,3 @@ export async function calculateExecutionTime<T>(
   log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
   return result;
 }
-

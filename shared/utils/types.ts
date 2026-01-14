@@ -1,4 +1,11 @@
-import { BANDWIDTH_ORDER_PERIODS, ENERGY_ORDER_PERIODS, OrderStatus, OrderType, SmartOrderStatus, OrderSource } from "./constants";
+import {
+  BANDWIDTH_ORDER_PERIODS,
+  ENERGY_ORDER_PERIODS,
+  OrderStatus,
+  OrderType,
+  SmartOrderStatus,
+  OrderSource,
+} from "./constants";
 
 export type OrderResourceType = OrderType;
 
@@ -145,7 +152,7 @@ export interface ProviderPriorityWithOrderCombination {
     "TronLocal-1": number;
     "TronLocal-2": number;
     "TronLocal-3": number;
-    "TronLocal": number;
+    TronLocal: number;
   };
   orderCombination: {
     duration: "1h" | "1d" | "3d";
@@ -153,4 +160,36 @@ export interface ProviderPriorityWithOrderCombination {
     sunRate: number;
     expectedCost: number;
   };
+}
+
+export interface SmartOrderNoOrdersCombination {
+  description: string;
+  addressSetup: "FROM_WITH_RESOURCES_TO_ACTIVATED" | "BOTH_ACTIVATED";
+  withActivation: boolean;
+  withEnergy: boolean;
+  withBandwidth: boolean;
+  energyAmount?: number;
+  lowEnergy?: boolean;
+  lowBandwidth?: boolean;
+}
+
+export interface SmartOrderWithOrdersCombination {
+  description: string;
+  addressSetup: "BOTH_ACTIVATED" | "FROM_WITH_RESOURCES_TO_ACTIVATED";
+  withActivation: boolean;
+  withEnergy: boolean;
+  withBandwidth: boolean;
+  energyAmount?: number;
+  expectedOrderTypes: ("ACTIVATION" | "ENERGY" | "BANDWIDTH")[];
+  expectedEnergyAmount?: number;
+  expectedBandwidthAmount?: number;
+  lowEnergy?: boolean;
+  lowBandwidth?: boolean;
+}
+
+export interface FromUnauthToAuthCombination {
+  description: string;
+  withActivation: boolean;
+  withEnergy: boolean;
+  withBandwidth: boolean;
 }

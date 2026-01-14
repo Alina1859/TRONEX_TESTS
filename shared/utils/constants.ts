@@ -88,21 +88,36 @@ export enum OrderSource {
   SMART_REFILL = "SMART_REFILL",
 }
 
-export const ENERGY_PRICE_FORMULA = (sunRate: number, hour: number, day: number, energyAmount: number) => {
+export const ENERGY_PRICE_FORMULA = (
+  sunRate: number,
+  hour: number,
+  day: number,
+  energyAmount: number
+) => {
   const durationMultiplier = day > 0 ? day : hour;
   return ((sunRate * durationMultiplier) / 1000000) * energyAmount;
-}
+};
 
-export const ENERGY_PRICE_FORMULA_DYNAMIC = (minSunRate: number, hour: number, day: number, energyAmount: number, dynamicPriceOffset: number) => {
+export const ENERGY_PRICE_FORMULA_DYNAMIC = (
+  minSunRate: number,
+  hour: number,
+  day: number,
+  energyAmount: number,
+  dynamicPriceOffset: number
+) => {
   const durationMultiplier = day > 0 ? day : hour;
   return (energyAmount * (minSunRate + dynamicPriceOffset) * durationMultiplier) / 1000000;
-}
+};
 
-
-export const BANDWIDTH_PRICE_FORMULA = (sunRate: number, hour: number, day: number, bandwidthAmount: number) => {
+export const BANDWIDTH_PRICE_FORMULA = (
+  sunRate: number,
+  hour: number,
+  day: number,
+  bandwidthAmount: number
+) => {
   const durationMultiplier = day > 0 ? day : hour;
-  return ((sunRate * durationMultiplier  + 295) / 1000000) * bandwidthAmount;
-}
+  return ((sunRate * durationMultiplier + 295) / 1000000) * bandwidthAmount;
+};
 
 export const PROVIDER_TEST_PRIORITY = 100;
 
@@ -183,3 +198,5 @@ export const validOrderId = 1;
 export const TEST_USER_ID_UUID = "123e4567-e89b-12d3-a456-426614174000";
 
 export const RATE_LIMIT_TEST_REQUEST_COUNT = 120;
+
+export const PRICE_TOLERANCE = 0.01;

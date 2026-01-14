@@ -15,7 +15,9 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
   const orderResponseCheck = new OrderResponseCheck();
   const orderFieldTest = new OrderFieldCheck();
 
-  test("Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с заказами", async ({ request }) => {
+  test("Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с заказами", async ({
+    request,
+  }) => {
     log.info("=== Тест: Проверка валидности полей ответа API ===");
 
     const getLastOrderByUserId = await orderRepo.getLastOrderByUserId(userIdPrimary);
@@ -38,7 +40,9 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     log.info("✓ Все проверки пройдены успешно");
   });
 
-  test("Тест-кейс № 2: Проверка безопасности доступа к заказам другого пользователя", async ({ request }) => {
+  test("Тест-кейс № 2: Проверка безопасности доступа к заказам другого пользователя", async ({
+    request,
+  }) => {
     log.info("=== Тест: Проверка безопасности доступа к заказам ===");
 
     const getLastOrderByUserId = await orderRepo.getLastOrderByUserId(userIdSecondary);
@@ -80,9 +84,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     log.info("✓ Все проверки пройдены успешно. Несуществующий заказ корректно обработан (404).");
   });
 
-  test("Тест-кейс № 4: Проверка обработки заказа с ID = 1", async ({
-    request,
-  }) => {
+  test("Тест-кейс № 4: Проверка обработки заказа с ID = 1", async ({ request }) => {
     log.info("=== Тест: Проверка обработки заказа с ID = 1 ===");
 
     const orderId = 1;
@@ -163,9 +165,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     );
   });
 
-  test('Тест-кейс № 6: Проверка получения заказа со статусом "COMPLETED"', async ({
-    request,
-  }) => {
+  test('Тест-кейс № 6: Проверка получения заказа со статусом "COMPLETED"', async ({ request }) => {
     log.info('=== Тест: Проверка получения заказа со статусом "COMPLETED" ===');
 
     const completedOrder = await orderRepo.getCompletedOrderByUserId(userIdPrimary);
@@ -277,9 +277,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     log.info('✓ Все проверки пройдены успешно. Заказ с типом "BANDWIDTH" корректно получен.');
   });
 
-  test('Тест-кейс № 10: Проверка получения заказа с типом "ACTIVATION"', async ({
-    request,
-  }) => {
+  test('Тест-кейс № 10: Проверка получения заказа с типом "ACTIVATION"', async ({ request }) => {
     log.info('=== Тест: Проверка получения заказа с типом "ACTIVATION" ===');
 
     const activationOrder = await orderRepo.getActivationOrderByUserId(userIdPrimary);

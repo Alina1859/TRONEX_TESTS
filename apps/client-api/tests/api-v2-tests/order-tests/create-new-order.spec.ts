@@ -34,7 +34,11 @@ import { BANDWIDTH_PURCHASE_COMBINATIONS } from "@shared/utils/variations_consta
 import { CoreRepository } from "@apps/client-api/api/core.api";
 import { userIdPrimary, apiKeyZero, apiUrl, apiKeyPrimary } from "@apps/client-api/api/constants";
 import { getPostHeaders } from "@shared/utils/headers";
-import { getFormulaParams } from "@shared/helpers/order-period-helpers";
+import {
+  getFormulaParams,
+  parseBandwidthDuration,
+  parseEnergyDuration,
+} from "@shared/helpers/order-period-helpers";
 
 test.describe("Create new order POST /api/v2/orders/", () => {
   const orderFieldCheck = new OrderFieldCheck();
@@ -42,10 +46,15 @@ test.describe("Create new order POST /api/v2/orders/", () => {
   const statusCheck = new ResponseStatusCheck();
   const walletActivationHelper = new WalletActivationHelper();
 
-  test("Тест-кейс № 1: Проверка создания нового заказа и валидации полей ответа", async ({ request }) => {
+  test("Тест-кейс № 1: Проверка создания нового заказа и валидации полей ответа", async ({
+    request,
+  }) => {
     log.info("=== Тест: Создание нового заказа ===");
     const orderApi = new OrderApi(request);
-    const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(request, statusCheck);
+    const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(
+      request,
+      statusCheck
+    );
     await walletActivationHelper.waitForActivationCompleted({
       orderId: activationOrder.id,
       targetAddress: wallet.address?.base58 || "",
@@ -88,9 +97,7 @@ test.describe("Create new order POST /api/v2/orders/", () => {
 
   test.describe("Тест-кейс № 2: Проверка невалидных значений в запросе", () => {
     for (const variation of invalidCreateOrderRequestVariations) {
-      test(`should reject invalid request: ${variation.description}`, async ({
-        request,
-      }) => {
+      test(`should reject invalid request: ${variation.description}`, async ({ request }) => {
         const orderApi = new OrderApi(request);
 
         const response = await orderApi.createNewOrder({ data: variation.data });
@@ -109,12 +116,15 @@ test.describe("Create new order POST /api/v2/orders/", () => {
       });
     }
   });
-  
+
   test("Тест-кейс № 3: Создание одного заказа с type = ENERGY", async ({ request }) => {
     const orderApi = new OrderApi(request);
     const coreRepo = new CoreRepository();
 
-    const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(request, statusCheck);
+    const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(
+      request,
+      statusCheck
+    );
     const targetAddress = wallet.address?.base58 || "";
     await walletActivationHelper.waitForActivationCompleted({
       orderId: activationOrder.id,
@@ -159,7 +169,10 @@ test.describe("Create new order POST /api/v2/orders/", () => {
     const orderApi = new OrderApi(request);
     const coreRepo = new CoreRepository();
 
-    const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(request, statusCheck);
+    const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(
+      request,
+      statusCheck
+    );
     const targetAddress = wallet.address?.base58 || "";
     await walletActivationHelper.waitForActivationCompleted({
       orderId: activationOrder.id,
@@ -205,7 +218,10 @@ test.describe("Create new order POST /api/v2/orders/", () => {
   }) => {
     const orderApi = new OrderApi(request);
 
-    const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(request, statusCheck);
+    const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(
+      request,
+      statusCheck
+    );
     const targetAddress = wallet.address?.base58 || "";
     await walletActivationHelper.waitForActivationCompleted({
       orderId: activationOrder.id,
@@ -273,19 +289,12 @@ test.describe("Create new order POST /api/v2/orders/", () => {
     const combinations = ENERGY_PURCHASE_COMBINATIONS;
     log.info(`Найдено ${combinations.length} комбинаций для тестирования`);
 
-    function parsePeriod(duration: EnergyPurchaseCombination["duration"]): EnergyOrderPeriodMs {
-      if (duration === "1h") return OrderPeriod.ONE_HOUR as EnergyOrderPeriodMs;
-      if (duration === "1d") return OrderPeriod.ONE_DAY as EnergyOrderPeriodMs;
-      if (duration === "3d") return OrderPeriod.THREE_DAYS as EnergyOrderPeriodMs;
-      throw new Error(`Неизвестный период: ${duration}`);
-    }
-
     for (const combo of combinations) {
       test(`should create order with energy=${combo.energy}, period=${combo.duration}, sunRate=${combo.sunRate}`, async ({
         request,
       }) => {
         test.setTimeout(300000);
-        const period = parsePeriod(combo.duration);
+        const period = parseEnergyDuration(combo.duration);
         const { hour, day } = getFormulaParams(period);
         const expectedCost = ENERGY_PRICE_FORMULA(combo.sunRate, hour, day, combo.energy);
         log.info(
@@ -295,18 +304,23 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         const orderApi = new OrderApi(request);
         const coreRepo = new CoreRepository();
 
-        const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(request, statusCheck);
+        const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(
+          request,
+          statusCheck
+        );
         const targetAddress = wallet.address?.base58 || "";
         await walletActivationHelper.waitForActivationCompleted({
-      orderId: activationOrder.id,
-      targetAddress,
-      timeoutMs: 30000,
-      stepMs: 1000,
-    });
+          orderId: activationOrder.id,
+          targetAddress,
+          timeoutMs: 30000,
+          stepMs: 1000,
+        });
 
         const initialPriceResponse = await coreRepo.coreConstantsKeyGet({ key: "PRICE_ENERGY" });
         const initialPriceEnergy: EnergyPriceValues = { ...initialPriceResponse.data };
-        log.info(`Начальное значение PRICE_ENERGY сохранено: ${JSON.stringify(initialPriceEnergy)}`);
+        log.info(
+          `Начальное значение PRICE_ENERGY сохранено: ${JSON.stringify(initialPriceEnergy)}`
+        );
 
         try {
           const currentPriceResponse = await coreRepo.coreConstantsKeyGet({ key: "PRICE_ENERGY" });
@@ -348,7 +362,9 @@ test.describe("Create new order POST /api/v2/orders/", () => {
           period: period,
         };
 
-        log.info(`Отправка запроса на создание заказа ENERGY: ${JSON.stringify(energyRequest, null, 2)}`);
+        log.info(
+          `Отправка запроса на создание заказа ENERGY: ${JSON.stringify(energyRequest, null, 2)}`
+        );
         const response = await orderApi.createNewOrder({ data: energyRequest });
         statusCheck.checkResponseStatus(response);
 
@@ -362,27 +378,22 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         priceCheck.checkOrderCost({ expectedCost });
 
         const dbFinalOrder = await walletActivationHelper.waitForOrderCompleted({
-      orderId: apiOrder.id,
-    });
+          orderId: apiOrder.id,
+        });
         const getOrderResponse = await orderApi.getOrderById({ orderId: apiOrder.id });
         statusCheck.checkResponseStatus(getOrderResponse);
         const apiFinalOrder = (await getOrderResponse.json()) as Order;
-        log.info(`Получен финальный заказ от API (ENERGY, by id): ${JSON.stringify(apiFinalOrder, null, 2)}`);
+        log.info(
+          `Получен финальный заказ от API (ENERGY, by id): ${JSON.stringify(apiFinalOrder, null, 2)}`
+        );
 
         orderFieldCheck.checkAllFields(apiFinalOrder);
         orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
 
         const priceCheckFinal = new PriceCheck(coreRepo, apiFinalOrder);
-        priceCheckFinal.checkOrderCost({
-          expectedCost,
-          tolerance: 0.01,
-          message: `Финальная стоимость заказа не совпадает с ожидаемой ${expectedCost}`,
-        });
-
         await priceCheckFinal.checkEnergyOrderPriceByFormula({
           period,
           energyAmount: combo.energy,
-          tolerance: 0.01,
           sunRate: combo.sunRate,
         });
 
@@ -409,20 +420,12 @@ test.describe("Create new order POST /api/v2/orders/", () => {
     const combinations = BANDWIDTH_PURCHASE_COMBINATIONS;
     log.info(`Найдено ${combinations.length} комбинаций для тестирования`);
 
-    function parsePeriod(
-      duration: BandwidthPurchaseCombination["duration"]
-    ): BandwidthOrderPeriodMs {
-      if (duration === "1h") return OrderPeriod.ONE_HOUR as BandwidthOrderPeriodMs;
-      if (duration === "1d") return OrderPeriod.ONE_DAY as BandwidthOrderPeriodMs;
-      throw new Error(`Неизвестный период: ${duration}`);
-    }
-
     for (const combo of combinations) {
       test(`should create order with bandwidth=${combo.bandwidth}, period=${combo.duration}, sunRate=${combo.sunRate}`, async ({
         request,
       }) => {
         test.setTimeout(300000);
-        const period = parsePeriod(combo.duration);
+        const period = parseBandwidthDuration(combo.duration);
         const { hour, day } = getFormulaParams(period);
         const expectedCost = BANDWIDTH_PRICE_FORMULA(combo.sunRate, hour, day, combo.bandwidth);
         log.info(
@@ -432,14 +435,17 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         const orderApi = new OrderApi(request);
         const coreRepo = new CoreRepository();
 
-        const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(request, statusCheck);
+        const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(
+          request,
+          statusCheck
+        );
         const targetAddress = wallet.address?.base58 || "";
         await walletActivationHelper.waitForActivationCompleted({
-      orderId: activationOrder.id,
-      targetAddress,
-      timeoutMs: 30000,
-      stepMs: 1000,
-    });
+          orderId: activationOrder.id,
+          targetAddress,
+          timeoutMs: 30000,
+          stepMs: 1000,
+        });
 
         const initialPriceResponse = await coreRepo.coreConstantsKeyGet({ key: "PRICE_BANDWIDTH" });
         const initialPriceBandwidth: BandwidthPriceValues = { ...initialPriceResponse.data };
@@ -448,7 +454,9 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         );
 
         try {
-          const currentPriceResponse = await coreRepo.coreConstantsKeyGet({ key: "PRICE_BANDWIDTH" });
+          const currentPriceResponse = await coreRepo.coreConstantsKeyGet({
+            key: "PRICE_BANDWIDTH",
+          });
 
           const priceValues: BandwidthPriceValues = {
             "1h": currentPriceResponse.data["1h"],
@@ -484,7 +492,9 @@ test.describe("Create new order POST /api/v2/orders/", () => {
           period: period,
         };
 
-        log.info(`Отправка запроса на создание заказа BANDWIDTH: ${JSON.stringify(bandwidthRequest, null, 2)}`);
+        log.info(
+          `Отправка запроса на создание заказа BANDWIDTH: ${JSON.stringify(bandwidthRequest, null, 2)}`
+        );
         const response = await orderApi.createNewOrder({ data: bandwidthRequest });
         statusCheck.checkResponseStatus(response);
 
@@ -498,23 +508,19 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         priceCheck.checkOrderCost({ expectedCost });
 
         const dbFinalOrder = await walletActivationHelper.waitForOrderCompleted({
-      orderId: apiOrder.id,
-    });
+          orderId: apiOrder.id,
+        });
         const getOrderResponse = await orderApi.getOrderById({ orderId: apiOrder.id });
         statusCheck.checkResponseStatus(getOrderResponse);
         const apiFinalOrder = (await getOrderResponse.json()) as Order;
-        log.info(`Получен финальный заказ от API (BANDWIDTH, by id): ${JSON.stringify(apiFinalOrder, null, 2)}`);
+        log.info(
+          `Получен финальный заказ от API (BANDWIDTH, by id): ${JSON.stringify(apiFinalOrder, null, 2)}`
+        );
 
         orderFieldCheck.checkAllFields(apiFinalOrder);
         orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
 
         const priceCheckFinal = new PriceCheck(coreRepo, apiFinalOrder);
-        priceCheckFinal.checkOrderCost({
-          expectedCost,
-          tolerance: 0.01,
-          message: `Финальная стоимость заказа не совпадает с ожидаемой ${expectedCost}`,
-        });
-
         await priceCheckFinal.checkBandwidthOrderPriceByFormula({
           period,
           bandwidthAmount: combo.bandwidth,
@@ -544,7 +550,10 @@ test.describe("Create new order POST /api/v2/orders/", () => {
   }) => {
     log.info("=== Тест: Создание заказа для пользователя без заказов с 0 балансом ===");
 
-    const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(request, statusCheck);
+    const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(
+      request,
+      statusCheck
+    );
     const targetAddress = wallet.address?.base58 || "";
     await walletActivationHelper.waitForActivationCompleted({
       orderId: activationOrder.id,
@@ -588,121 +597,110 @@ test.describe("Create new order POST /api/v2/orders/", () => {
     const combinations = ENERGY_PURCHASE_COMBINATIONS_FOR_USER;
     log.info(`Найдено ${combinations.length} комбинаций для тестирования`);
 
-    function parsePeriod(duration: EnergyPurchaseCombination["duration"]): EnergyOrderPeriodMs {
-      if (duration === "1h") return OrderPeriod.ONE_HOUR as EnergyOrderPeriodMs;
-      if (duration === "1d") return OrderPeriod.ONE_DAY as EnergyOrderPeriodMs;
-      if (duration === "3d") return OrderPeriod.THREE_DAYS as EnergyOrderPeriodMs;
-      throw new Error(`Неизвестный период: ${duration}`);
-    }
-
     for (const combo of combinations) {
       test(`should create order with energy=${combo.energy}, period=${combo.duration}, sunRate=${combo.sunRate}`, async ({
         request,
       }) => {
         test.setTimeout(300000);
-        const period = parsePeriod(combo.duration);
+        const period = parseEnergyDuration(combo.duration);
         const { hour, day } = getFormulaParams(period);
         const expectedCost = ENERGY_PRICE_FORMULA(combo.sunRate, hour, day, combo.energy);
-      log.info(
-        `=== Тест: Создание заказа ENERGY для пользователя со скидкой (период=${combo.duration}, энергия=${combo.energy}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${expectedCost} TRX) ===`
-      );
-
-      const orderApi = new OrderApi(request);
-      const coreRepo = new CoreRepository();
-
-      const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(request, statusCheck);
-      const targetAddress = wallet.address?.base58 || "";
-      await walletActivationHelper.waitForActivationCompleted({
-      orderId: activationOrder.id,
-      targetAddress,
-      timeoutMs: 30000,
-      stepMs: 1000,
-    });
-
-      try {
-        const priceValues: Partial<EnergyPriceValues> = {
-          [combo.duration]: combo.sunRate,
-        };
-
-        await coreRepo.coreUsersUserIdSettingsKeyPut({
-          userId: userIdPrimary,
-          key: "PRICE_ENERGY",
-          coreUsersUserIdSettingsKeyPutRequest: {
-            value: priceValues,
-          },
-        });
         log.info(
-          `PRICE_ENERGY для пользователя установлен: ${JSON.stringify({ value: priceValues })}`
+          `=== Тест: Создание заказа ENERGY для пользователя со скидкой (период=${combo.duration}, энергия=${combo.energy}, курс SUN=${combo.sunRate}, ожидаемая стоимость=${expectedCost} TRX) ===`
         );
 
-        const verifyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet({
-          userId: userIdPrimary,
-          key: "PRICE_ENERGY",
+        const orderApi = new OrderApi(request);
+        const coreRepo = new CoreRepository();
+
+        const { wallet, activationOrder } = await walletActivationHelper.createActivatedWallet(
+          request,
+          statusCheck
+        );
+        const targetAddress = wallet.address?.base58 || "";
+        await walletActivationHelper.waitForActivationCompleted({
+          orderId: activationOrder.id,
+          targetAddress,
+          timeoutMs: 30000,
+          stepMs: 1000,
         });
-        const actualValue = verifyResponse.data[combo.duration];
 
-        if (actualValue !== combo.sunRate) {
-          throw new Error(
-            `PRICE_ENERGY не установлен корректно. Ожидалось: ${combo.sunRate}, получено: ${actualValue}`
+        try {
+          const priceValues: Partial<EnergyPriceValues> = {
+            [combo.duration]: combo.sunRate,
+          };
+
+          await coreRepo.coreUsersUserIdSettingsKeyPut({
+            userId: userIdPrimary,
+            key: "PRICE_ENERGY",
+            coreUsersUserIdSettingsKeyPutRequest: {
+              value: priceValues,
+            },
+          });
+          log.info(
+            `PRICE_ENERGY для пользователя установлен: ${JSON.stringify({ value: priceValues })}`
           );
+
+          const verifyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet({
+            userId: userIdPrimary,
+            key: "PRICE_ENERGY",
+          });
+          const actualValue = verifyResponse.data[combo.duration];
+
+          if (actualValue !== combo.sunRate) {
+            throw new Error(
+              `PRICE_ENERGY не установлен корректно. Ожидалось: ${combo.sunRate}, получено: ${actualValue}`
+            );
+          }
+          log.info(`PRICE_ENERGY проверен: ${combo.duration} = ${actualValue}`);
+        } catch (error) {
+          log.error(`Ошибка при установке PRICE_ENERGY: ${error}`);
+          throw error;
         }
-        log.info(`PRICE_ENERGY проверен: ${combo.duration} = ${actualValue}`);
-      } catch (error) {
-        log.error(`Ошибка при установке PRICE_ENERGY: ${error}`);
-        throw error;
-      }
 
-      const energyRequest: CreateOrderRequest = {
-        type: OrderType.ENERGY,
-        targetAddress,
-        amount: combo.energy,
-        period: period,
-      };
+        const energyRequest: CreateOrderRequest = {
+          type: OrderType.ENERGY,
+          targetAddress,
+          amount: combo.energy,
+          period: period,
+        };
 
-      log.info(
-        `Отправка запроса на создание заказа ENERGY: ${JSON.stringify(energyRequest, null, 2)}`
-      );
-      const response = await request.post(`${apiUrl}/api/v2/orders/`, {
-        headers: getPostHeaders(apiKeyPrimary),
-        data: energyRequest,
-      });
-      statusCheck.checkResponseStatus(response);
+        log.info(
+          `Отправка запроса на создание заказа ENERGY: ${JSON.stringify(energyRequest, null, 2)}`
+        );
+        const response = await request.post(`${apiUrl}/api/v2/orders/`, {
+          headers: getPostHeaders(apiKeyPrimary),
+          data: energyRequest,
+        });
+        statusCheck.checkResponseStatus(response);
 
-      const apiOrder = (await response.json()) as Order;
-      log.info(
-        `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${expectedCost}`
-      );
+        const apiOrder = (await response.json()) as Order;
+        log.info(
+          `Заказ создан: id=${apiOrder.id}, стоимость=${apiOrder.sellPrice}, ожидаемая=${expectedCost}`
+        );
 
-      const priceCheck = new PriceCheck(coreRepo, apiOrder);
-      priceCheck.checkOrderCost({ expectedCost });
+        const priceCheck = new PriceCheck(coreRepo, apiOrder);
+        priceCheck.checkOrderCost({ expectedCost });
 
-      const dbFinalOrder = await walletActivationHelper.waitForOrderCompleted({
-      orderId: apiOrder.id,
-    });
-      const getOrderResponse = await orderApi.getOrderById({ orderId: apiOrder.id });
-      statusCheck.checkResponseStatus(getOrderResponse);
-      const apiFinalOrder = (await getOrderResponse.json()) as Order;
+        const dbFinalOrder = await walletActivationHelper.waitForOrderCompleted({
+          orderId: apiOrder.id,
+        });
+        const getOrderResponse = await orderApi.getOrderById({ orderId: apiOrder.id });
+        statusCheck.checkResponseStatus(getOrderResponse);
+        const apiFinalOrder = (await getOrderResponse.json()) as Order;
 
-      orderFieldCheck.checkAllFields(apiFinalOrder);
-      orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
+        orderFieldCheck.checkAllFields(apiFinalOrder);
+        orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
 
-      const priceCheckFinal = new PriceCheck(coreRepo, apiFinalOrder);
-      priceCheckFinal.checkOrderCost({
-        expectedCost,
-        tolerance: 0.01,
-        message: `Финальная стоимость заказа не совпадает с ожидаемой ${expectedCost}`,
-      });
+        const priceCheckFinal = new PriceCheck(coreRepo, apiFinalOrder);
+        await priceCheckFinal.checkEnergyOrderPriceByFormula({
+          period,
+          energyAmount: combo.energy,
+          sunRate: combo.sunRate,
+        });
 
-      await priceCheckFinal.checkEnergyOrderPriceByFormula({
-        period,
-        energyAmount: combo.energy,
-        tolerance: 0.01,
-        sunRate: combo.sunRate,
-      });
-
-      log.info(
-        `✓ Комбинация успешно проверена: период=${combo.duration}, энергия=${combo.energy}, курс=${combo.sunRate}`
-      );
+        log.info(
+          `✓ Комбинация успешно проверена: период=${combo.duration}, энергия=${combo.energy}, курс=${combo.sunRate}`
+        );
       });
     }
   });

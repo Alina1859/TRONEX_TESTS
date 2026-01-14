@@ -64,11 +64,7 @@ export class WalletActivationHelper {
     });
   }
 
-  async waitForOrderCompleted(params: {
-    orderId: number;
-    timeoutMs?: number;
-    stepMs?: number;
-  }) {
+  async waitForOrderCompleted(params: { orderId: number; timeoutMs?: number; stepMs?: number }) {
     const { orderId, timeoutMs = 90000, stepMs = 1000 } = params;
     return this.waitForOrderStatus({
       orderId,
@@ -104,4 +100,3 @@ export class WalletActivationHelper {
     return { wallet, activationOrder };
   }
 }
-
