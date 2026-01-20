@@ -28,7 +28,7 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Пустой API ключ корректно отклонен (401).");
+    log.info("✅ Все проверки пройдены успешно. Пустой API ключ корректно отклонен (401).");
   });
 
   test("GET /api/v2/orders/{id} should return 401 for invalid API key", async () => {
@@ -46,7 +46,7 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
+    log.info("✅ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
   });
 
   test("GET /api/v2/orders should return 401 for empty API key", async () => {
@@ -61,7 +61,7 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Пустой API ключ корректно отклонен (401).");
+    log.info("✅ Все проверки пройдены успешно. Пустой API ключ корректно отклонен (401).");
   });
 
   test("GET /api/v2/orders should return 401 for invalid API key", async () => {
@@ -79,7 +79,7 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
+    log.info("✅ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
   });
 
   test("POST /api/v2/orders/ should return 401 for empty API key", async () => {
@@ -99,7 +99,7 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Пустой API ключ корректно отклонен (401).");
+    log.info("✅ Все проверки пройдены успешно. Пустой API ключ корректно отклонен (401).");
   });
 
   test("POST /api/v2/orders/ should return 401 for invalid API key", async () => {
@@ -125,7 +125,7 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
+    log.info("✅ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
   });
 
   test("POST /api/v2/orders/ should reject request without Content-Type", async () => {
@@ -153,7 +153,7 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Запрос без Content-Type корректно отклонен.");
+    log.info("✅ Все проверки пройдены успешно. Запрос без Content-Type корректно отклонен.");
   });
 
   test("GET /api/v2/smart-orders/{smartOrderId} should return 401 for empty API key", async () => {
@@ -171,7 +171,7 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Пустой API ключ корректно отклонен (401).");
+    log.info("✅ Все проверки пройдены успешно. Пустой API ключ корректно отклонен (401).");
   });
 
   test("GET /api/v2/smart-orders/{smartOrderId} should return 401 for invalid API key", async () => {
@@ -192,7 +192,7 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
+    log.info("✅ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
   });
 
   test("POST /api/v2/smart-orders/ should return 401 for empty API key", async () => {
@@ -219,7 +219,7 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Пустой API ключ корректно отклонен (401).");
+    log.info("✅ Все проверки пройдены успешно. Пустой API ключ корректно отклонен (401).");
   });
 
   test("POST /api/v2/smart-orders/ should return 401 for invalid API key", async () => {
@@ -249,7 +249,7 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
+    log.info("✅ Все проверки пройдены успешно. Невалидный API ключ корректно отклонен (401).");
   });
 
   test("POST /api/v2/smart-orders/ should reject request without Content-Type", async () => {
@@ -281,6 +281,6 @@ test.describe("API key validation", () => {
     const errorResponse = await response.json();
     log.info("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Запрос без Content-Type корректно отклонен.");
+    log.info("✅ Все проверки пройдены успешно. Запрос без Content-Type корректно отклонен.");
   });
 });

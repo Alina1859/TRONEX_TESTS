@@ -45,7 +45,7 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
             value: initialProviderSettings,
           },
         });
-        log.info(`✓ Начальные настройки PROVIDER_SETTINGS восстановлены`);
+        log.info(`✅ Начальные настройки PROVIDER_SETTINGS восстановлены`);
       } catch (error) {
         log.error(`Ошибка при восстановлении начальных настроек: ${error}`);
         throw error;
@@ -73,7 +73,7 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
             coreUsersUserIdSettingsKeyPutRequest: requestBody,
           });
 
-          log.info(`📄 Тело ответа API (PUT /settings):`);
+          log.info(` Тело ответа API (PUT /settings):`);
           log.info(`${JSON.stringify(response.data, null, 2)}`);
 
           responseStatusCheck.checkResponseStatus(response);
@@ -87,7 +87,7 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
             key: "PROVIDER_SETTINGS",
           });
 
-          log.info(`📄 Тело ответа API (GET /settings):`);
+          log.info(` Тело ответа API (GET /settings):`);
           log.info(`${JSON.stringify(verifyResponse.data, null, 2)}`);
 
           providerPriorityCheck.checkProviderPriority(
@@ -95,7 +95,7 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
             providerName,
             priorityValue
           );
-          log.info(`✓ Приоритет ${providerName} успешно установлен и верифицирован`);
+          log.info(`✅ Приоритет ${providerName} успешно установлен и верифицирован`);
         });
       });
     });
@@ -115,13 +115,13 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
         coreUsersUserIdSettingsKeyPutRequest: requestBody,
       });
 
-      log.info(`📄 Тело ответа API (PUT /settings):`);
+      log.info(` Тело ответа API (PUT /settings):`);
       log.info(`${JSON.stringify(response.data, null, 2)}`);
 
       responseStatusCheck.checkResponseStatus(response);
 
       expect(response.data).toBeNull();
-      log.info(`✓ Приоритет провайдера успешно удален`);
+      log.info(`✅ Приоритет провайдера успешно удален`);
     });
 
     await test.step("Проверить удаление приоритета", async () => {
@@ -130,11 +130,11 @@ test.describe("Put providers priority PUT /core/users/{userId}/settings/PROVIDER
         key: "PROVIDER_SETTINGS",
       });
 
-      log.info(`📄 Тело ответа API (GET /settings):`);
+      log.info(` Тело ответа API (GET /settings):`);
       log.info(`${JSON.stringify(verifyResponse.data, null, 2)}`);
 
       expect(verifyResponse.data).toBeNull();
-      log.info(`✓ Удаление приоритета провайдера успешно верифицировано`);
+      log.info(`✅ Удаление приоритета провайдера успешно верифицировано`);
     });
   });
 });

@@ -72,7 +72,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
 
           responseStatusCheck.checkResponseStatus(priorityResponse, HttpStatus.OK);
           log.info(
-            `✓ Приоритет провайдера ${providerName} установлен на ${PROVIDER_TEST_PRIORITY}`
+            `✅ Приоритет провайдера ${providerName} установлен на ${PROVIDER_TEST_PRIORITY}`
           );
 
           const verifyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet({
@@ -88,7 +88,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
             providerName,
             PROVIDER_TEST_PRIORITY
           );
-          log.info(`✓ Приоритет провайдера ${providerName} успешно установлен и верифицирован`);
+          log.info(`✅ Приоритет провайдера ${providerName} успешно установлен и верифицирован`);
         });
 
         const { targetAddress } = await test.step("Создать и активировать кошелек", async () => {
@@ -103,7 +103,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
             timeoutMs: 30000,
             stepMs: 1000,
           });
-          log.info(`✓ Кошелек активирован: ${address}`);
+          log.info(`✅ Кошелек активирован: ${address}`);
           return { targetAddress: address };
         });
 
@@ -128,7 +128,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
           const order = (await response.json()) as Order;
           log.info(`API Response: ${JSON.stringify(order, null, 2)}`);
 
-          log.info(`✓ Заказ создан: id=${order.id}, sellPrice=${order.sellPrice}`);
+          log.info(`✅ Заказ создан: id=${order.id}, sellPrice=${order.sellPrice}`);
 
           orderFieldCheck.checkAllFields(order);
 
@@ -149,7 +149,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
 
           orderResponseCheck.checkProvider(dbFinalOrder, providerName);
           log.info(
-            `✓ Провайдер в БД (${dbFinalOrder.provider}) соответствует ожидаемому (${providerName})`
+            `✅ Провайдер в БД (${dbFinalOrder.provider}) соответствует ожидаемому (${providerName})`
           );
 
           orderResponseCheck.checkPrice(dbFinalOrder.sellPrice, expectedSellPrice);
@@ -159,7 +159,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
               ? parseFloat(dbFinalOrder.sellPrice)
               : dbFinalOrder.sellPrice;
           log.info(
-            `✓ Цена заказа из БД (${actualSellPrice}) соответствует ожидаемой по формуле (${expectedSellPrice})`
+            `✅ Цена заказа из БД (${actualSellPrice}) соответствует ожидаемой по формуле (${expectedSellPrice})`
           );
 
           const getOrderResponse = await orderApi.getOrderById({ orderId: apiOrder.id });
@@ -170,7 +170,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
           orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
         });
 
-        log.info(`✓ Тест завершен успешно`);
+        log.info(`✅ Тест завершен успешно`);
       });
     }
   });
@@ -209,7 +209,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
 
         responseStatusCheck.checkResponseStatus(priorityResponse, HttpStatus.OK);
         log.info(
-          `✓ Приоритет провайдера ${priorityProviderName} установлен на ${PROVIDER_TEST_PRIORITY}`
+          `✅ Приоритет провайдера ${priorityProviderName} установлен на ${PROVIDER_TEST_PRIORITY}`
         );
 
         const verifyResponse = await coreRepo.coreUsersUserIdSettingsKeyGet({
@@ -226,7 +226,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
           PROVIDER_TEST_PRIORITY
         );
         log.info(
-          `✓ Приоритет провайдера ${priorityProviderName} успешно установлен и верифицирован`
+          `✅ Приоритет провайдера ${priorityProviderName} успешно установлен и верифицирован`
         );
       });
 
@@ -242,7 +242,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
           timeoutMs: 30000,
           stepMs: 1000,
         });
-        log.info(`✓ Кошелек активирован: ${address}`);
+        log.info(`✅ Кошелек активирован: ${address}`);
         return { targetAddress: address };
       });
 
@@ -267,7 +267,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
         const order = (await response.json()) as Order;
         log.info(`API Response: ${JSON.stringify(order, null, 2)}`);
 
-        log.info(`✓ Заказ создан: id=${order.id}, sellPrice=${order.sellPrice}`);
+        log.info(`✅ Заказ создан: id=${order.id}, sellPrice=${order.sellPrice}`);
 
         orderFieldCheck.checkAllFields(order);
         return { apiOrder: order };
@@ -290,7 +290,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
 
         orderResponseCheck.checkProvider(dbFinalOrder, expectedProviderName);
         log.info(
-          `✓ Провайдер в БД (${dbFinalOrder.provider}) соответствует ожидаемому (${expectedProviderName}), а не приоритетному (${priorityProviderName})`
+          `✅ Провайдер в БД (${dbFinalOrder.provider}) соответствует ожидаемому (${expectedProviderName}), а не приоритетному (${priorityProviderName})`
         );
 
         orderResponseCheck.checkPrice(dbFinalOrder.sellPrice, expectedSellPrice);
@@ -300,7 +300,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
             ? parseFloat(dbFinalOrder.sellPrice)
             : dbFinalOrder.sellPrice;
         log.info(
-          `✓ Цена заказа из БД (${actualSellPrice}) соответствует ожидаемой по формуле обычных тарифов (${expectedSellPrice})`
+          `✅ Цена заказа из БД (${actualSellPrice}) соответствует ожидаемой по формуле обычных тарифов (${expectedSellPrice})`
         );
 
         const getOrderResponse = await orderApi.getOrderById({ orderId: apiOrder.id });
@@ -311,7 +311,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
         orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
       });
 
-      log.info(`✓ Тест завершен успешно`);
+      log.info(`✅ Тест завершен успешно`);
   });
 
   test("Тест-кейс № 3: Создание заказа без приоритета провайдера", async ({
@@ -348,7 +348,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
             `⚠ Настройки провайдера не пусты, но должны быть очищены в beforeEach. Продолжаем тест.`
           );
         } else {
-          log.info(`✓ Настройки провайдера отсутствуют (null)`);
+          log.info(`✅ Настройки провайдера отсутствуют (null)`);
         }
       });
 
@@ -364,7 +364,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
           timeoutMs: 30000,
           stepMs: 1000,
         });
-        log.info(`✓ Кошелек активирован: ${address}`);
+        log.info(`✅ Кошелек активирован: ${address}`);
         return { targetAddress: address };
       });
 
@@ -389,7 +389,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
         const order = (await response.json()) as Order;
         log.info(`API Response: ${JSON.stringify(order, null, 2)}`);
 
-        log.info(`✓ Заказ создан: id=${order.id}, sellPrice=${order.sellPrice}`);
+        log.info(`✅ Заказ создан: id=${order.id}, sellPrice=${order.sellPrice}`);
 
         orderFieldCheck.checkAllFields(order);
 
@@ -421,7 +421,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
         }
 
         log.info(
-          `✓ Провайдер в БД (${actualProvider}) выбран системой из доступных провайдеров: ${availableProviders.join(", ")}`
+          `✅ Провайдер в БД (${actualProvider}) выбран системой из доступных провайдеров: ${availableProviders.join(", ")}`
         );
 
         orderResponseCheck.checkPrice(dbFinalOrder.sellPrice, expectedSellPrice);
@@ -431,7 +431,7 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
             ? parseFloat(dbFinalOrder.sellPrice)
             : dbFinalOrder.sellPrice;
         log.info(
-          `✓ Цена заказа из БД (${actualSellPrice}) соответствует ожидаемой по формуле обычных тарифов (${expectedSellPrice})`
+          `✅ Цена заказа из БД (${actualSellPrice}) соответствует ожидаемой по формуле обычных тарифов (${expectedSellPrice})`
         );
 
         const getOrderResponse = await orderApi.getOrderById({ orderId: apiOrder.id });
@@ -442,6 +442,6 @@ test.describe("Create order with provider priority POST /api/v2/orders", () => {
         orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
       });
 
-      log.info(`✓ Тест завершен успешно`);
+      log.info(`✅ Тест завершен успешно`);
   });
 });

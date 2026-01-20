@@ -193,3 +193,12 @@ export interface FromUnauthToAuthCombination {
   withEnergy: boolean;
   withBandwidth: boolean;
 }
+
+export interface CheckRequestResponseMatchParams {
+  apiSmartOrder: SmartOrderWithOrders;
+  fromAddress: string;
+  toAddress: string;
+  withActivation: boolean;
+  withEnergy: boolean;
+  withBandwidth: boolean;
+}

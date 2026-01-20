@@ -14,7 +14,7 @@ export const clearProviderSettings = async (coreRepo: CoreRepository, userId: st
           value: null,
         },
       });
-      log.info(`✓ Все настройки провайдеров удалены (value: null)`);
+      log.info(`✅ Все настройки провайдеров удалены (value: null)`);
     } catch (error) {
       log.error(`Ошибка при удалении настроек провайдеров: ${error}`);
       throw error;

@@ -33,7 +33,7 @@ export class ResponseStatusCheck {
   }
 
   private logStatusCheck(actualStatus: number, expectedStatus: number): void {
-    log.info(`📋 Статус ответа: ожидаемый ${expectedStatus}, фактический ${actualStatus}`);
+    log.info(` Статус ответа: ожидаемый ${expectedStatus}, фактический ${actualStatus}`);
 
     const isMatch = actualStatus === expectedStatus;
     log.info(
@@ -69,7 +69,12 @@ export class ResponseStatusCheck {
         const headers = response.headers();
         const retryAfter = headers["retry-after"] || headers["Retry-After"];
 
-        this.logRateLimitDetection(i + 1, status, retryAfter, rateLimitResponse);
+        this.logRateLimitDetection({
+          requestIndex: i + 1,
+          status,
+          retryAfter,
+          rateLimitResponse,
+        });
 
         return {
           hit: true,
@@ -83,13 +88,18 @@ export class ResponseStatusCheck {
     return { hit: false, requestIndex: -1, response: null };
   }
 
-  private logRateLimitDetection(
-    requestIndex: number,
-    status: number,
-    retryAfter?: string,
-    rateLimitResponse?: any
-  ): void {
-    log.info(`✓ Rate limiting обнаружен на запросе #${requestIndex}`);
+  private logRateLimitDetection({
+    requestIndex,
+    status,
+    retryAfter,
+    rateLimitResponse,
+  }: {
+    requestIndex: number;
+    status: number;
+    retryAfter?: string;
+    rateLimitResponse?: any;
+  }): void {
+    log.info(`✅ Rate limiting обнаружен на запросе #${requestIndex}`);
     log.info(`  Статус: ${status} (Too Many Requests)`);
 
     if (retryAfter) {
@@ -114,7 +124,7 @@ export class ResponseStatusCheck {
   ): void {
     if (rateLimitInfo.hit) {
       log.info(
-        `✓ Rate limiting работает корректно. API вернул ${HttpStatus.TOO_MANY_REQUESTS} после превышения лимита.`
+        `✅ Rate limiting работает корректно. API вернул ${HttpStatus.TOO_MANY_REQUESTS} после превышения лимита.`
       );
     } else {
       log.warn(`⚠ Rate limiting не был обнаружен после ${requestCount} параллельных запросов.`);

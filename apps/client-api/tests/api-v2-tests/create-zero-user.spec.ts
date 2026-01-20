@@ -31,13 +31,13 @@
 //     expect(typeof accessToken).toBe("string");
 //     expect(accessToken.length).toBeGreaterThan(0);
 
-//     log.info(`✓ Пользователь успешно создан!`);
+//     log.info(`✅ Пользователь успешно создан!`);
 //     log.info(`User ID: ${userId}`);
 //     log.info(`Access Token: ${accessToken}`);
 //     log.info(`Добавьте следующие строки в ваш .env файл:`);
 //     log.info(`USER_ID_WITHOUT_ORDERS=${userId}`);
 //     log.info(`API_KEY_WITHOUT_ORDERS=${accessToken}`);
-//     log.info(`✓ Тестовый пользователь без заказов создан успешно: ${userId}`);
+//     log.info(`✅ Тестовый пользователь без заказов создан успешно: ${userId}`);
 //   } catch (error: any) {
 //     log.error(`✗ Ошибка при создании пользователя: ${error.message}`);
 //     if (error.response) {

@@ -51,7 +51,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
     orders.forEach((order: Order) => orderFieldCheck.checkAllFields(order));
     orderResponseCheck.checkSortedByCreatedAtDesc(orders);
 
-    log.info("✓ Проверки списка заказов по умолчанию пройдены");
+    log.info("✅ Проверки списка заказов по умолчанию пройдены");
   });
 
   test("Тест-кейс № 2: Проверка невалидных значений offset", async ({ request }) => {
@@ -73,7 +73,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
       log.info("");
     }
 
-    log.info("✓ Все невалидные значения offset корректно отклонены (400)");
+    log.info("✅ Все невалидные значения offset корректно отклонены (400)");
   });
 
   test("Тест-кейс № 3: Проверка невалидных значений limit", async ({ request }) => {
@@ -95,7 +95,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
       log.info("");
     }
 
-    log.info("✓ Все невалидные значения limit корректно отклонены (400)");
+    log.info("✅ Все невалидные значения limit корректно отклонены (400)");
   });
 
   test("Тест-кейс № 4: Проверка невалидных комбинаций offset и limit", async ({ request }) => {
@@ -119,7 +119,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
       log.info("");
     }
 
-    log.info("✓ Все невалидные комбинации offset/limit корректно отклонены (400)");
+    log.info("✅ Все невалидные комбинации offset/limit корректно отклонены (400)");
   });
 
   test("Тест-кейс № 5: Проверка значения offset = 0", async ({ request }) => {
@@ -148,7 +148,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
       orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
     });
 
-    log.info("✓ offset = 0: получены последние 10 заказов пользователя, отсортированы по убыванию");
+    log.info("✅ offset = 0: получены последние 10 заказов пользователя, отсортированы по убыванию");
   });
 
   test("Тест-кейс № 6: Проверка значения offset = 10", async ({ request }) => {
@@ -178,7 +178,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
       orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
     });
 
-    log.info("✓ offset = 10: получены заказы второй страницы, без пересечений с первой");
+    log.info("✅ offset = 10: получены заказы второй страницы, без пересечений с первой");
   });
 
   test("Тест-кейс № 7: Проверка значения limit = 5", async ({ request }) => {
@@ -208,7 +208,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
       orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
     });
 
-    log.info("✓ limit = 5: получены ожидаемые заказы пользователя, не более 5");
+    log.info("✅ limit = 5: получены ожидаемые заказы пользователя, не более 5");
   });
 
   test("Тест-кейс № 8: Проверка значения offset = 1000", async ({ request }) => {
@@ -242,7 +242,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
       log.info("Получен пустой список заказов (offset превышает количество доступных заказов)");
     }
 
-    log.info("✓ offset = 1000: корректно возвращен пустой массив при отсутствии заказов");
+    log.info("✅ offset = 1000: корректно возвращен пустой массив при отсутствии заказов");
   });
 
   test("Тест-кейс № 9: Проверка комбинации offset = 10, limit = 5", async ({ request }) => {
@@ -272,7 +272,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
       orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
     });
 
-    log.info("✓ offset = 10, limit = 5: получены ожидаемые 5 заказов, начиная с 11-го");
+    log.info("✅ offset = 10, limit = 5: получены ожидаемые 5 заказов, начиная с 11-го");
   });
 
   test("Тест-кейс № 10: Проверка возврата пустого массива для пользователя без заказов", async ({
@@ -305,7 +305,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
     orderResponseCheck.checkOrderListExactLength(orders, expectedOrders.length);
     orderResponseCheck.checkOrderListIsEmpty(orders, expectedOrders);
 
-    log.info("✓ API корректно возвращает пустой массив для пользователя без заказов");
+    log.info("✅ API корректно возвращает пустой массив для пользователя без заказов");
   });
 
   test("Тест-кейс № 11: Проверка значения limit = ORDER_LIST_MAX_LIMIT", async ({ request }) => {
@@ -336,7 +336,7 @@ test.describe("Get order list GET /api/v2/orders/", () => {
     });
 
     log.info(
-      `✓ limit = ${ORDER_LIST_MAX_LIMIT}: получены ожидаемые заказы пользователя, не более ${ORDER_LIST_MAX_LIMIT}`
+      `✅ limit = ${ORDER_LIST_MAX_LIMIT}: получены ожидаемые заказы пользователя, не более ${ORDER_LIST_MAX_LIMIT}`
     );
   });
 });

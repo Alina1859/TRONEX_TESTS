@@ -92,7 +92,7 @@ test.describe("Create new order POST /api/v2/orders/", () => {
     orderFieldCheck.checkAllFields(apiFinalOrder);
     orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
 
-    log.info("✓ Все проверки полей ответа после создания заказа пройдены");
+    log.info("✅ Все проверки полей ответа после создания заказа пройдены");
   });
 
   test.describe("Тест-кейс № 2: Проверка невалидных значений в запросе", () => {
@@ -410,7 +410,7 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         }
 
         log.info(
-          `✓ Комбинация успешно проверена: период=${combo.duration}, энергия=${combo.energy}, курс=${combo.sunRate}`
+          `✅ Комбинация успешно проверена: период=${combo.duration}, энергия=${combo.energy}, курс=${combo.sunRate}`
         );
       });
     }
@@ -539,7 +539,7 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         }
 
         log.info(
-          `✓ Комбинация успешно проверена: период=${combo.duration}, bandwidth=${combo.bandwidth}, курс=${combo.sunRate}`
+          `✅ Комбинация успешно проверена: период=${combo.duration}, bandwidth=${combo.bandwidth}, курс=${combo.sunRate}`
         );
       });
     }
@@ -590,7 +590,7 @@ test.describe("Create new order POST /api/v2/orders/", () => {
       log.info(`Response text: ${responseText}`);
     }
 
-    log.info("✓ Тест завершен: проверка создания заказа для пользователя с нулевым балансом");
+    log.info("✅ Тест завершен: проверка создания заказа для пользователя с нулевым балансом");
   });
 
   test.describe("Тест-кейс № 10: Создание заказов с различными комбинациями энергии, периодов и цен для PRICE_ENERGY для пользователя со скидкой", () => {
@@ -699,7 +699,7 @@ test.describe("Create new order POST /api/v2/orders/", () => {
         });
 
         log.info(
-          `✓ Комбинация успешно проверена: период=${combo.duration}, энергия=${combo.energy}, курс=${combo.sunRate}`
+          `✅ Комбинация успешно проверена: период=${combo.duration}, энергия=${combo.energy}, курс=${combo.sunRate}`
         );
       });
     }

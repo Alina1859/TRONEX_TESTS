@@ -25,14 +25,14 @@
 //     expect(accessToken).toBeDefined();
 //     expect(typeof accessToken).toBe("string");
 //     expect(accessToken.length).toBeGreaterThan(0);
-//     log.info(`✓ Токен успешно получен. Пользователь существует.`);
+//     log.info(`✅ Токен успешно получен. Пользователь существует.`);
 
 //     log.info(`Удаление пользователя с ID: ${userId}`);
 //     const deleteResponse = await coreRepo.coreUsersUserIdDelete(userId);
 //     const deleteResult = deleteResponse.data;
 
 //     expect(deleteResult).toBe(true);
-//     log.info(`✓ Пользователь успешно удален. Результат: ${deleteResult}`);
+//     log.info(`✅ Пользователь успешно удален. Результат: ${deleteResult}`);
 
 //     try {
 //       await coreRepo.coreUserUserIdAccessTokenGet(userId);
@@ -40,15 +40,15 @@
 //     } catch (error: any) {
 //       if (error.response) {
 //         const status = error.response.status;
-//         log.info(`✓ Попытка получить токен для удаленного пользователя вернула статус: ${status}`);
+//         log.info(`✅ Попытка получить токен для удаленного пользователя вернула статус: ${status}`);
 //         expect(status).toBeGreaterThanOrEqual(400);
-//         log.info(`✓ Пользователь успешно удален и больше недоступен`);
+//         log.info(`✅ Пользователь успешно удален и больше недоступен`);
 //       } else {
 //         throw error;
 //       }
 //     }
 
-//     log.info(`✓ Тест завершен успешно: пользователь удален`);
+//     log.info(`✅ Тест завершен успешно: пользователь удален`);
 //   } catch (error: any) {
 //     log.error(`✗ Ошибка при выполнении теста: ${error.message}`);
 //     if (error.response) {

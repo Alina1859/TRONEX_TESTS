@@ -37,7 +37,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     orderResponseCheck.checkOrderFieldEquality(apiOrder, lastOrder);
     orderFieldTest.checkAllFields(apiOrder);
 
-    log.info("✓ Все проверки пройдены успешно");
+    log.info("✅ Все проверки пройдены успешно");
   });
 
   test("Тест-кейс № 2: Проверка безопасности доступа к заказам другого пользователя", async ({
@@ -61,7 +61,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Доступ к чужому заказу заблокирован.");
+    log.info("✅ Все проверки пройдены успешно. Доступ к чужому заказу заблокирован.");
   });
 
   test("Тест-кейс № 3: Проверка обработки несуществующего заказа", async ({ request }) => {
@@ -81,7 +81,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Несуществующий заказ корректно обработан (404).");
+    log.info("✅ Все проверки пройдены успешно. Несуществующий заказ корректно обработан (404).");
   });
 
   test("Тест-кейс № 4: Проверка обработки заказа с ID = 1", async ({ request }) => {
@@ -96,9 +96,9 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     const orderExists = orderInDb && orderInDb.length > 0;
 
     if (orderExists) {
-      log.info(`✓ Заказ с ID ${orderId} существует в БД. Проверяем корректность ответа API.`);
+      log.info(`✅ Заказ с ID ${orderId} существует в БД. Проверяем корректность ответа API.`);
     } else {
-      log.info(`✓ Заказ с ID ${orderId} не существует в БД. Проверяем обработку ошибки 404.`);
+      log.info(`✅ Заказ с ID ${orderId} не существует в БД. Проверяем обработку ошибки 404.`);
     }
 
     const orderApi = new OrderApi(request);
@@ -114,7 +114,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
       orderResponseCheck.checkOrderFieldEquality(apiOrder, orderInDb[0]);
       orderFieldTest.checkAllFields(apiOrder);
 
-      log.info("✓ Все проверки пройдены успешно. Заказ с ID = 1 корректно получен.");
+      log.info("✅ Все проверки пройдены успешно. Заказ с ID = 1 корректно получен.");
     } else {
       log.info("Проверка обработки ошибки 404 для несуществующего заказа...");
       responseStatusCheck.checkResponseStatus(response, HttpStatus.NOT_FOUND);
@@ -122,7 +122,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
       log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
       log.info(
-        "✓ Все проверки пройдены успешно. Несуществующий заказ с ID = 1 корректно обработан (404)."
+        "✅ Все проверки пройдены успешно. Несуществующий заказ с ID = 1 корректно обработан (404)."
       );
     }
   });
@@ -147,7 +147,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
         const status = response.status();
 
         if (status === HttpStatus.BAD_REQUEST || status === HttpStatus.NOT_FOUND) {
-          log.info(`  ✓ Корректно обработано: статус ${status}`);
+          log.info(`  ✅ Корректно обработано: статус ${status}`);
         } else {
           log.warn(
             `  ✗ Неожиданный статус: ${status} (ожидался ${HttpStatus.BAD_REQUEST} или ${HttpStatus.NOT_FOUND})`
@@ -161,7 +161,7 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
     }
 
     log.info(
-      "✓ Все граничные и базовые некорректные значения orderId были правильно отклонены API."
+      "✅ Все граничные и базовые некорректные значения orderId были правильно отклонены API."
     );
   });
 
@@ -188,9 +188,9 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
 
     log.info("Проверка статуса заказа...");
     orderResponseCheck.checkOrderStatus(apiOrder, "COMPLETED");
-    log.info(`✓ Статус заказа корректный: ${apiOrder.status}`);
+    log.info(`✅ Статус заказа корректный: ${apiOrder.status}`);
 
-    log.info('✓ Все проверки пройдены успешно. Заказ со статусом "COMPLETED" корректно получен.');
+    log.info('✅ Все проверки пройдены успешно. Заказ со статусом "COMPLETED" корректно получен.');
   });
 
   test('Тест-кейс № 7: Проверка получения заказа со статусом "FAILED"', async ({ request }) => {
@@ -216,9 +216,9 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
 
     log.info("Проверка статуса заказа...");
     orderResponseCheck.checkOrderStatus(apiOrder, "FAILED");
-    log.info(`✓ Статус заказа корректный: ${apiOrder.status}`);
+    log.info(`✅ Статус заказа корректный: ${apiOrder.status}`);
 
-    log.info('✓ Все проверки пройдены успешно. Заказ со статусом "FAILED" корректно получен.');
+    log.info('✅ Все проверки пройдены успешно. Заказ со статусом "FAILED" корректно получен.');
   });
 
   test('Тест-кейс № 8: Проверка получения заказа с типом "ENERGY"', async ({ request }) => {
@@ -244,9 +244,9 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
 
     log.info("Проверка типа заказа...");
     orderResponseCheck.checkOrderType(apiOrder, "ENERGY");
-    log.info(`✓ Тип заказа корректный: ${apiOrder.type}`);
+    log.info(`✅ Тип заказа корректный: ${apiOrder.type}`);
 
-    log.info('✓ Все проверки пройдены успешно. Заказ с типом "ENERGY" корректно получен.');
+    log.info('✅ Все проверки пройдены успешно. Заказ с типом "ENERGY" корректно получен.');
   });
 
   test('Тест-кейс № 9: Проверка получения заказа с типом "BANDWIDTH"', async ({ request }) => {
@@ -272,9 +272,9 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
 
     log.info("Проверка типа заказа...");
     orderResponseCheck.checkOrderType(apiOrder, "BANDWIDTH");
-    log.info(`✓ Тип заказа корректный: ${apiOrder.type}`);
+    log.info(`✅ Тип заказа корректный: ${apiOrder.type}`);
 
-    log.info('✓ Все проверки пройдены успешно. Заказ с типом "BANDWIDTH" корректно получен.');
+    log.info('✅ Все проверки пройдены успешно. Заказ с типом "BANDWIDTH" корректно получен.');
   });
 
   test('Тест-кейс № 10: Проверка получения заказа с типом "ACTIVATION"', async ({ request }) => {
@@ -300,8 +300,8 @@ test.describe("Get order by ID GET /api/v2/orders/{id}", () => {
 
     log.info("Проверка типа заказа...");
     orderResponseCheck.checkOrderType(apiOrder, "ACTIVATION");
-    log.info(`✓ Тип заказа корректный: ${apiOrder.type}`);
+    log.info(`✅ Тип заказа корректный: ${apiOrder.type}`);
 
-    log.info('✓ Все проверки пройдены успешно. Заказ с типом "ACTIVATION" корректно получен.');
+    log.info('✅ Все проверки пройдены успешно. Заказ с типом "ACTIVATION" корректно получен.');
   });
 });

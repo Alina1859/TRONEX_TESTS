@@ -8,16 +8,18 @@ import { AddressCheck } from "@apps/client-api/test-objects/address-check";
 import { SmartOrderApi } from "@apps/client-api/api/smart-order.api";
 import { apiKeyZero } from "@apps/client-api/api/constants";
 import { SmartOrderWithOrders, Order } from "@shared/utils/types";
-import { HttpStatus, OrderType } from "@shared/utils/constants";
-import { invalidCreateSmartOrderRequestVariations } from "@shared/utils/variations_constants/invalid-create-smart-order-request-variations";
-import { invalidSmartOrderExtraFieldsVariations } from "@shared/utils/variations_constants/invalid-smart-order-extra-fields-variations";
+import { HttpStatus } from "@shared/utils/constants";
+import {
+  invalidCreateSmartOrderRequestVariations,
+  invalidSmartOrderExtraFieldsVariations,
+  SMART_ORDER_NO_ORDERS_COMBINATIONS,
+  SMART_ORDER_WITH_ORDERS_COMBINATIONS,
+  FROM_UNAUTH_TO_AUTH_COMBINATIONS,
+} from "@shared/utils/variations_constants";
 import { PriceCheck } from "@apps/client-api/test-objects/price-check";
 import { CoreRepository } from "@apps/client-api/api/core.api";
 import { EnergyOrderPeriodMs, BandwidthOrderPeriodMs } from "@shared/utils/types";
 import { SmartOrderTestHelper } from "@shared/helpers/smart-order-helper";
-import { SMART_ORDER_NO_ORDERS_COMBINATIONS } from "@shared/utils/variations_constants/smart-order-no-orders-variations";
-import { SMART_ORDER_WITH_ORDERS_COMBINATIONS } from "@shared/utils/variations_constants/smart-order-with-orders-variations";
-import { FROM_UNAUTH_TO_AUTH_COMBINATIONS } from "@shared/utils/variations_constants/smart-order-from-unauth-to-auth-variations";
 
 test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
   const smartOrderFieldCheck = new SmartOrderFieldCheck();
@@ -67,14 +69,14 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
     log.info("Проверка обязательных полей и их типов...");
     smartOrderFieldCheck.checkAllFields(apiSmartOrder);
 
-    smartOrderFieldCheck.checkRequestResponseMatch(
+    smartOrderFieldCheck.checkRequestResponseMatch({
       apiSmartOrder,
       fromAddress,
       toAddress,
-      true,
-      true,
-      true
-    );
+      withActivation: true,
+      withEnergy: true,
+      withBandwidth: true,
+    });
 
     const dbFinalSmartOrder = await smartOrderTestHelper.waitForSmartOrderCompleted(
       apiSmartOrder.id
@@ -113,7 +115,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
       }
     }
 
-    log.info("✓ Все проверки полей ответа после создания smart order пройдены");
+    log.info("✅ Все проверки полей ответа после создания smart order пройдены");
   });
 
   test.describe("Тест-кейс № 2: Проверка отклонения невалидных значений в запросе", () => {
@@ -160,16 +162,16 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
         log.info(`API Response (with extra fields): ${JSON.stringify(apiSmartOrder, null, 2)}`);
 
         smartOrderFieldCheck.checkAllFields(apiSmartOrder);
-        smartOrderFieldCheck.checkRequestResponseMatch(
+        smartOrderFieldCheck.checkRequestResponseMatch({
           apiSmartOrder,
           fromAddress,
           toAddress,
-          requestData.withActivation ?? true,
-          requestData.withEnergy ?? true,
-          requestData.withBandwidth ?? true
-        );
+          withActivation: requestData.withActivation ?? true,
+          withEnergy: requestData.withEnergy ?? true,
+          withBandwidth: requestData.withBandwidth ?? true,
+        });
 
-        log.info(`✓ Smart order успешно создан с лишними полями: ${variation.description}`);
+        log.info(`✅ Smart order успешно создан с лишними полями: ${variation.description}`);
       });
     }
   });
@@ -223,7 +225,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
       log.info(`Response text: ${responseText}`);
     }
 
-    log.info("✓ Тест завершен: проверка создания smart order для пользователя с нулевым балансом");
+    log.info("✅ Тест завершен: проверка создания smart order для пользователя с нулевым балансом");
   });
 
   test("Тест-кейс № 5: Проверка создания smart order с неактивированным fromAddress при withActivation=false", async ({
@@ -272,7 +274,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
     }
 
     log.info(
-      "✓ Тест завершен: проверка создания smart order с неактивированным fromAddress (withActivation=false)"
+      "✅ Тест завершен: проверка создания smart order с неактивированным fromAddress (withActivation=false)"
     );
   });
 
@@ -319,14 +321,14 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
     log.info("Проверка обязательных полей и их типов...");
     smartOrderFieldCheck.checkAllFields(apiSmartOrder);
 
-    smartOrderFieldCheck.checkRequestResponseMatch(
+    smartOrderFieldCheck.checkRequestResponseMatch({
       apiSmartOrder,
       fromAddress,
       toAddress,
-      true,
-      true,
-      true
-    );
+      withActivation: true,
+      withEnergy: true,
+      withBandwidth: true,
+    });
 
     const dbFinalSmartOrder = await smartOrderTestHelper.waitForSmartOrderCompleted(
       apiSmartOrder.id
@@ -345,9 +347,9 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
     smartOrderFieldCheck.checkAllFields(apiFinalSmartOrder);
     smartOrderResponseCheck.checkSmartOrderFieldEquality(apiFinalSmartOrder, dbFinalSmartOrder);
 
-    log.info("✓ Все проверки полей ответа после создания smart order пройдены");
+    log.info("✅ Все проверки полей ответа после создания smart order пройдены");
     log.info(
-      "✓ Тест завершен: проверка создания smart order с активированным fromAddress и неактивированным toAddress"
+      "✅ Тест завершен: проверка создания smart order с активированным fromAddress и неактивированным toAddress"
     );
   });
 
@@ -446,7 +448,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
         smartOrderResponseCheck.checkSmartOrderHasNoOrders(apiFinalSmartOrder);
 
         log.info(
-          "✓ Smart order завершился COMPLETED без создания подзаказов в указанной комбинации условий"
+          "✅ Smart order завершился COMPLETED без создания подзаказов в указанной комбинации условий"
         );
       });
     }
@@ -572,7 +574,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
         }
 
         log.info(
-          `✓ Smart order создал подзаказы ожидаемых типов: ${combination.expectedOrderTypes.join(", ")}`
+          `✅ Smart order создал подзаказы ожидаемых типов: ${combination.expectedOrderTypes.join(", ")}`
         );
       });
     }
@@ -669,7 +671,7 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
         }
 
         log.info(
-          `✓ Тест-кейс № 9 успешно выполнен: создан smart order с ожидаемыми подзаказами для неактивированного fromAddress`
+          `✅ Тест-кейс № 9 успешно выполнен: создан smart order с ожидаемыми подзаказами для неактивированного fromAddress`
         );
       });
     }
@@ -719,11 +721,11 @@ test.describe("Create new smart order POST /api/v2/smart-orders/", () => {
   //     });
   //     log.warn(`⚠ Запрос не был прерван, статус: ${response.status()}`);
   //   } catch (error: any) {
-  //     log.info(`✓ Сетевая ошибка успешно перехвачена: ${error.message}`);
+  //     log.info(`✅ Сетевая ошибка успешно перехвачена: ${error.message}`);
   //     expect(error.message).toMatch(/aborted|failed|network|timeout|ECONNREFUSED|ENOTFOUND/i);
   //   }
 
   //   expect(requestAborted).toBe(true);
-  //   log.info("✓ Тест завершен: проверка обработки сетевой ошибки при создании smart order");
+  //   log.info("✅ Тест завершен: проверка обработки сетевой ошибки при создании smart order");
   // });
 });

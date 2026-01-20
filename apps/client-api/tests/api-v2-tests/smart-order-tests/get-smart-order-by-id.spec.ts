@@ -37,7 +37,7 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
     smartOrderFieldTest.checkAllFields(apiSmartOrder);
     smartOrderResponseCheck.checkSmartOrderFieldEquality(apiSmartOrder, lastSmartOrder);
 
-    log.info("✓ Все проверки пройдены успешно");
+    log.info("✅ Все проверки пройдены успешно");
   });
 
   test("Тест-кейс № 2: Проверка обработки несуществующего smart order", async ({ request }) => {
@@ -60,7 +60,7 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
     log.info(
-      "✓ Все проверки пройдены успешно. Несуществующий смарт заказ корректно обработан (404)."
+      "✅ Все проверки пройдены успешно. Несуществующий смарт заказ корректно обработан (404)."
     );
   });
 
@@ -88,7 +88,7 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
     const errorResponse = await response.json();
     log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
-    log.info("✓ Все проверки пройдены успешно. Доступ к чужому смарт заказу заблокирован.");
+    log.info("✅ Все проверки пройдены успешно. Доступ к чужому смарт заказу заблокирован.");
   });
 
   test("Тест-кейс № 4: Проверка обработки smart order с ID = 1", async ({ request }) => {
@@ -104,11 +104,11 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
 
     if (smartOrderExists) {
       log.info(
-        `✓ Смарт заказ с ID ${smartOrderId} существует в БД. Проверяем корректность ответа API.`
+        `✅ Смарт заказ с ID ${smartOrderId} существует в БД. Проверяем корректность ответа API.`
       );
     } else {
       log.info(
-        `✓ Смарт заказ с ID ${smartOrderId} не существует в БД. Проверяем обработку ошибки 404.`
+        `✅ Смарт заказ с ID ${smartOrderId} не существует в БД. Проверяем обработку ошибки 404.`
       );
     }
 
@@ -125,7 +125,7 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
       smartOrderResponseCheck.checkSmartOrderFieldEquality(apiSmartOrder, smartOrderInDb[0]);
       smartOrderFieldTest.checkAllFields(apiSmartOrder);
 
-      log.info("✓ Все проверки пройдены успешно. Смарт заказ с ID = 1 корректно получен.");
+      log.info("✅ Все проверки пройдены успешно. Смарт заказ с ID = 1 корректно получен.");
     } else {
       log.info("Проверка обработки ошибки 404 для несуществующего смарт заказа...");
       responseStatusCheck.checkResponseStatus(response, HttpStatus.NOT_FOUND);
@@ -133,7 +133,7 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
       log.error("Error Response:", JSON.stringify(errorResponse, null, 2));
 
       log.info(
-        "✓ Все проверки пройдены успешно. Несуществующий смарт заказ с ID = 1 корректно обработан (404)."
+        "✅ Все проверки пройдены успешно. Несуществующий смарт заказ с ID = 1 корректно обработан (404)."
       );
     }
   });
@@ -169,9 +169,9 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
   //     log.info("Проверка, что массив orders пустой...");
   //     expect(Array.isArray(apiSmartOrder.orders)).toBe(true);
   //     expect(apiSmartOrder.orders.length).toBe(0);
-  //     log.info(`✓ Массив orders пустой: ${apiSmartOrder.orders.length} элементов`);
+  //     log.info(`✅ Массив orders пустой: ${apiSmartOrder.orders.length} элементов`);
 
-  //     log.info("✓ Все проверки пройдены успешно. Смарт заказ без Orders корректно получен.");
+  //     log.info("✅ Все проверки пройдены успешно. Смарт заказ без Orders корректно получен.");
   //   });
 
   test("Тест-кейс № 5: Проверка граничных значений и базовых некорректных значений smartOrderId", async ({
@@ -198,7 +198,7 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
         const status = response.status();
 
         if (variation.expectedStatus.includes(status)) {
-          log.info(`  ✓ Корректно обработано: статус ${status}`);
+          log.info(`  ✅ Корректно обработано: статус ${status}`);
         } else {
           log.warn(
             `  ✗ Неожиданный статус: ${status} (ожидался один из: ${variation.expectedStatus.join(", ")})`
@@ -212,7 +212,7 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
     }
 
     log.info(
-      "✓ Все граничные и базовые некорректные значения smartOrderId были правильно отклонены API."
+      "✅ Все граничные и базовые некорректные значения smartOrderId были правильно отклонены API."
     );
   });
 
@@ -246,10 +246,10 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
 
     log.info("Проверка статуса smart order...");
     smartOrderResponseCheck.checkSmartOrderStatus(apiSmartOrder, "COMPLETED");
-    log.info(`✓ Статус smart order корректный: ${apiSmartOrder.status}`);
+    log.info(`✅ Статус smart order корректный: ${apiSmartOrder.status}`);
 
     log.info(
-      '✓ Все проверки пройдены успешно. Smart order со статусом "COMPLETED" корректно получен.'
+      '✅ Все проверки пройдены успешно. Smart order со статусом "COMPLETED" корректно получен.'
     );
   });
 
@@ -283,10 +283,10 @@ test.describe("Get smart order by ID GET /api/v2/smart-orders/{id}", () => {
 
     log.info("Проверка статуса smart order...");
     smartOrderResponseCheck.checkSmartOrderStatus(apiSmartOrder, "FAILED");
-    log.info(`✓ Статус smart order корректный: ${apiSmartOrder.status}`);
+    log.info(`✅ Статус smart order корректный: ${apiSmartOrder.status}`);
 
     log.info(
-      '✓ Все проверки пройдены успешно. Smart order со статусом "FAILED" корректно получен.'
+      '✅ Все проверки пройдены успешно. Smart order со статусом "FAILED" корректно получен.'
     );
   });
 });
