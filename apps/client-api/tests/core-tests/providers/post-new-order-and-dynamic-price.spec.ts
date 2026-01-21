@@ -4,7 +4,7 @@ import { OrderApi } from "@apps/client-api/api/order.api";
 import { log } from "@shared/utils/logger";
 import {
   HttpStatus,
-  ENERGY_PRICE_FORMULA_DYNAMIC,
+  ENERGY_PRICE_FORMULA,
   PROVIDERS,
   DYNAMIC_PRICE_OFFSET_TEST_VALUE,
   PRICE_TOLERANCE,
@@ -15,9 +15,16 @@ import { OrderResponseCheck } from "@apps/client-api/test-objects/order-response
 import { OrderFieldCheck } from "@apps/client-api/test-objects/order-field-check";
 import { WalletActivationHelper } from "@shared/helpers/wallet-activation-helper";
 import { CreateOrderRequest, Order } from "@shared/utils/types";
-import { clearProviderSettings, getProviderEnergyPrice } from "@shared/helpers/provider-settings-helper";
+import {
+  clearProviderSettings,
+  getEnergyPrice,
+  getProviderEnergyPrice,
+} from "@shared/helpers/provider-settings-helper";
 import { getPeriodKey, getFormulaParams } from "@shared/helpers/order-period-helpers";
-import { DYNAMIC_PRICE_ORDER_COMBINATIONS } from "@shared/utils/variations_constants";
+import {
+  DYNAMIC_PRICE_ORDER_COMBINATIONS_1H,
+  DYNAMIC_PRICE_ORDER_COMBINATIONS_LONG,
+} from "@shared/utils/variations_constants";
 
 test.describe("Create order with dynamic price POST /api/v2/orders", () => {
   test.describe.configure({ mode: "serial", timeout: 300000 });
@@ -68,8 +75,8 @@ test.describe("Create order with dynamic price POST /api/v2/orders", () => {
     });
   });
 
-  test.describe("Тест-кейс № 1: Создание комбинаций заказов ENERGY с динамической ценой без приоритета провайдера", () => {
-    for (const combination of DYNAMIC_PRICE_ORDER_COMBINATIONS) {
+  test.describe("Тест-кейс № 1: Создание комбинаций на 1h заказов ENERGY с динамической ценой без приоритета провайдера", () => {
+    for (const combination of DYNAMIC_PRICE_ORDER_COMBINATIONS_1H) {
       const { duration, amount } = combination;
       const periodKey = getPeriodKey(duration);
       const { hour, day } = getFormulaParams(duration);
@@ -100,16 +107,10 @@ test.describe("Create order with dynamic price POST /api/v2/orders", () => {
 
         const expectedProviderName = availableProvider.name;
         const minSunRate = getProviderEnergyPrice(expectedProviderName);
-        const expectedSellPrice = ENERGY_PRICE_FORMULA_DYNAMIC(
-          minSunRate,
-          hour,
-          day,
-          amount,
-          DYNAMIC_PRICE_OFFSET_TEST_VALUE
-        );
+        const expectedSellPrice = ENERGY_PRICE_FORMULA(minSunRate, hour, day, amount);
 
         log.info(
-          `Ожидаемая цена с динамическим смещением: ${expectedSellPrice} (minSunRate: ${minSunRate}, dynamicPriceOffset: ${DYNAMIC_PRICE_OFFSET_TEST_VALUE}, period: ${periodKey}, amount: ${amount})`
+          `Ожидаемая цена: ${expectedSellPrice} (sunRate: ${minSunRate}, period: ${periodKey}, amount: ${amount})`
         );
 
         await test.step("Проверить, что настройки провайдера отсутствуют", async () => {
@@ -240,7 +241,153 @@ test.describe("Create order with dynamic price POST /api/v2/orders", () => {
     }
   });
 
-//   test.describe("Тест-кейс № 2: Создание заказа ENERGY с приоритетом провайдера TronLocal-1 и динамической ценой", () => {
+  test.describe(
+    "Тест-кейс № 2: Создание комбинаций на 1d/3d заказов ENERGY с динамическим приоритетом провайдера",
+    () => {
+      for (const combination of DYNAMIC_PRICE_ORDER_COMBINATIONS_LONG) {
+        const { duration, amount } = combination;
+        const periodKey = getPeriodKey(duration);
+        const { hour, day } = getFormulaParams(duration);
+
+        test(
+          `should create ENERGY order with dynamic priority for ${periodKey} period and ${amount} energy`,
+          async ({ request }) => {
+            log.info(
+              `=== Тест: Создание заказа ENERGY с динамическим приоритетом и динамической ценой, период ${periodKey}, количество ${amount} ===`
+            );
+
+            const orderApi = new OrderApi(request);
+
+            const availableProvider = PROVIDERS.find((provider) => {
+              const energyConfig = provider.availabilityConfig.ENERGY;
+              if (energyConfig === true) return true;
+              if (Array.isArray(energyConfig)) {
+                return (energyConfig as ReadonlyArray<string>).includes(periodKey);
+              }
+              return false;
+            });
+
+            if (!availableProvider) {
+              throw new Error(
+                `Не найден провайдер, поддерживающий ENERGY для периода ${periodKey} в конфигурации PROVIDERS`
+              );
+            }
+
+            const expectedProviderName = availableProvider.name;
+            const minSunRate = await getEnergyPrice(coreRepo, userIdPrimary, periodKey);
+            const expectedSellPrice = ENERGY_PRICE_FORMULA(minSunRate, hour, day, amount);
+
+            log.info(
+              `Ожидаемая цена с динамическим приоритетом: ${expectedSellPrice} (sunRate: ${minSunRate}, period: ${periodKey}, amount: ${amount})`
+            );
+
+            const { targetAddress } = await test.step(
+              "Создать и активировать кошелек",
+              async () => {
+                const { wallet, activationOrder } =
+                  await walletActivationHelper.createActivatedWallet(
+                    request,
+                    responseStatusCheck
+                  );
+                const address = wallet.address?.base58 || "";
+                await walletActivationHelper.waitForActivationCompleted({
+                  orderId: activationOrder.id,
+                  targetAddress: address,
+                  timeoutMs: 30000,
+                  stepMs: 1000,
+                });
+                log.info(`✅ Кошелек активирован: ${address}`);
+                return { targetAddress: address };
+              }
+            );
+
+            const { apiOrder } = await test.step(
+              "Создать заказ ENERGY с динамическим приоритетом и динамической ценой",
+              async () => {
+                const energyRequest: CreateOrderRequest = {
+                  type: "ENERGY",
+                  targetAddress: targetAddress,
+                  amount: amount,
+                  period: duration,
+                };
+
+                log.info(
+                  `Отправка запроса на создание заказа: ${JSON.stringify(energyRequest, null, 2)}`
+                );
+
+                const response = await orderApi.createNewOrder({
+                  data: energyRequest,
+                  apiKey: apiKeyPrimary,
+                });
+                responseStatusCheck.checkResponseStatus(response, HttpStatus.OK);
+
+                const order = (await response.json()) as Order;
+                log.info(`API Response: ${JSON.stringify(order, null, 2)}`);
+
+                log.info(`✅ Заказ создан: id=${order.id}, sellPrice=${order.sellPrice}`);
+
+                orderResponseCheck.checkOrderType(order, "ENERGY");
+                log.info(`✅ Тип заказа соответствует ожидаемому: ENERGY`);
+
+                const actualSellPrice =
+                  typeof order.sellPrice === "string"
+                    ? parseFloat(order.sellPrice)
+                    : order.sellPrice;
+                const priceDifference = Math.abs(actualSellPrice - expectedSellPrice);
+                if (priceDifference > PRICE_TOLERANCE) {
+                  throw new Error(
+                    `Цена заказа из API (${actualSellPrice}) не совпадает с ожидаемой (${expectedSellPrice}), разница: ${priceDifference}`
+                  );
+                }
+                log.info(
+                  `✅ Цена заказа из API (${actualSellPrice}) соответствует ожидаемой (${expectedSellPrice})`
+                );
+
+                orderFieldCheck.checkAllFields(order);
+
+                return { apiOrder: order };
+              }
+            );
+
+            await test.step("Проверить провайдера и цену в базе данных", async () => {
+              const dbFinalOrder = await walletActivationHelper.waitForOrderCompleted({
+                orderId: apiOrder.id,
+              });
+              log.info(
+                `Заказ завершен. Order ID: ${apiOrder.id}, Provider в БД: ${dbFinalOrder.provider}, sellPrice в БД: ${dbFinalOrder.sellPrice}`
+              );
+
+              orderResponseCheck.checkProvider(dbFinalOrder, expectedProviderName);
+              log.info(
+                `✅ Провайдер в БД (${dbFinalOrder.provider}) соответствует ожидаемому (${expectedProviderName})`
+              );
+
+              orderResponseCheck.checkPrice(dbFinalOrder.sellPrice, expectedSellPrice);
+
+              const actualSellPrice =
+                typeof dbFinalOrder.sellPrice === "string"
+                  ? parseFloat(dbFinalOrder.sellPrice)
+                  : dbFinalOrder.sellPrice;
+              log.info(
+                `✅ Цена заказа из БД (${actualSellPrice}) соответствует ожидаемой по формуле с динамическим смещением (${expectedSellPrice})`
+              );
+
+              const getOrderResponse = await orderApi.getOrderById({ orderId: apiOrder.id });
+              responseStatusCheck.checkResponseStatus(getOrderResponse, HttpStatus.OK);
+              const apiFinalOrder = (await getOrderResponse.json()) as Order;
+
+              orderFieldCheck.checkAllFields(apiFinalOrder);
+              orderResponseCheck.checkOrderFieldEquality(apiFinalOrder, dbFinalOrder);
+            });
+
+            log.info(`✅ Тест завершен успешно`);
+          }
+        );
+      }
+    }
+  );
+
+  //   test.describe("Тест-кейс № 2: Создание заказа ENERGY с приоритетом провайдера TronLocal-1 и динамической ценой", () => {
 //     test("should create ENERGY order with TronLocal-1 priority and dynamic price for 1d period and 65000 energy", async ({
 //       request,
 //     }) => {
