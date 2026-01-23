@@ -16,6 +16,7 @@ playwright test
 npm run test:api
 ```
 или
+
 ```bash
 playwright test --project=client-api
 ```

@@ -1,8 +1,6 @@
 import { SMART_ORDER_ID_MIN, SMART_ORDER_ID_MAX } from "../constants";
 
-// Граничные значения и базовые некорректные значения для проверки валидации
 export const boundaryAndInvalidSmartOrderIdVariations = [
-  // Граничные значения для smartOrderId (должен быть >= SMART_ORDER_ID_MIN и <= SMART_ORDER_ID_MAX)
   {
     value: SMART_ORDER_ID_MIN - 1,
     description: `Ноль (граничное значение, должно быть >= ${SMART_ORDER_ID_MIN})`,
@@ -39,7 +37,6 @@ export const boundaryAndInvalidSmartOrderIdVariations = [
     expectedStatus: [400, 404],
   },
 
-  // Базовые некорректные значения
   { value: -100, description: "Отрицательное число (-100)", expectedStatus: [400, 404] },
   { value: 0.5, description: "Дробное число (0.5)", expectedStatus: [400, 404] },
   { value: 1.5, description: "Дробное число (1.5)", expectedStatus: [400, 404] },
@@ -86,7 +83,6 @@ export const boundaryAndInvalidSmartOrderIdVariations = [
   { value: null, description: "null", expectedStatus: [400, 404] },
   { value: undefined, description: "undefined", expectedStatus: [400, 404] },
 
-  // Специальные символы
   { value: "1@", description: "Символ @", expectedStatus: [400, 404] },
   { value: "1#", description: "Символ #", expectedStatus: [400, 404] },
   { value: "1$", description: "Символ $", expectedStatus: [400, 404] },

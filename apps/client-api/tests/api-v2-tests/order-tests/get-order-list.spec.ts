@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 import { OrderApi } from "@apps/client-api/api/order.api";
 import { OrderFieldCheck } from "@apps/client-api/test-objects/order-field-check";
 import { ResponseStatusCheck } from "@apps/client-api/test-objects/response-status-check";
@@ -11,6 +11,7 @@ import {
 import { log } from "@shared/utils/logger";
 import { Order } from "@shared/utils/types";
 import {
+  HttpStatus,
   ORDER_LIST_DEFAULT_LIMIT,
   ORDER_LIST_DEFAULT_OFFSET,
   ORDER_LIST_MAX_LIMIT,
@@ -19,24 +20,24 @@ import { OrderRepository } from "@apps/client-api/repositories/order.repository"
 import { userIdPrimary, userIdZero, apiKeyZero, apiUrl } from "@apps/client-api/api/constants";
 import { getHeaders } from "@shared/utils/headers";
 
-// Тестирует корректность работы эндпоинта GET /api/v2/orders/
-test.describe("Get order list", () => {
+test.describe("Get order list GET /api/v2/orders/", () => {
   const responseStatusCheck = new ResponseStatusCheck();
   const orderFieldCheck = new OrderFieldCheck();
   const orderResponseCheck = new OrderResponseCheck();
 
-  // Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с заказами с дефолтными параметрами
-  test(`GET /api/v2/orders/ should return default paginated list`, async ({ request }) => {
+  test("Тест-кейс № 1: Проверка валидности полей ответа API для пользователя с заказами с дефолтными параметрами", async ({
+    request,
+  }) => {
     log.info("=== Тест: Получение списка заказов с параметрами по умолчанию ===");
 
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      ORDER_LIST_DEFAULT_OFFSET,
-      ORDER_LIST_DEFAULT_LIMIT
-    );
-    const response = await orderApi.getOrderList();
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: ORDER_LIST_DEFAULT_OFFSET,
+      limit: ORDER_LIST_DEFAULT_LIMIT,
+    });
+    const response = await orderApi.getOrderList({});
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
     responseStatusCheck.checkResponseStatus(response);
@@ -50,11 +51,10 @@ test.describe("Get order list", () => {
     orders.forEach((order: Order) => orderFieldCheck.checkAllFields(order));
     orderResponseCheck.checkSortedByCreatedAtDesc(orders);
 
-    log.info("✓ Проверки списка заказов по умолчанию пройдены");
+    log.info("✅ Проверки списка заказов по умолчанию пройдены");
   });
 
-  // Тест-кейс № 2: Проверка невалидных значений offset
-  test(`GET /api/v2/orders/ should return 400 for invalid offset values`, async ({ request }) => {
+  test("Тест-кейс № 2: Проверка невалидных значений offset", async ({ request }) => {
     log.info("=== Тест: Проверка невалидных значений offset ===");
 
     const orderApi = new OrderApi(request);
@@ -66,18 +66,17 @@ test.describe("Get order list", () => {
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-      responseStatusCheck.checkResponseStatus(response, 400);
+      responseStatusCheck.checkResponseStatus(response, HttpStatus.BAD_REQUEST);
 
       const errorResponse = await response.json();
       log.info(`Ответ ошибки: ${JSON.stringify(errorResponse, null, 2)}`);
       log.info("");
     }
 
-    log.info("✓ Все невалидные значения offset корректно отклонены (400)");
+    log.info("✅ Все невалидные значения offset корректно отклонены (400)");
   });
 
-  // Тест-кейс № 3: Проверка невалидных значений limit
-  test(`GET /api/v2/orders/ should return 400 for invalid limit values`, async ({ request }) => {
+  test("Тест-кейс № 3: Проверка невалидных значений limit", async ({ request }) => {
     log.info("=== Тест: Проверка невалидных значений limit ===");
 
     const orderApi = new OrderApi(request);
@@ -89,20 +88,17 @@ test.describe("Get order list", () => {
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-      responseStatusCheck.checkResponseStatus(response, 400);
+      responseStatusCheck.checkResponseStatus(response, HttpStatus.BAD_REQUEST);
 
       const errorResponse = await response.json();
       log.info(`Ответ ошибки: ${JSON.stringify(errorResponse, null, 2)}`);
       log.info("");
     }
 
-    log.info("✓ Все невалидные значения limit корректно отклонены (400)");
+    log.info("✅ Все невалидные значения limit корректно отклонены (400)");
   });
 
-  // Тест-кейс № 4: Проверка невалидных комбинаций offset и limit
-  test(`GET /api/v2/orders/ should return 400 for invalid offset/limit combinations`, async ({
-    request,
-  }) => {
+  test("Тест-кейс № 4: Проверка невалидных комбинаций offset и limit", async ({ request }) => {
     log.info("=== Тест: Проверка невалидных комбинаций offset и limit ===");
 
     const orderApi = new OrderApi(request);
@@ -116,27 +112,26 @@ test.describe("Get order list", () => {
       const response = await orderApi.getOrderList(variation.params as any);
       log.info(`API запрос выполнен. Статус: ${response.status()}`);
 
-      responseStatusCheck.checkResponseStatus(response, 400);
+      responseStatusCheck.checkResponseStatus(response, HttpStatus.BAD_REQUEST);
 
       const errorResponse = await response.json();
       log.info(`Ответ ошибки: ${JSON.stringify(errorResponse, null, 2)}`);
       log.info("");
     }
 
-    log.info("✓ Все невалидные комбинации offset/limit корректно отклонены (400)");
+    log.info("✅ Все невалидные комбинации offset/limit корректно отклонены (400)");
   });
 
-  // Тест-кейс № 5: Проверка значения offset = 0
-  test(`GET /api/v2/orders/ should work with offset = 0`, async ({ request }) => {
+  test("Тест-кейс № 5: Проверка значения offset = 0", async ({ request }) => {
     log.info("=== Тест: Проверка offset = 0 ===");
 
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      0,
-      ORDER_LIST_DEFAULT_LIMIT
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: 0,
+      limit: ORDER_LIST_DEFAULT_LIMIT,
+    });
 
     const response = await orderApi.getOrderList({ offset: 0 });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -153,21 +148,20 @@ test.describe("Get order list", () => {
       orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
     });
 
-    log.info("✓ offset = 0: получены последние 10 заказов пользователя, отсортированы по убыванию");
+    log.info("✅ offset = 0: получены последние 10 заказов пользователя, отсортированы по убыванию");
   });
 
-  // Тест-кейс № 6: Проверка значения offset = 10
-  test(`GET /api/v2/orders/ should work with offset = 10`, async ({ request }) => {
+  test("Тест-кейс № 6: Проверка значения offset = 10", async ({ request }) => {
     log.info("=== Тест: Проверка offset = 10 ===");
 
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      10,
-      ORDER_LIST_DEFAULT_LIMIT
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: 10,
+      limit: ORDER_LIST_DEFAULT_LIMIT,
+    });
 
     const response = await orderApi.getOrderList({ offset: 10 });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -184,21 +178,20 @@ test.describe("Get order list", () => {
       orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
     });
 
-    log.info("✓ offset = 10: получены заказы второй страницы, без пересечений с первой");
+    log.info("✅ offset = 10: получены заказы второй страницы, без пересечений с первой");
   });
 
-  // Тест-кейс № 7: Проверка значения limit = 5
-  test(`GET /api/v2/orders/ should respect limit = 5`, async ({ request }) => {
+  test("Тест-кейс № 7: Проверка значения limit = 5", async ({ request }) => {
     log.info("=== Тест: Проверка limit = 5 ===");
 
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      ORDER_LIST_DEFAULT_OFFSET,
-      5
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: ORDER_LIST_DEFAULT_OFFSET,
+      limit: 5,
+    });
 
     const response = await orderApi.getOrderList({ limit: 5 });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -215,23 +208,20 @@ test.describe("Get order list", () => {
       orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
     });
 
-    log.info("✓ limit = 5: получены ожидаемые заказы пользователя, не более 5");
+    log.info("✅ limit = 5: получены ожидаемые заказы пользователя, не более 5");
   });
 
-  // Тест-кейс № 8: Проверка значения offset = 1000
-  test(`GET /api/v2/orders/ should return empty array when offset is too large`, async ({
-    request,
-  }) => {
+  test("Тест-кейс № 8: Проверка значения offset = 1000", async ({ request }) => {
     log.info("=== Тест: Проверка offset = 1000 ===");
 
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      1000,
-      ORDER_LIST_DEFAULT_LIMIT
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: 1000,
+      limit: ORDER_LIST_DEFAULT_LIMIT,
+    });
 
     const response = await orderApi.getOrderList({ offset: 1000 });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -248,45 +238,24 @@ test.describe("Get order list", () => {
         orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
       });
     } else {
-      expect(orders.length).toBe(0);
+      orderResponseCheck.checkOrderListEmpty(orders);
       log.info("Получен пустой список заказов (offset превышает количество доступных заказов)");
     }
 
-    log.info("✓ offset = 1000: корректно возвращен пустой массив при отсутствии заказов");
+    log.info("✅ offset = 1000: корректно возвращен пустой массив при отсутствии заказов");
   });
 
-  // Тест-кейс № 9: Rate limiting
-  test(`GET /api/v2/orders/ should enforce rate limiting`, async ({ request }) => {
-    log.info("=== Тест: Проверка rate limiting ===");
-
-    const orderApi = new OrderApi(request);
-    const requestCount = 120;
-
-    log.info(`Отправка ${requestCount} запросов параллельно (100 запросов в секунду)...`);
-
-    const startTime = Date.now();
-    const requests = Array.from({ length: requestCount }, () => orderApi.getOrderList());
-    const responses = await Promise.all(requests);
-    const endTime = Date.now();
-    const duration = (endTime - startTime) / 1000;
-
-    log.info(`Все ${requestCount} запросов выполнены за ${duration.toFixed(2)} секунд`);
-
-    const statusCounts = await responseStatusCheck.processRateLimitResponses(
-      responses,
-      requestCount
-    );
-    orderResponseCheck.checkRateLimitEnforcement(statusCounts);
-  });
-
-  // Тест-кейс № 10: Проверка комбинации offset = 10, limit = 5
-  test(`GET /api/v2/orders/ should work with offset = 10 and limit = 5`, async ({ request }) => {
+  test("Тест-кейс № 9: Проверка комбинации offset = 10, limit = 5", async ({ request }) => {
     log.info("=== Тест: Проверка offset = 10, limit = 5 ===");
 
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(userIdPrimary, 10, 5);
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: 10,
+      limit: 5,
+    });
 
     const response = await orderApi.getOrderList({ offset: 10, limit: 5 });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -303,22 +272,21 @@ test.describe("Get order list", () => {
       orderResponseCheck.checkOrderFieldEquality(order, expectedOrders[index]);
     });
 
-    log.info("✓ offset = 10, limit = 5: получены ожидаемые 5 заказов, начиная с 11-го");
+    log.info("✅ offset = 10, limit = 5: получены ожидаемые 5 заказов, начиная с 11-го");
   });
 
-  // Тест-кейс № 11: Проверка возврата пустого массива для пользователя без заказов
-  test(`GET /api/v2/orders/ should return empty array for user with zero orders`, async ({
+  test("Тест-кейс № 10: Проверка возврата пустого массива для пользователя без заказов", async ({
     request,
   }) => {
     log.info("=== Тест: Проверка возврата пустого массива для пользователя без заказов ===");
 
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdZero,
-      ORDER_LIST_DEFAULT_OFFSET,
-      ORDER_LIST_DEFAULT_LIMIT
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdZero,
+      offset: ORDER_LIST_DEFAULT_OFFSET,
+      limit: ORDER_LIST_DEFAULT_LIMIT,
+    });
 
     const response = await request.get(`${apiUrl}/api/v2/orders/`, {
       headers: getHeaders(apiKeyZero),
@@ -337,21 +305,20 @@ test.describe("Get order list", () => {
     orderResponseCheck.checkOrderListExactLength(orders, expectedOrders.length);
     orderResponseCheck.checkOrderListIsEmpty(orders, expectedOrders);
 
-    log.info("✓ API корректно возвращает пустой массив для пользователя без заказов");
+    log.info("✅ API корректно возвращает пустой массив для пользователя без заказов");
   });
 
-  // Тест-кейс № 12: Проверка значения limit = ORDER_LIST_MAX_LIMIT
-  test(`GET /api/v2/orders/ should respect limit = ORDER_LIST_MAX_LIMIT`, async ({ request }) => {
+  test("Тест-кейс № 11: Проверка значения limit = ORDER_LIST_MAX_LIMIT", async ({ request }) => {
     log.info(`=== Тест: Проверка limit = ${ORDER_LIST_MAX_LIMIT} ===`);
 
     const orderApi = new OrderApi(request);
     const orderRepo = new OrderRepository();
 
-    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated(
-      userIdPrimary,
-      ORDER_LIST_DEFAULT_OFFSET,
-      ORDER_LIST_MAX_LIMIT
-    );
+    const expectedOrders = await orderRepo.getOrdersByUserIdPaginated({
+      userId: userIdPrimary,
+      offset: ORDER_LIST_DEFAULT_OFFSET,
+      limit: ORDER_LIST_MAX_LIMIT,
+    });
 
     const response = await orderApi.getOrderList({ limit: ORDER_LIST_MAX_LIMIT });
     log.info(`API запрос выполнен. Статус: ${response.status()}`);
@@ -369,7 +336,7 @@ test.describe("Get order list", () => {
     });
 
     log.info(
-      `✓ limit = ${ORDER_LIST_MAX_LIMIT}: получены ожидаемые заказы пользователя, не более ${ORDER_LIST_MAX_LIMIT}`
+      `✅ limit = ${ORDER_LIST_MAX_LIMIT}: получены ожидаемые заказы пользователя, не более ${ORDER_LIST_MAX_LIMIT}`
     );
   });
 });

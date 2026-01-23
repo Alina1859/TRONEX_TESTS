@@ -1,5 +1,6 @@
 import { expect } from "@playwright/test";
 import { Order } from "@shared/utils/types";
+import { HttpStatus, PRICE_TOLERANCE } from "@shared/utils/constants";
 
 export class OrderResponseCheck {
   checkOrderId(apiOrder: Order, expectedOrderId: string | number) {
@@ -49,7 +50,38 @@ export class OrderResponseCheck {
     expect(expectedOrders.length).toBe(0);
   }
 
+  checkOrderListEmpty(orders: Order[]) {
+    expect(orders.length).toBe(0);
+  }
+
   checkRateLimitEnforcement(statusCounts: Record<number, number>): void {
-    expect(statusCounts[429]).toBeGreaterThan(0);
+    expect(statusCounts[HttpStatus.TOO_MANY_REQUESTS]).toBeGreaterThan(0);
+  }
+
+  checkOrderStatus(apiOrder: Order, expectedStatus: string) {
+    expect(apiOrder.status).toBe(expectedStatus);
+  }
+
+  checkOrderType(apiOrder: Order, expectedType: string) {
+    expect(apiOrder.type).toBe(expectedType);
+  }
+
+  checkProvider(dbOrder: any, expectedProviderName: string) {
+    expect(dbOrder.provider).toBe(expectedProviderName);
+  }
+
+  checkPrice(
+    actualPrice: number | string,
+    expectedPrice: number,
+    tolerance: number = PRICE_TOLERANCE,
+    message?: string
+  ) {
+    const actualPriceNumber =
+      typeof actualPrice === "string" ? parseFloat(actualPrice) : actualPrice;
+    const priceDifference = Math.abs(actualPriceNumber - expectedPrice);
+    const errorMessage =
+      message ||
+      `Цена заказа из БД (${actualPriceNumber}) не совпадает с ожидаемой по формуле (${expectedPrice}), разница: ${priceDifference}`;
+    expect(priceDifference, errorMessage).toBeLessThanOrEqual(tolerance);
   }
 }

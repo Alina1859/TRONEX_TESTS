@@ -9,9 +9,8 @@ export function getHeaders(apiKey: string = apiKeyPrimary) {
 
 export function getPostHeaders(apiKey: string = apiKeyPrimary) {
   return {
-    Accept: "application/json",
+    ...getHeaders(apiKey),
     "Content-Type": "application/json",
-    "X-API-KEY": apiKey,
   };
 }
 

@@ -1,8 +1,6 @@
 import { ORDER_ID_MIN, ORDER_ID_MAX } from "../constants";
 
-// Граничные значения и базовые некорректные значения для проверки валидации
 export const boundaryAndInvalidOrderIdVariations = [
-  // Граничные значения для orderId (должен быть >= ORDER_ID_MIN и <= ORDER_ID_MAX)
   {
     value: ORDER_ID_MIN - 1,
     description: `Ноль (граничное значение, должно быть >= ${ORDER_ID_MIN})`,
@@ -20,7 +18,6 @@ export const boundaryAndInvalidOrderIdVariations = [
   },
   { value: 4294967295, description: "Максимальное 32-битное unsigned integer (4294967295)" },
 
-  // Базовые некорректные значения
   { value: -100, description: "Отрицательное число (-100)" },
   { value: 0.5, description: "Дробное число (0.5)" },
   { value: 1.5, description: "Дробное число (1.5)" },
@@ -45,7 +42,6 @@ export const boundaryAndInvalidOrderIdVariations = [
   { value: null, description: "null" },
   { value: undefined, description: "undefined" },
 
-  // Специальные символы
   { value: "1@", description: "Символ @" },
   { value: "1#", description: "Символ #" },
   { value: "1$", description: "Символ $" },

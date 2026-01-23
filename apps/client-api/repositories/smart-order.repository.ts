@@ -1,7 +1,33 @@
 import { coreDb } from "@shared/database/connection";
 import { SmartOrder } from "@shared/utils/types";
+import { SmartOrderStatus } from "@shared/utils/constants";
 
 export class SmartOrderRepository {
+  private async getSmartOrderByUserId(params: {
+    userId: string;
+    status?: SmartOrderStatus;
+  }): Promise<SmartOrder[]> {
+    const { userId, status } = params;
+
+    if (status) {
+      return await coreDb.$queryRaw<SmartOrder[]>`
+        SELECT *
+        FROM "SmartOrder"
+        WHERE "userId" = ${userId} AND status = ${status}
+        ORDER BY "createdAt" DESC
+        LIMIT 1
+      `;
+    }
+
+    return await coreDb.$queryRaw<SmartOrder[]>`
+      SELECT *
+      FROM "SmartOrder"
+      WHERE "userId" = ${userId}
+      ORDER BY "createdAt" DESC
+      LIMIT 1
+    `;
+  }
+
   async getSmartOrderById(smartOrderId: number): Promise<SmartOrder[]> {
     return await coreDb.$queryRaw<SmartOrder[]>`
       SELECT *
@@ -12,13 +38,7 @@ export class SmartOrderRepository {
   }
 
   async getLastSmartOrderByUserId(userId: string): Promise<SmartOrder[]> {
-    return await coreDb.$queryRaw<SmartOrder[]>`
-      SELECT *
-      FROM "SmartOrder"
-      WHERE "userId" = ${userId}
-      ORDER BY "createdAt" DESC 
-      LIMIT 1
-    `;
+    return await this.getSmartOrderByUserId({ userId });
   }
 
   async getMaxSmartOrderId(): Promise<number> {
@@ -29,23 +49,11 @@ export class SmartOrderRepository {
   }
 
   async getCompletedSmartOrderByUserId(userId: string): Promise<SmartOrder[]> {
-    return await coreDb.$queryRaw<SmartOrder[]>`
-      SELECT *
-      FROM "SmartOrder" 
-      WHERE "userId" = ${userId} AND status = 'COMPLETED'
-      ORDER BY "createdAt" DESC 
-      LIMIT 1
-    `;
+    return await this.getSmartOrderByUserId({ userId, status: SmartOrderStatus.COMPLETED });
   }
 
   async getFailedSmartOrderByUserId(userId: string): Promise<SmartOrder[]> {
-    return await coreDb.$queryRaw<SmartOrder[]>`
-      SELECT *
-      FROM "SmartOrder" 
-      WHERE "userId" = ${userId} AND status = 'FAILED'
-      ORDER BY "createdAt" DESC 
-      LIMIT 1
-    `;
+    return await this.getSmartOrderByUserId({ userId, status: SmartOrderStatus.FAILED });
   }
 
   // async getSmartOrderWithoutOrdersByUserId(userId: string): Promise<SmartOrder[]> {

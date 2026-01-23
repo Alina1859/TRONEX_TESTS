@@ -1,8 +1,11 @@
 import { expect } from "@playwright/test";
+import { AddressCheck } from "@apps/client-api/test-objects/address-check";
+import { SmartOrderWithOrders, CheckRequestResponseMatchParams } from "@shared/utils/types";
+import { SmartOrderStatus } from "@shared/utils/constants";
 import { OrderFieldCheck } from "./order-field-check";
-import { SMART_ORDER_STATUSES, SmartOrderWithOrders } from "@shared/utils/types";
 
 export class SmartOrderFieldCheck {
+  private addressCheck = new AddressCheck();
   checkId(apiSmartOrder: SmartOrderWithOrders) {
     expect(apiSmartOrder).toHaveProperty("id");
     expect(typeof apiSmartOrder.id).toBe("number");
@@ -11,7 +14,7 @@ export class SmartOrderFieldCheck {
   checkStatus(apiSmartOrder: SmartOrderWithOrders) {
     expect(apiSmartOrder).toHaveProperty("status");
     expect(typeof apiSmartOrder.status).toBe("string");
-    expect(SMART_ORDER_STATUSES).toContain(apiSmartOrder.status);
+    expect(Object.values(SmartOrderStatus)).toContain(apiSmartOrder.status);
   }
 
   checkFromAddress(apiSmartOrder: SmartOrderWithOrders) {
@@ -19,12 +22,7 @@ export class SmartOrderFieldCheck {
     expect(typeof apiSmartOrder.fromAddress).toBe("string");
     expect(apiSmartOrder.fromAddress.length).toBeGreaterThan(0);
 
-    const address = apiSmartOrder.fromAddress;
-    expect(address.length).toBe(34);
-    expect(address.startsWith("T")).toBe(true);
-
-    const base58Regex = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
-    expect(base58Regex.test(address)).toBe(true);
+    this.addressCheck.checkTronAddress(apiSmartOrder.fromAddress);
   }
 
   checkToAddress(apiSmartOrder: SmartOrderWithOrders) {
@@ -32,12 +30,7 @@ export class SmartOrderFieldCheck {
     expect(typeof apiSmartOrder.toAddress).toBe("string");
     expect(apiSmartOrder.toAddress.length).toBeGreaterThan(0);
 
-    const address = apiSmartOrder.toAddress;
-    expect(address.length).toBe(34);
-    expect(address.startsWith("T")).toBe(true);
-
-    const base58Regex = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
-    expect(base58Regex.test(address)).toBe(true);
+    this.addressCheck.checkTronAddress(apiSmartOrder.toAddress);
   }
 
   checkWithActivation(apiSmartOrder: SmartOrderWithOrders) {
@@ -61,11 +54,24 @@ export class SmartOrderFieldCheck {
 
     const orderFieldCheck = new OrderFieldCheck();
     for (const order of apiSmartOrder.orders) {
-      expect(order).not.toBeNull();
-      expect(typeof order).toBe("object");
       orderFieldCheck.checkAllFields(order);
       expect(order.status).toBe("COMPLETED");
     }
+  }
+
+  checkRequestResponseMatch({
+    apiSmartOrder,
+    fromAddress,
+    toAddress,
+    withActivation,
+    withEnergy,
+    withBandwidth,
+  }: CheckRequestResponseMatchParams) {
+    expect(apiSmartOrder.fromAddress).toBe(fromAddress);
+    expect(apiSmartOrder.toAddress).toBe(toAddress);
+    expect(apiSmartOrder.withActivation).toBe(withActivation);
+    expect(apiSmartOrder.withEnergy).toBe(withEnergy);
+    expect(apiSmartOrder.withBandwidth).toBe(withBandwidth);
   }
 
   checkAllFields(apiSmartOrder: SmartOrderWithOrders) {

@@ -1,4 +1,5 @@
 node_modules
+.idea/
 .env
 playwright-report/
 **/playwright-report/
@@ -6,3 +7,5 @@ test-results/
 inspect.ts
 schema.prisma
 shared/core-api
+test-cases-providers-priority.txt
+apps/client-api/tests/core-tests/providers/tests not ready/

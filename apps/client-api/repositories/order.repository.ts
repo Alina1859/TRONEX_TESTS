@@ -1,21 +1,62 @@
 import { coreDb } from "@shared/database/connection";
 import { Order } from "@shared/utils/types";
+import { OrderStatus, OrderType } from "@shared/utils/constants";
 
 export class OrderRepository {
-  async getLastOrderByUserId(userId: string): Promise<Order[]> {
+  private async getOrderByUserId(params: {
+    userId: string;
+    status?: OrderStatus;
+    type?: OrderType;
+  }): Promise<Order[]> {
+    const { userId, status, type } = params;
+
+    if (status && type) {
+      return await coreDb.$queryRaw<Order[]>`
+        SELECT *
+        FROM "Order"
+        WHERE "userId" = ${userId} AND status = ${status} AND type = ${type}
+        ORDER BY "createdAt" DESC
+        LIMIT 1
+      `;
+    }
+
+    if (status) {
+      return await coreDb.$queryRaw<Order[]>`
+        SELECT *
+        FROM "Order"
+        WHERE "userId" = ${userId} AND status = ${status}
+        ORDER BY "createdAt" DESC
+        LIMIT 1
+      `;
+    }
+
+    if (type) {
+      return await coreDb.$queryRaw<Order[]>`
+        SELECT *
+        FROM "Order"
+        WHERE "userId" = ${userId} AND type = ${type}
+        ORDER BY "createdAt" DESC
+        LIMIT 1
+      `;
+    }
+
     return await coreDb.$queryRaw<Order[]>`
       SELECT *
-      FROM "Order" 
+      FROM "Order"
       WHERE "userId" = ${userId}
-      ORDER BY "createdAt" DESC 
+      ORDER BY "createdAt" DESC
       LIMIT 1
     `;
   }
 
-  async getOrderById(orderId: number): Promise<{ id: number }[]> {
-    return await coreDb.$queryRaw<{ id: number }[]>`
+  async getLastOrderByUserId(userId: string): Promise<Order[]> {
+    return await this.getOrderByUserId({ userId });
+  }
+
+  async getOrderById(orderId: number): Promise<Order[]> {
+    return await coreDb.$queryRaw<Order[]>`
       SELECT *
-      FROM "Order" 
+      FROM "Order"
       WHERE id = ${orderId}
       LIMIT 1
     `;
@@ -29,53 +70,23 @@ export class OrderRepository {
   }
 
   async getCompletedOrderByUserId(userId: string): Promise<Order[]> {
-    return await coreDb.$queryRaw<Order[]>`
-      SELECT *
-      FROM "Order" 
-      WHERE "userId" = ${userId} AND status = 'COMPLETED'
-      ORDER BY "createdAt" DESC 
-      LIMIT 1
-    `;
+    return await this.getOrderByUserId({ userId, status: OrderStatus.COMPLETED });
   }
 
   async getFailedOrderByUserId(userId: string): Promise<Order[]> {
-    return await coreDb.$queryRaw<Order[]>`
-      SELECT *
-      FROM "Order" 
-      WHERE "userId" = ${userId} AND status = 'FAILED'
-      ORDER BY "createdAt" DESC 
-      LIMIT 1
-    `;
+    return await this.getOrderByUserId({ userId, status: OrderStatus.FAILED });
   }
 
   async getEnergyOrderByUserId(userId: string): Promise<Order[]> {
-    return await coreDb.$queryRaw<Order[]>`
-      SELECT *
-      FROM "Order" 
-      WHERE "userId" = ${userId} AND type = 'ENERGY'
-      ORDER BY "createdAt" DESC 
-      LIMIT 1
-    `;
+    return await this.getOrderByUserId({ userId, type: OrderType.ENERGY });
   }
 
   async getBandwidthOrderByUserId(userId: string): Promise<Order[]> {
-    return await coreDb.$queryRaw<Order[]>`
-      SELECT *
-      FROM "Order" 
-      WHERE "userId" = ${userId} AND type = 'BANDWIDTH'
-      ORDER BY "createdAt" DESC 
-      LIMIT 1
-    `;
+    return await this.getOrderByUserId({ userId, type: OrderType.BANDWIDTH });
   }
 
   async getActivationOrderByUserId(userId: string): Promise<Order[]> {
-    return await coreDb.$queryRaw<Order[]>`
-      SELECT *
-      FROM "Order" 
-      WHERE "userId" = ${userId} AND type = 'ACTIVATION'
-      ORDER BY "createdAt" DESC 
-      LIMIT 1
-    `;
+    return await this.getOrderByUserId({ userId, type: OrderType.ACTIVATION });
   }
 
   async getOrderUserId(orderId: number): Promise<string | null> {
@@ -87,11 +98,12 @@ export class OrderRepository {
     return result[0]?.userId ?? null;
   }
 
-  async getOrdersByUserIdPaginated(
-    userId: string,
-    offset: number,
-    limit: number
-  ): Promise<Order[]> {
+  async getOrdersByUserIdPaginated(params: {
+    userId: string;
+    offset: number;
+    limit: number;
+  }): Promise<Order[]> {
+    const { userId, offset, limit } = params;
     return await coreDb.$queryRaw<Order[]>`
       SELECT *
       FROM "Order"

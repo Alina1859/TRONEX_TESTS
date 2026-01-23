@@ -1,56 +1,32 @@
 import { APIRequestContext } from "@playwright/test";
-import { apiUrl } from "./constants";
+import { ORDERS_BASE_URL } from "./constants";
 import { getHeaders, getPostHeaders } from "../../../shared/utils/headers";
 
 export class OrderApi {
   constructor(private request: APIRequestContext) {}
 
-  async getOrderList(params?: { offset?: any; limit?: any }) {
-    return await this.request.get(`${apiUrl}/api/v2/orders/`, {
-      headers: getHeaders(),
-      params,
+  async getOrderList(params?: { offset?: any; limit?: any; apiKey?: string }) {
+    const queryParams: { offset?: any; limit?: any } = {};
+    if (params?.offset !== undefined) queryParams.offset = params.offset;
+    if (params?.limit !== undefined) queryParams.limit = params.limit;
+
+    return await this.request.get(ORDERS_BASE_URL, {
+      headers: getHeaders(params?.apiKey),
+      params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
     });
   }
 
-  async createNewOrder(data: any) {
-    return await this.request.post(`${apiUrl}/api/v2/orders/`, {
-      headers: getPostHeaders(),
-      data,
+  async createNewOrder(params: { data: any; apiKey?: string; withoutContentType?: boolean }) {
+    const { data, apiKey, withoutContentType } = params;
+    return await this.request.post(ORDERS_BASE_URL, {
+      headers: withoutContentType ? getHeaders(apiKey) : getPostHeaders(apiKey),
+      data: withoutContentType ? JSON.stringify(data) : data,
     });
   }
 
-  async getOrderById(orderId: any) {
-    return await this.request.get(`${apiUrl}/api/v2/orders/${orderId}`, {
-      headers: getHeaders(),
-    });
-  }
-
-  async getOrderByIdWithApiKey(orderId: any, apiKey: string) {
-    return await this.request.get(`${apiUrl}/api/v2/orders/${orderId}`, {
-      headers: getHeaders(apiKey),
-    });
-  }
-
-  async getOrderListWithApiKey(apiKey: string) {
-    return await this.request.get(`${apiUrl}/api/v2/orders/`, {
-      headers: getHeaders(apiKey),
-    });
-  }
-
-  async createNewOrderWithApiKey(data: any, apiKey: string) {
-    return await this.request.post(`${apiUrl}/api/v2/orders/`, {
-      headers: getPostHeaders(apiKey),
-      data,
-    });
-  }
-
-  async createNewOrderWithoutContentType(data: any, apiKey: string) {
-    return await this.request.post(`${apiUrl}/api/v2/orders/`, {
-      headers: {
-        Accept: "application/json",
-        "X-API-KEY": apiKey,
-      },
-      data: JSON.stringify(data),
+  async getOrderById(params: { orderId: any; apiKey?: string }) {
+    return await this.request.get(`${ORDERS_BASE_URL}${params.orderId}`, {
+      headers: getHeaders(params.apiKey),
     });
   }
 }
